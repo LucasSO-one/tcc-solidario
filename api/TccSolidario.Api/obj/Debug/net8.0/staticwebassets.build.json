@@ -1,0 +1,12 @@
+{
+  "Version": 1,
+  "Hash": "kGMBfwd4ZWM41xdFbYo8lBHsEoyaN5AnSFM0n0p8Uig=",
+  "Source": "TccSolidario.Api",
+  "BasePath": "_content/TccSolidario.Api",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": [],
+  "Endpoints": []
+}
