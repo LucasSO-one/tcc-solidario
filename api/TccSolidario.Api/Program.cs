@@ -9,6 +9,9 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+
+builder.Services.AddHttpClient<ICnpjValidatorService, CnpjValidatorService>();
+
 var app = builder.Build();
 
 
