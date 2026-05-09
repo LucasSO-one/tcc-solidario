@@ -1,5 +1,4 @@
-using TccSolidario.Api.Models;
-using TccSolidario.Api.Models.Enums;
+using Microsoft.EntityFrameworkCore;
 
 
 public static class DbInitializer
@@ -21,7 +20,7 @@ public static class DbInitializer
         var nome = configuration["AdminSettings:Nome"];
 
         // 4. Cria o Admin
-        var admin = new Administrador
+        var admin = new Admin
         {
             Nome = nome ?? "Admin Padrão",
             Email = email ?? "admin@admin.com",
