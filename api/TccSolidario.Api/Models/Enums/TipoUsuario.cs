@@ -1,3 +1,5 @@
+namespace TccSolidario.Api.Models.Enums;
+
 public enum TipoUsuario
 {
     Varejista = 1, 

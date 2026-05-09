@@ -1,4 +1,7 @@
 using Microsoft.EntityFrameworkCore;
+using TccSolidario.Api.Services; // <-- Esta linha resolve o erro do CNPJ
+using TccSolidario.Api.Data; // <-- Garante que ele ache o AppDbContext
+using TccSolidario.Api.Data.Seeding;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,7 +13,12 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 
-builder.Services.AddHttpClient<ICnpjValidatorService, CnpjValidatorService>();
+builder.Services.AddHttpClient<ICnpjValidatorService, CnpjValidatorService>(client =>
+{
+    // Colocamos um "cracha" para a BrasilAPI saber que somos uma aplicacao legitima
+    client.DefaultRequestHeaders.Add("User-Agent", "TccSolidarioApp/1.0");
+    client.DefaultRequestHeaders.Add("Accept", "application/json");
+});
 
 var app = builder.Build();
 

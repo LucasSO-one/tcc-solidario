@@ -1,4 +1,6 @@
 using System.ComponentModel.DataAnnotations.Schema;
+using TccSolidario.Api.Models.Enums;
+namespace TccSolidario.Api.Models; 
 
 
 public class Produto
