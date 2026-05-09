@@ -1,3 +1,0 @@
-﻿<Project>
-  <Import Project="..\build\TccSolidario.Api.props" />
-</Project>
