@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
+using TccSolidario.Api.Models;
 
-
+namespace TccSolidario.Api.Data;
 public class AppDbContext : DbContext
 {
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)

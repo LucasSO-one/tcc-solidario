@@ -1,13 +1,11 @@
-using Microsoft.EntityFrameworkCore;
+using TccSolidario.Api.Models; 
+using TccSolidario.Api.Models.Enums;
 
-
+namespace TccSolidario.Api.Data.Seeding;
 public static class DbInitializer
 {
     public static void Initialize(AppDbContext context, IConfiguration configuration)
     {
-        // 1. Garante que o banco existe
-        // context.Database.EnsureCreated(); // Cuidado: Se usar Migrations, evite essa linha e use o Migrate() no Program.cs
-
         // 2. Verifica se já existe algum Admin
         if (context.Usuarios.Any(u => u.Tipo == TipoUsuario.Admin))
         {
