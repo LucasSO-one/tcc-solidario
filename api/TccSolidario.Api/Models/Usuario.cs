@@ -1,4 +1,7 @@
 using System.ComponentModel.DataAnnotations;
+using TccSolidario.Api.Models.Enums;
+namespace TccSolidario.Api.Models; 
+
 
 
 public abstract class Usuario

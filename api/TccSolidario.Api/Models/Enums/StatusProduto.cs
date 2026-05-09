@@ -1,3 +1,5 @@
+namespace TccSolidario.Api.Models.Enums;
+
 public enum StatusProduto
 {
     Disponivel = 0,
