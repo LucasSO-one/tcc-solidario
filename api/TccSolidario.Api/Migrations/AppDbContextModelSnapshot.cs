@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
+using TccSolidario.Api.Data;
 
 #nullable disable
 
@@ -21,7 +22,7 @@ namespace TccSolidario.Api.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("Endereco", b =>
+            modelBuilder.Entity("TccSolidario.Api.Models.Endereco", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -71,7 +72,7 @@ namespace TccSolidario.Api.Migrations
                     b.ToTable("Enderecos");
                 });
 
-            modelBuilder.Entity("Produto", b =>
+            modelBuilder.Entity("TccSolidario.Api.Models.Produto", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -114,7 +115,7 @@ namespace TccSolidario.Api.Migrations
                     b.ToTable("Produtos");
                 });
 
-            modelBuilder.Entity("Transacao", b =>
+            modelBuilder.Entity("TccSolidario.Api.Models.Transacao", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -154,7 +155,7 @@ namespace TccSolidario.Api.Migrations
                     b.ToTable("Transacoes");
                 });
 
-            modelBuilder.Entity("Usuario", b =>
+            modelBuilder.Entity("TccSolidario.Api.Models.Usuario", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -175,6 +176,9 @@ namespace TccSolidario.Api.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<int>("StatusAprovacao")
+                        .HasColumnType("integer");
+
                     b.Property<string>("Tipo")
                         .IsRequired()
                         .HasColumnType("text");
@@ -193,16 +197,16 @@ namespace TccSolidario.Api.Migrations
                     b.UseTphMappingStrategy();
                 });
 
-            modelBuilder.Entity("Admin", b =>
+            modelBuilder.Entity("TccSolidario.Api.Models.Admin", b =>
                 {
-                    b.HasBaseType("Usuario");
+                    b.HasBaseType("TccSolidario.Api.Models.Usuario");
 
                     b.HasDiscriminator().HasValue("Admin");
                 });
 
-            modelBuilder.Entity("Consumidor", b =>
+            modelBuilder.Entity("TccSolidario.Api.Models.Consumidor", b =>
                 {
-                    b.HasBaseType("Usuario");
+                    b.HasBaseType("TccSolidario.Api.Models.Usuario");
 
                     b.Property<string>("CPF")
                         .IsRequired()
@@ -215,9 +219,9 @@ namespace TccSolidario.Api.Migrations
                     b.HasDiscriminator().HasValue("Consumidor");
                 });
 
-            modelBuilder.Entity("Ong", b =>
+            modelBuilder.Entity("TccSolidario.Api.Models.Ong", b =>
                 {
-                    b.HasBaseType("Usuario");
+                    b.HasBaseType("TccSolidario.Api.Models.Usuario");
 
                     b.Property<string>("AreaAtuacao")
                         .IsRequired()
@@ -235,9 +239,9 @@ namespace TccSolidario.Api.Migrations
                     b.HasDiscriminator().HasValue("Ong");
                 });
 
-            modelBuilder.Entity("Varejista", b =>
+            modelBuilder.Entity("TccSolidario.Api.Models.Varejista", b =>
                 {
-                    b.HasBaseType("Usuario");
+                    b.HasBaseType("TccSolidario.Api.Models.Usuario");
 
                     b.Property<string>("CNPJ")
                         .IsRequired()
@@ -260,9 +264,9 @@ namespace TccSolidario.Api.Migrations
                     b.HasDiscriminator().HasValue("Varejista");
                 });
 
-            modelBuilder.Entity("Endereco", b =>
+            modelBuilder.Entity("TccSolidario.Api.Models.Endereco", b =>
                 {
-                    b.HasOne("Usuario", "Usuario")
+                    b.HasOne("TccSolidario.Api.Models.Usuario", "Usuario")
                         .WithMany("Enderecos")
                         .HasForeignKey("UsuarioId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -271,9 +275,9 @@ namespace TccSolidario.Api.Migrations
                     b.Navigation("Usuario");
                 });
 
-            modelBuilder.Entity("Produto", b =>
+            modelBuilder.Entity("TccSolidario.Api.Models.Produto", b =>
                 {
-                    b.HasOne("Varejista", "Varejista")
+                    b.HasOne("TccSolidario.Api.Models.Varejista", "Varejista")
                         .WithMany()
                         .HasForeignKey("VarejistaId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -282,17 +286,17 @@ namespace TccSolidario.Api.Migrations
                     b.Navigation("Varejista");
                 });
 
-            modelBuilder.Entity("Transacao", b =>
+            modelBuilder.Entity("TccSolidario.Api.Models.Transacao", b =>
                 {
-                    b.HasOne("Consumidor", "Consumidor")
+                    b.HasOne("TccSolidario.Api.Models.Consumidor", "Consumidor")
                         .WithMany()
                         .HasForeignKey("ConsumidorId");
 
-                    b.HasOne("Ong", "Ong")
+                    b.HasOne("TccSolidario.Api.Models.Ong", "Ong")
                         .WithMany()
                         .HasForeignKey("OngId");
 
-                    b.HasOne("Produto", "Produto")
+                    b.HasOne("TccSolidario.Api.Models.Produto", "Produto")
                         .WithMany()
                         .HasForeignKey("ProdutoId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -305,7 +309,7 @@ namespace TccSolidario.Api.Migrations
                     b.Navigation("Produto");
                 });
 
-            modelBuilder.Entity("Usuario", b =>
+            modelBuilder.Entity("TccSolidario.Api.Models.Usuario", b =>
                 {
                     b.Navigation("Enderecos");
                 });

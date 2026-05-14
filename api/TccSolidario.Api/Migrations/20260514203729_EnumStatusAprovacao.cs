@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace TccSolidario.Api.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class EnumStatusAprovacao : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -21,6 +21,7 @@ namespace TccSolidario.Api.Migrations
                     SenhaHash = table.Column<string>(type: "text", nullable: false),
                     DataCriacao = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     Tipo = table.Column<string>(type: "text", nullable: false),
+                    StatusAprovacao = table.Column<int>(type: "integer", nullable: false),
                     TipoUsuarioString = table.Column<string>(type: "character varying(13)", maxLength: 13, nullable: false),
                     CPF = table.Column<string>(type: "character varying(11)", maxLength: 11, nullable: true),
                     DataNascimento = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),

@@ -21,6 +21,9 @@ public abstract class Usuario
     public TipoUsuario Tipo { get; set; }
 
     public List<Endereco> Enderecos { get; set; } = new();
+
+    [Required]
+    public StatusAprovacao StatusAprovacao { get; set; } = StatusAprovacao.Pendente;
 }
 
 public class Varejista : Usuario
