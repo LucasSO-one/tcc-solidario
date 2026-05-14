@@ -2,6 +2,9 @@ using Microsoft.EntityFrameworkCore;
 using TccSolidario.Api.Services; // <-- Esta linha resolve o erro do CNPJ
 using TccSolidario.Api.Data; // <-- Garante que ele ache o AppDbContext
 using TccSolidario.Api.Data.Seeding;
+using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,6 +21,37 @@ builder.Services.AddHttpClient<ICnpjValidatorService, CnpjValidatorService>(clie
     // Colocamos um "cracha" para a BrasilAPI saber que somos uma aplicacao legitima
     client.DefaultRequestHeaders.Add("User-Agent", "TccSolidarioApp/1.0");
     client.DefaultRequestHeaders.Add("Accept", "application/json");
+});
+
+// Configuracao do JWT
+var jwtKey = builder.Configuration["Jwt:Key"];
+if (string.IsNullOrEmpty(jwtKey))
+{
+    throw new InvalidOperationException("A chave JWT não foi configurada no appsettings.json.");
+}
+
+var key = Encoding.ASCII.GetBytes(jwtKey);
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.RequireHttpsMetadata = false; // Em producao, mude para true
+    options.SaveToken = true;
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = new SymmetricSecurityKey(key),
+        ValidateIssuer = true,
+        ValidIssuer = builder.Configuration["Jwt:Issuer"],
+        ValidateAudience = true,
+        ValidAudience = builder.Configuration["Jwt:Audience"],
+        ValidateLifetime = true, // Verifica se o token expirou
+        ClockSkew = TimeSpan.Zero // Remove o tempo de tolerancia de 5 min do .NET
+    };
 });
 
 var app = builder.Build();

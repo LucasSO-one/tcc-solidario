@@ -240,3 +240,11 @@ C:\Users\guilh\Documents\tcc-solidario\api\TccSolidario.Api\obj\Debug\net8.0\Tcc
 C:\Users\guilh\Documents\tcc-solidario\api\TccSolidario.Api\obj\Debug\net8.0\TccSolidario.Api.dll
 C:\Users\guilh\Documents\tcc-solidario\api\TccSolidario.Api\obj\Debug\net8.0\refint\TccSolidario.Api.dll
 C:\Users\guilh\Documents\tcc-solidario\api\TccSolidario.Api\obj\Debug\net8.0\TccSolidario.Api.pdb
+C:\Users\UsuarioPc\Documents\tccSolidario\api\TccSolidario.Api\bin\Debug\net8.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
+C:\Users\UsuarioPc\Documents\tccSolidario\api\TccSolidario.Api\bin\Debug\net8.0\Microsoft.IdentityModel.Abstractions.dll
+C:\Users\UsuarioPc\Documents\tccSolidario\api\TccSolidario.Api\bin\Debug\net8.0\Microsoft.IdentityModel.JsonWebTokens.dll
+C:\Users\UsuarioPc\Documents\tccSolidario\api\TccSolidario.Api\bin\Debug\net8.0\Microsoft.IdentityModel.Logging.dll
+C:\Users\UsuarioPc\Documents\tccSolidario\api\TccSolidario.Api\bin\Debug\net8.0\Microsoft.IdentityModel.Protocols.dll
+C:\Users\UsuarioPc\Documents\tccSolidario\api\TccSolidario.Api\bin\Debug\net8.0\Microsoft.IdentityModel.Protocols.OpenIdConnect.dll
+C:\Users\UsuarioPc\Documents\tccSolidario\api\TccSolidario.Api\bin\Debug\net8.0\Microsoft.IdentityModel.Tokens.dll
+C:\Users\UsuarioPc\Documents\tccSolidario\api\TccSolidario.Api\bin\Debug\net8.0\System.IdentityModel.Tokens.Jwt.dll
