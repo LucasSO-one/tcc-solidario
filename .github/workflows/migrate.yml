@@ -1,0 +1,30 @@
+name: Run EF Core Migrations
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
+      - name: Configurar .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restaurar dependências
+        run: dotnet restore
+
+      - name: Instalar EF Core CLI
+        run: dotnet tool install --global dotnet-ef
+
+      - name: Rodar migrations
+        run: dotnet ef database update --project api/TccSolidario.Api
+        env:
+          ConnectionStrings__DefaultConnection: ${{ secrets.DATABASE_URL }}
