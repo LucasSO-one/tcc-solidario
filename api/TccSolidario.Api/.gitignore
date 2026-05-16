@@ -20,3 +20,7 @@ obj/
 
 # VSCode
 .vscode/
+
+# Ignorar arquivos de configuração de ambiente
+appsettings.json
+appsettings.*.json
