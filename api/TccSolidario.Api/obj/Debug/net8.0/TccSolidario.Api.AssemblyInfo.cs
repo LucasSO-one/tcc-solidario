@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("TccSolidario.Api")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+c699d780558542322d293d03ee51aaee8d4c22a8")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+77f4d1b09bd47478176df17923a4943c8070fab4")]
 [assembly: System.Reflection.AssemblyProductAttribute("TccSolidario.Api")]
 [assembly: System.Reflection.AssemblyTitleAttribute("TccSolidario.Api")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
