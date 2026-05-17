@@ -13,6 +13,7 @@ public class AdminController : ControllerBase
 {
     private readonly AppDbContext _context;
 
+    // Injeção de dependência do contexto do banco de dados
     public AdminController(AppDbContext context)
     {
         _context = context;
