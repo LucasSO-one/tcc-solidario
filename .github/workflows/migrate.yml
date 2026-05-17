@@ -28,14 +28,10 @@ jobs:
         run: |
           RESOLVED=$(dig +short A db.wqgrxpnjelgixasitbzo.supabase.co | grep -E '^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$' | head -1)
           echo "IP resolvido: $RESOLVED"
-          if [ -z "$RESOLVED" ]; then
-            echo "SUPABASE_IPV4=db.wqgrxpnjelgixasitbzo.supabase.co" >> $GITHUB_ENV
-          else
-            echo "SUPABASE_IPV4=$RESOLVED" >> $GITHUB_ENV
-          fi
+          echo "$RESOLVED db.wqgrxpnjelgixasitbzo.supabase.co" | sudo tee -a /etc/hosts
 
       - name: Rodar migrations
         run: dotnet ef database update --project api/TccSolidario.Api
         env:
-          ConnectionStrings__DefaultConnection: "Host=${{ env.SUPABASE_IPV4 }};Port=5432;Database=postgres;Username=postgres;Password=${{ secrets.DB_PASSWORD }};SSL Mode=Require;Trust Server Certificate=true"
+          ConnectionStrings__DefaultConnection: "Host=db.wqgrxpnjelgixasitbzo.supabase.co;Port=5432;Database=postgres;Username=postgres;Password=${{ secrets.DB_PASSWORD }};SSL Mode=Require;Trust Server Certificate=true"
           Jwt__Key: ${{ secrets.JWT_KEY }}
