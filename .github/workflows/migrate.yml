@@ -26,8 +26,13 @@ jobs:
 
       - name: Forçar IPv4 no host do Supabase
         run: |
-          RESOLVED=$(dig +short A db.wqgrxpnjelgixasitbzo.supabase.co | head -1)
-          echo "SUPABASE_IPV4=$RESOLVED" >> $GITHUB_ENV
+          RESOLVED=$(dig +short A db.wqgrxpnjelgixasitbzo.supabase.co | grep -E '^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$' | head -1)
+          echo "IP resolvido: $RESOLVED"
+          if [ -z "$RESOLVED" ]; then
+            echo "SUPABASE_IPV4=db.wqgrxpnjelgixasitbzo.supabase.co" >> $GITHUB_ENV
+          else
+            echo "SUPABASE_IPV4=$RESOLVED" >> $GITHUB_ENV
+          fi
 
       - name: Rodar migrations
         run: dotnet ef database update --project api/TccSolidario.Api
