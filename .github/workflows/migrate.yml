@@ -24,10 +24,13 @@ jobs:
       - name: Instalar EF Core CLI
         run: dotnet tool install --global dotnet-ef
 
+      - name: Forçar IPv4 no host do Supabase
+        run: |
+          RESOLVED=$(dig +short A db.wqgrxpnjelgixasitbzo.supabase.co | head -1)
+          echo "SUPABASE_IPV4=$RESOLVED" >> $GITHUB_ENV
+
       - name: Rodar migrations
         run: dotnet ef database update --project api/TccSolidario.Api
         env:
-          ConnectionStrings__DefaultConnection: ${{ secrets.DATABASE_URL }}
+          ConnectionStrings__DefaultConnection: "Host=${{ env.SUPABASE_IPV4 }};Port=5432;Database=postgres;Username=postgres;Password=${{ secrets.DB_PASSWORD }};SSL Mode=Require;Trust Server Certificate=true"
           Jwt__Key: ${{ secrets.JWT_KEY }}
-
-      
