@@ -84,8 +84,9 @@ public class AdminController : ControllerBase
 
         // Atualiza o status no banco de dados
 
-        
+
         usuario.StatusAprovacao = request.NovoStatus;
+        
         await _context.SaveChangesAsync();
 
         string mensagem = request.NovoStatus == StatusAprovacao.Aprovado 
