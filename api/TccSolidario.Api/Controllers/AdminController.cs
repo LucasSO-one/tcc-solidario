@@ -76,6 +76,7 @@ public class AdminController : ControllerBase
             return BadRequest(new { Sucesso = false, Erro = "Este cadastro ja foi avaliado anteriormente." });
         }
 
+        // Verifica se o status enviado é válido (2 para Aprovar, 3 para Rejeitar)
         if (request.NovoStatus != StatusAprovacao.Aprovado && request.NovoStatus != StatusAprovacao.Rejeitado)
         {
             return BadRequest(new { Sucesso = false, Erro = "Status invalido. Envie 2 para Aprovar ou 3 para Rejeitar." });
