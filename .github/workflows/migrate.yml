@@ -28,3 +28,6 @@ jobs:
         run: dotnet ef database update --project api/TccSolidario.Api
         env:
           ConnectionStrings__DefaultConnection: ${{ secrets.DATABASE_URL }}
+          Jwt__Key: ${{ secrets.JWT_KEY }}
+
+      
