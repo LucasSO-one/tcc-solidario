@@ -1,4 +1,4 @@
-namespace TccSolidario.Api.DTOs.Auth;
+namespace TccSolidario.Api.DTOs.Cnpj;
 
 public class CnpjRequest
 {

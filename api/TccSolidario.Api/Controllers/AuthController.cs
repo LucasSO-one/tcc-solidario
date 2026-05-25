@@ -1,40 +1,104 @@
+namespace TccSolidario.Api.Controllers;
+
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using TccSolidario.Api.Services;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
+using Microsoft.IdentityModel.Tokens;
 using TccSolidario.Api.DTOs.Auth;
+using TccSolidario.Api.Data;
+using TccSolidario.Api.Models;
+using TccSolidario.Api.Models.Enums;
 
 [ApiController]
-[Route("api/controller")]
+[Route("api/[controller]")]
 public class AuthController : ControllerBase
 {
-    private readonly ICnpjValidatorService _cnpjValidator;
+    private readonly AppDbContext _context;
+    private readonly IConfiguration _configuration;
     private readonly ILogger<AuthController> _logger;
 
-    // injeção de dependência do serviço de validação de CNPJ e do logger
-    public AuthController(ICnpjValidatorService cnpjValidator, ILogger<AuthController> logger)
+    public AuthController(AppDbContext context, IConfiguration configuration, ILogger<AuthController> logger)
     {
-        _cnpjValidator = cnpjValidator;
+        _context = context;
+        _configuration = configuration;
         _logger = logger;
     }
 
-    [HttpPost("testar-cnpj")]
-    public async Task<IActionResult> TestarValidadorCnpj([FromBody] CnpjRequest request)
+    [HttpPost("login")]
+    public async Task<IActionResult> Login([FromBody] LoginRequest request)
     {
-        _logger.LogInformation($"[Teste] Iniciando validacao para o CNPJ: {request.Cnpj}");
+        var usuario = await _context.Usuarios.FirstOrDefaultAsync(u => u.Email == request.Email);
 
-        bool isValido = await _cnpjValidator.ValidarCnpjAtivoAsync(request.Cnpj);
+        if (usuario == null)
+        {
+            return Unauthorized(new { Sucesso = false, Erro = "Credenciais invalidas." });
+        }
 
-        if (isValido)
+        if (usuario.Tipo != TipoUsuario.Admin)
         {
-            _logger.LogInformation("[Resultado] O CNPJ foi APROVADO.");
-            return Ok(new { Sucesso = true, Mensagem = "CNPJ Valido e pronto para cadastro!" });
+            if (usuario.StatusAprovacao == StatusAprovacao.Pendente)
+            {
+                return Unauthorized(new { Sucesso = false, Erro = "Sua conta ainda esta em analise pela nossa equipe." });
+            }
+            
+            if (usuario.StatusAprovacao == StatusAprovacao.Rejeitado)
+            {
+                return Unauthorized(new { Sucesso = false, Erro = "Sua solicitacao de cadastro foi rejeitada." });
+            }
         }
-        else
+
+        if (!BCrypt.Net.BCrypt.Verify(request.Senha, usuario.SenhaHash))
         {
-            _logger.LogWarning("[Resultado] O CNPJ foi REPROVADO.");
-            return BadRequest(new { Sucesso = false, Erro = "CNPJ Invalido ou Inativo." });
+            return Unauthorized(new { Sucesso = false, Erro = "Credenciais invalidas." });
         }
+
+        var token = GerarTokenJwt(usuario);
+
+        _logger.LogInformation($"[Login] Usuario autenticado: {usuario.Email}");
+
+        return Ok(new 
+        { 
+            Sucesso = true, 
+            Token = token,
+            Usuario = new 
+            {
+                Id = usuario.Id,
+                Email = usuario.Email,
+                Tipo = usuario.Tipo.ToString()
+            }
+        });
     }
 
-}
+    private string GerarTokenJwt(Usuario usuario)
+    {
+        var jwtKey = _configuration["Jwt:Key"];
+        var key = Encoding.ASCII.GetBytes(jwtKey!);
 
+        var claims = new List<Claim>
+        {
+            new Claim(JwtRegisteredClaimNames.Sub, usuario.Id.ToString()),
+            new Claim(JwtRegisteredClaimNames.Email, usuario.Email),
+            new Claim("TipoUsuario", usuario.Tipo.ToString())
+        };
+
+        var tokenDescriptor = new SecurityTokenDescriptor
+        {
+            Subject = new ClaimsIdentity(claims),
+            Expires = DateTime.UtcNow.AddHours(8),
+            Issuer = _configuration["Jwt:Issuer"],
+            Audience = _configuration["Jwt:Audience"],
+            SigningCredentials = new SigningCredentials(
+                new SymmetricSecurityKey(key), 
+                SecurityAlgorithms.HmacSha256Signature)
+        };
+
+        var tokenHandler = new JwtSecurityTokenHandler();
+        var token = tokenHandler.CreateToken(tokenDescriptor);
+
+        return tokenHandler.WriteToken(token);
+    }
+}

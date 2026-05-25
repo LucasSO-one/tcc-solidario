@@ -248,3 +248,4 @@ C:\Users\UsuarioPc\Documents\tccSolidario\api\TccSolidario.Api\bin\Debug\net8.0\
 C:\Users\UsuarioPc\Documents\tccSolidario\api\TccSolidario.Api\bin\Debug\net8.0\Microsoft.IdentityModel.Protocols.OpenIdConnect.dll
 C:\Users\UsuarioPc\Documents\tccSolidario\api\TccSolidario.Api\bin\Debug\net8.0\Microsoft.IdentityModel.Tokens.dll
 C:\Users\UsuarioPc\Documents\tccSolidario\api\TccSolidario.Api\bin\Debug\net8.0\System.IdentityModel.Tokens.Jwt.dll
+C:\Users\UsuarioPc\Documents\tccSolidario\api\TccSolidario.Api\bin\Debug\net8.0\BCrypt-Net-Next.dll
