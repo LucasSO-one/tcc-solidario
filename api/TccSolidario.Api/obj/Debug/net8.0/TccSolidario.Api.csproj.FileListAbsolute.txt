@@ -216,12 +216,6 @@ C:\Users\UsuarioPc\Documents\tccSolidario\api\TccSolidario.Api\obj\Debug\net8.0\
 C:\Users\UsuarioPc\Documents\tccSolidario\api\TccSolidario.Api\obj\Debug\net8.0\staticwebassets.build.json
 C:\Users\UsuarioPc\Documents\tccSolidario\api\TccSolidario.Api\obj\Debug\net8.0\staticwebassets.development.json
 C:\Users\UsuarioPc\Documents\tccSolidario\api\TccSolidario.Api\obj\Debug\net8.0\staticwebassets.build.endpoints.json
-C:\Users\UsuarioPc\Documents\tccSolidario\api\TccSolidario.Api\obj\Debug\net8.0\staticwebassets\msbuild.TccSolidario.Api.Microsoft.AspNetCore.StaticWebAssets.props
-C:\Users\UsuarioPc\Documents\tccSolidario\api\TccSolidario.Api\obj\Debug\net8.0\staticwebassets\msbuild.TccSolidario.Api.Microsoft.AspNetCore.StaticWebAssetEndpoints.props
-C:\Users\UsuarioPc\Documents\tccSolidario\api\TccSolidario.Api\obj\Debug\net8.0\staticwebassets\msbuild.build.TccSolidario.Api.props
-C:\Users\UsuarioPc\Documents\tccSolidario\api\TccSolidario.Api\obj\Debug\net8.0\staticwebassets\msbuild.buildMultiTargeting.TccSolidario.Api.props
-C:\Users\UsuarioPc\Documents\tccSolidario\api\TccSolidario.Api\obj\Debug\net8.0\staticwebassets\msbuild.buildTransitive.TccSolidario.Api.props
-C:\Users\UsuarioPc\Documents\tccSolidario\api\TccSolidario.Api\obj\Debug\net8.0\staticwebassets.pack.json
 C:\Users\UsuarioPc\Documents\tccSolidario\api\TccSolidario.Api\obj\Debug\net8.0\TccSolid.734D5577.Up2Date
 C:\Users\UsuarioPc\Documents\tccSolidario\api\TccSolidario.Api\obj\Debug\net8.0\TccSolidario.Api.dll
 C:\Users\UsuarioPc\Documents\tccSolidario\api\TccSolidario.Api\obj\Debug\net8.0\refint\TccSolidario.Api.dll
@@ -249,3 +243,8 @@ C:\Users\UsuarioPc\Documents\tccSolidario\api\TccSolidario.Api\bin\Debug\net8.0\
 C:\Users\UsuarioPc\Documents\tccSolidario\api\TccSolidario.Api\bin\Debug\net8.0\Microsoft.IdentityModel.Tokens.dll
 C:\Users\UsuarioPc\Documents\tccSolidario\api\TccSolidario.Api\bin\Debug\net8.0\System.IdentityModel.Tokens.Jwt.dll
 C:\Users\UsuarioPc\Documents\tccSolidario\api\TccSolidario.Api\bin\Debug\net8.0\BCrypt-Net-Next.dll
+C:\Users\UsuarioPc\Documents\tccSolidario\api\TccSolidario.Api\obj\Debug\net8.0\rpswa.dswa.cache.json
+C:\Users\UsuarioPc\Documents\tccSolidario\api\TccSolidario.Api\obj\Debug\net8.0\rjimswa.dswa.cache.json
+C:\Users\UsuarioPc\Documents\tccSolidario\api\TccSolidario.Api\obj\Debug\net8.0\rjsmrazor.dswa.cache.json
+C:\Users\UsuarioPc\Documents\tccSolidario\api\TccSolidario.Api\obj\Debug\net8.0\rjsmcshtml.dswa.cache.json
+C:\Users\UsuarioPc\Documents\tccSolidario\api\TccSolidario.Api\obj\Debug\net8.0\staticwebassets.build.json.cache
