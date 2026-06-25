@@ -42,7 +42,8 @@ public class Ong : Usuario
     [Required, StringLength(14)]
     public string CNPJ { get; set; } = string.Empty;
     public string AreaAtuacao { get; set; } = string.Empty;
-    public string NomeResponsavel { get; set; } = string.Empty;
+    [Required, StringLength(100)]
+    public string NomeFantasia { get; set; } = string.Empty;
 }
 
 

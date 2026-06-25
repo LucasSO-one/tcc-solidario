@@ -6,9 +6,11 @@ using TccSolidario.Api.Data;
 using TccSolidario.Api.Models;
 using TccSolidario.Api.Models.Enums;
 using TccSolidario.Api.DTOs.Admin;
+using Microsoft.AspNetCore.Authorization;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class AdminController : ControllerBase
 {
     private readonly AppDbContext _context;
@@ -50,7 +52,7 @@ public class AdminController : ControllerBase
             }
             else if (usuario is Ong ong)
             {
-                dto.NomeOuRazaoSocial = ong.NomeResponsavel;
+                dto.NomeOuRazaoSocial = ong.NomeFantasia;
                 dto.Documento = ong.CNPJ;
             }
 
@@ -60,7 +62,7 @@ public class AdminController : ControllerBase
         return Ok(response);
     }
 
-    // ROTA 2: Aprovar ou Rejeitar um cadastro
+    // Aprovar ou Rejeitar um cadastro
     [HttpPut("avaliar-cadastro/{id}")]
     public async Task<IActionResult> AvaliarCadastro(Guid id, [FromBody] AvaliarCadastroRequest request)
     {
@@ -83,7 +85,6 @@ public class AdminController : ControllerBase
         }
 
         // Atualiza o status no banco de dados
-
 
         usuario.StatusAprovacao = request.NovoStatus;
         
