@@ -1,0 +1,123 @@
+.sidebar{
+
+    width:270px;
+
+    min-height:100vh;
+
+    background:#276749;
+
+    padding:30px 20px;
+
+    color:white;
+
+}
+
+.logo{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:15px;
+
+    margin-bottom:60px;
+
+}
+
+.logo-icon{
+
+    width:48px;
+
+    height:48px;
+
+    border-radius:50%;
+
+    background:white;
+
+    color:#276749;
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    font-size:22px;
+
+}
+
+.logo h2{
+
+    font-size:24px;
+
+    font-weight:600;
+
+}
+
+.logo p{
+
+    font-size:14px;
+
+    opacity:.8;
+
+}
+
+nav{
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:15px;
+
+}
+
+.menu{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:12px;
+
+    padding:14px;
+
+    border:none;
+
+    border-radius:8px;
+
+    cursor:pointer;
+
+    background:transparent;
+
+    color:white;
+
+    font-size:15px;
+
+    transition:.3s;
+
+}
+
+.menu:hover{
+
+    background:rgba(255,255,255,.12);
+
+}
+
+.active{
+
+    background:white;
+
+    color:#276749;
+
+}
+
+.sidebar{
+
+    position:fixed;
+
+    left:0;
+
+    top:0;
+
+}
