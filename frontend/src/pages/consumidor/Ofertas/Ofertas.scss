@@ -1,0 +1,83 @@
+.ofertas{
+
+    margin-left:270px;
+
+    padding:60px;
+
+    background:#F7FAFC;
+
+    min-height:100vh;
+
+}
+
+.ofertas h1{
+
+    font-size:34px;
+
+    color:#1A202C;
+
+    margin-bottom:8px;
+
+}
+
+.ofertas p{
+
+    color:#4A5568;
+
+    margin-bottom:30px;
+
+}
+
+.busca{
+
+    width:450px;
+
+    height:50px;
+
+    background:white;
+
+    border:1px solid #CBD5E0;
+
+    border-radius:10px;
+
+    display:flex;
+
+    align-items:center;
+
+    gap:12px;
+
+    padding:0 18px;
+
+    margin-bottom:35px;
+
+}
+
+.busca svg{
+
+    color:#718096;
+
+    font-size:18px;
+
+}
+
+.busca input{
+
+    flex:1;
+
+    border:none;
+
+    outline:none;
+
+    font-size:15px;
+
+}
+
+.grid-ofertas{
+
+    display:grid;
+
+    grid-template-columns:repeat(auto-fit,minmax(290px,1fr));
+
+    gap:25px;
+
+}

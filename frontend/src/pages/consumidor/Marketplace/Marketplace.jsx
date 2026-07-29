@@ -2,8 +2,8 @@ import "./Marketplace.css";
 
 import { FaSearch, FaShoppingBasket } from "react-icons/fa";
 
-import OfertaCard from "../../../../components/OfertaCard/OfertaCard.jsx";
-import ofertas from "../../../data/ofertas";
+// import OfertaCard from "../../../../components/OfertaCard/OfertaCard.jsx";
+// import ofertas from "../../../data/ofertas";
 
 function Marketplace(){
 

@@ -1,6 +1,6 @@
-import "./VitrineONG.css";
+import "./VitrineONG.scss";
 import ProductCard from "../../../components/ProductCard/ProductCard";
-import produtos from "../../../data/produtos";
+// import produtos from "../../../data/produtos";
 
 function VitrineONG() {
   return (

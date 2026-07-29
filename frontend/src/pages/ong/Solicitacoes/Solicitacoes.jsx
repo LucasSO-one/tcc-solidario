@@ -1,10 +1,7 @@
-import "./Solicitacoes.css"; //Importando o arquivo de estilo CSS para a página de solicitações
-
+import "./Solicitacoes.scss"; //Importando o arquivo de estilo CSS para a página de solicitações
 import { FaClipboardList } from "react-icons/fa";
-
 import SolicitacaoCard from "../../../components/SolicitacaoCard/SolicitacaoCard";
-
-import solicitacoes from "../../../data/solicitacoes";
+// import solicitacoes from "../../../data/solicitacoes";
 
 function Solicitacoes(){
 
