@@ -29,5 +29,5 @@ jobs:
       - name: Rodar migrations
         run: dotnet ef database update --project api/TccSolidario.Api
         env:
-          ConnectionStrings__DefaultConnection: "Host=aws-1-us-east-1.pooler.supabase.com;Port=5432;Database=postgres;Username=postgres.wqgrxpnjelgixasitbzo;Password=${{ secrets.DB_PASSWORD }};SSL Mode=Require;Trust Server Certificate=true;Pooling=true"
+          ConnectionStrings__DefaultConnection: "Host=aws-1-us-east-1.pooler.supabase.com;Port=5432;Database=postgres;Username=postgres.wqgrxpnjelgixasitbzo;Password=${{ secrets.DB_PASSWORD }};SSL Mode=Require;Trust Server Certificate=true;Pooling=false"
           Jwt__Key: ${{ secrets.JWT_KEY }}
