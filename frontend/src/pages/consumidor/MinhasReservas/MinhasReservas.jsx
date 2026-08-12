@@ -1,11 +1,21 @@
-import React from 'react'
+import "./MinhasReservas.scss";
+import ReservationCard from "../../../components/ReservationCard/ReservationCard";
+// import reservas from "../../../data/reservasConsumidor";
 
-const MinhasReservas = () => {
+function MinhasReservas() {
   return (
-    <div>
-      
-    </div>
-  )
+    <main className="minhas-reservas">
+      <h1>Minhas Reservas</h1>
+      <p>Acompanhe suas reservas e retiradas.</p>
+
+      {reservas.map((reserva) => (
+        <ReservationCard
+          key={reserva.id}
+          {...reserva}
+        />
+      ))}
+    </main>
+  );
 }
 
-export default MinhasReservas
+export default MinhasReservas;

@@ -24,9 +24,12 @@ import Marketplace from "./pages/consumidor/Marketplace/Marketplace";
 import MinhasReservas from "./pages/consumidor/MinhasReservas/MinhasReservas";
 
 // ONG
-import VitrineOng from "./pages/ong/VitrineOng/VitrineOng";
+import VitrineONG from "./pages/ong/VitrineOng/VitrineONG";
 import MeusResgates from "./pages/ong/MeusResgates/MeusResgates";
 import Solicitacoes from "./pages/ong/Solicitacoes/Solicitacoes";
+
+import Register from "./pages/auth/Register/Register"
+import Login from "./pages/auth/Login/Login"
 
 // instalem o npm install pra rodar o projeto !
 
@@ -37,9 +40,9 @@ function App() {
 
         {/* Rotas públicas aqui */}
 
-        {/* <Route path="/" element={<Home />} />
+        {/* <Route path="/" element={<Home />} /> */}
         <Route path="/login" element={<Login />} />
-        <Route path="/cadastro" element={<Register />} /> */}
+        <Route path="/register" element={<Register />} /> 
 
         {/* Rotas privadas */}
 
@@ -56,7 +59,7 @@ function App() {
         </Route>
 
         <Route path="/dashboard/ong" element={<OngLayout />}>
-          <Route index element={<VitrineOng />} />
+          <Route index element={<VitrineONG />} />
           <Route path="resgates" element={<MeusResgates />} />
           <Route path="solicitacoes" element={<Solicitacoes />} />
         </Route>

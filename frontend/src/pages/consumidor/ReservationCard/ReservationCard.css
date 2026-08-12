@@ -1,0 +1,42 @@
+.reservation-card{
+    display:flex;
+    align-items:center;
+    gap:20px;
+    padding:20px;
+    background:#fff;
+    border:1px solid #E2E8F0;
+    border-radius:12px;
+    margin-bottom:16px;
+}
+
+.reservation-card img{
+    width:80px;
+    height:80px;
+    object-fit:cover;
+    border-radius:8px;
+}
+
+.reservation-info{
+    flex:1;
+}
+
+.status{
+    padding:8px 16px;
+    border-radius:20px;
+    font-weight:600;
+}
+
+.status.ativa{
+    background:#C6F6D5;
+    color:#276749;
+}
+
+.status.retirada{
+    background:#D7F6F7;
+    color:#2B6CB0;
+}
+
+.status.cancelada{
+    background:#FED7D7;
+    color:#C53030;
+}

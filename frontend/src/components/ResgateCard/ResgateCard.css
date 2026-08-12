@@ -1,0 +1,130 @@
+.resgate-card{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    background:white;
+
+    border:1px solid #E2E8F0;
+
+    border-radius:12px;
+
+    padding:20px;
+
+    margin-top:18px;
+
+    transition:.2s;
+
+}
+
+.resgate-info{
+
+    display:flex;
+
+    gap:18px;
+
+    align-items:center;
+
+}
+
+.icone{
+
+    font-size:28px;
+
+    color:#2F855A;
+
+}
+
+.resgate-info h3{
+
+    margin:0;
+
+    font-size:22px;
+
+}
+
+.resgate-info p{
+
+    margin:6px 0;
+
+    color:#4A5568;
+
+    display:flex;
+
+    align-items:center;
+
+    gap:6px;
+
+}
+
+.resgate-info small{
+
+    color:#718096;
+
+}
+
+.codigo{
+
+    background:#2F855A;
+
+    color:white;
+
+    border:none;
+
+    border-radius:8px;
+
+    padding:14px 24px;
+
+    font-weight:600;
+
+    cursor:pointer;
+
+    display:flex;
+
+    align-items:center;
+
+    gap:10px;
+
+    transition:.2s;
+
+}
+
+.codigo:hover{
+
+    background:#276749;
+
+    transform:scale(1.03);
+
+}
+
+.retirado{
+
+    background:#D7F6F7;
+
+    color:#2F855A;
+
+    border:1px solid #A0D9D4;
+
+    padding:12px 24px;
+
+    border-radius:20px;
+
+    display:flex;
+
+    gap:8px;
+
+    align-items:center;
+
+}
+
+
+.resgate-card:hover{
+
+    transform:translateY(-2px);
+
+    box-shadow:0 6px 15px rgba(0,0,0,.08);
+
+}
