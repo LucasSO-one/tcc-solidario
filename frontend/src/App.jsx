@@ -10,7 +10,7 @@ import VarejistaLayout from "./layouts/VarejistaLayout";
 import DashboardAdm from "./pages/admin/DashboardAdm/DashboardAdm";
 import Approvals from "./pages/admin/Approvals/Approvals";
 import Users from "./pages/admin/Users/Users";
-
+import Perfil from "./pages/admin/Perfil/Perfil";
 // Varejista
 import DashboardVarejista from "./pages/varejista/DashboardVarejista/DashboardVarejista";
 import CadastrarLote from "./pages/varejista/CadastrarLote/CadastrarLote";
@@ -50,6 +50,7 @@ function App() {
           <Route index element={<DashboardAdm />} />
           <Route path="approvals" element={<Approvals />} />
           <Route path="users" element={<Users />} />
+          <Route path="perfil" element={<Perfil />} />
         </Route>
 
         <Route path="/dashboard/consumidor" element={<ConsumidorLayout />}>

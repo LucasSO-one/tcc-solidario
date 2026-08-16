@@ -1,0 +1,287 @@
+@use '../../../styles/variables.scss' as *;
+
+.dashboard-admin {
+  font-family: $font-family-base;
+  color: $color-text-primary;
+  background: $color-bg;
+  padding: $space-lg;
+  display: flex;
+  flex-direction: column;
+  gap: $space-lg;
+
+  // ---------------------------------------------------------------------
+  // Header
+  // ---------------------------------------------------------------------
+  &__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: $space-md;
+    flex-wrap: wrap;
+  }
+
+  &__title {
+    margin: 0;
+    font-size: $font-size-2xl;
+    font-weight: $font-weight-bold;
+  }
+
+  &__subtitle {
+    margin: $space-xs 0 0;
+    font-size: $font-size-sm;
+    color: $color-text-secondary;
+  }
+
+  // ---------------------------------------------------------------------
+  // Botões
+  // ---------------------------------------------------------------------
+  &__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: $space-sm;
+    border: none;
+    border-radius: $radius-md;
+    padding: 10px 16px;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-medium;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+
+    &--ghost {
+      background: $color-surface;
+      color: $color-text-primary;
+      border: 1px solid $color-border;
+
+      &:hover {
+        background: $color-bg;
+      }
+    }
+
+    &--primary {
+      background: $color-primary;
+      color: $color-surface;
+
+      &:hover {
+        background: $color-primary-dark;
+      }
+    }
+  }
+
+  // ---------------------------------------------------------------------
+  // Banner de aprovações pendentes
+  // ---------------------------------------------------------------------
+  &__banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: $space-md;
+    background: $color-alert-bg;
+    border-radius: $radius-lg;
+    padding: $space-md $space-lg;
+    flex-wrap: wrap;
+  }
+
+  &__banner-text {
+    display: flex;
+    align-items: flex-start;
+    gap: $space-sm;
+  }
+
+  &__banner-icon {
+    color: $color-primary;
+    margin-top: 2px;
+    flex-shrink: 0;
+  }
+
+  &__banner-title {
+    margin: 0;
+    font-size: $font-size-base;
+    font-weight: $font-weight-semibold;
+  }
+
+  &__banner-desc {
+    margin: 2px 0 0;
+    font-size: $font-size-sm;
+    color: $color-text-secondary;
+  }
+
+  // ---------------------------------------------------------------------
+  // Grid de métricas
+  // ---------------------------------------------------------------------
+  &__metrics {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: $space-md;
+
+    @media (max-width: $breakpoint-tablet) {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    @media (max-width: $breakpoint-mobile) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  // ---------------------------------------------------------------------
+  // Seções genéricas
+  // ---------------------------------------------------------------------
+  &__section {
+    display: flex;
+    flex-direction: column;
+    gap: $space-md;
+  }
+
+  &__section-title {
+    display: flex;
+    align-items: center;
+    gap: $space-sm;
+    margin: 0;
+    font-size: $font-size-lg;
+    font-weight: $font-weight-semibold;
+  }
+
+  &__impact {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: $space-md;
+
+    @media (max-width: $breakpoint-tablet) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  &__activity {
+    display: flex;
+    flex-direction: column;
+    gap: $space-md;
+    background: $color-surface;
+    border: 1px solid $color-border;
+    border-radius: $radius-lg;
+    padding: $space-lg;
+  }
+}
+
+// ---------------------------------------------------------------------
+// Card de métrica
+// ---------------------------------------------------------------------
+.metric-card {
+  background: $color-surface;
+  border: 1px solid $color-border;
+  border-radius: $radius-lg;
+  padding: $space-md;
+  box-shadow: $shadow-card;
+  display: flex;
+  flex-direction: column;
+  gap: $space-sm;
+
+  &__top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  &__label {
+    font-size: $font-size-sm;
+    color: $color-text-secondary;
+  }
+
+  &__icon {
+    color: $color-primary;
+  }
+
+  &__value {
+    margin: 0;
+    font-size: $font-size-xl;
+    font-weight: $font-weight-bold;
+  }
+
+  &__delta {
+    margin: 0;
+    font-size: $font-size-xs;
+    color: $color-text-muted;
+  }
+}
+
+// ---------------------------------------------------------------------
+// Card de impacto
+// ---------------------------------------------------------------------
+.impact-card {
+  display: flex;
+  align-items: center;
+  gap: $space-md;
+  background: $color-primary-light;
+  border-radius: $radius-lg;
+  padding: $space-md $space-lg;
+
+  &__icon {
+    color: $color-primary;
+    flex-shrink: 0;
+  }
+
+  &__value {
+    margin: 0;
+    font-size: $font-size-lg;
+    font-weight: $font-weight-bold;
+  }
+
+  &__label {
+    margin: 2px 0 0;
+    font-size: $font-size-xs;
+    color: $color-text-secondary;
+  }
+}
+
+// ---------------------------------------------------------------------
+// Tabela de atividade recente
+// ---------------------------------------------------------------------
+.activity-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: $font-size-sm;
+
+  thead th {
+    text-align: left;
+    padding: $space-sm 0;
+    border-bottom: 1px solid $color-border;
+    color: $color-text-secondary;
+    font-weight: $font-weight-medium;
+  }
+
+  tbody td {
+    padding: $space-md 0;
+    border-bottom: 1px solid $color-border;
+    vertical-align: middle;
+  }
+
+  tbody tr:last-child td {
+    border-bottom: none;
+  }
+
+  &__when-col {
+    text-align: right;
+    width: 120px;
+  }
+
+  &__when {
+    text-align: right;
+    color: $color-text-muted;
+  }
+
+  &__badge {
+    display: inline-flex;
+    align-items: center;
+    background: $color-accent-blue-bg;
+    color: $color-accent-blue;
+    border-radius: $radius-full;
+    padding: 4px 12px;
+    font-size: $font-size-xs;
+    font-weight: $font-weight-medium;
+  }
+
+  &__empty {
+    text-align: center;
+    color: $color-text-muted;
+    padding: $space-lg 0;
+  }
+}

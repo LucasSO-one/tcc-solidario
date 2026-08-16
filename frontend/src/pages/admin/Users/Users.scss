@@ -1,0 +1,210 @@
+@use '../../../styles/variables.scss' as *;
+
+.usuarios-plataforma {
+  font-family: $font-family-base;
+  color: $color-text-primary;
+  background: $color-bg;
+  padding: $space-lg;
+  display: flex;
+  flex-direction: column;
+  gap: $space-lg;
+
+  &__title {
+    margin: 0;
+    font-size: $font-size-2xl;
+    font-weight: $font-weight-bold;
+  }
+
+  &__subtitle {
+    margin: $space-xs 0 0;
+    font-size: $font-size-sm;
+    color: $color-text-secondary;
+  }
+
+  // ---------------------------------------------------------------------
+  // Painel
+  // ---------------------------------------------------------------------
+  &__panel {
+    background: $color-surface;
+    border: 1px solid $color-border;
+    border-radius: $radius-lg;
+    padding: $space-lg;
+    display: flex;
+    flex-direction: column;
+    gap: $space-md;
+  }
+
+  &__toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: $space-md;
+    flex-wrap: wrap;
+  }
+
+  &__toolbar-right {
+    display: flex;
+    align-items: center;
+    gap: $space-md;
+    flex-wrap: wrap;
+  }
+
+  &__count {
+    display: inline-flex;
+    align-items: center;
+    gap: $space-sm;
+    font-size: $font-size-base;
+    font-weight: $font-weight-semibold;
+    color: $color-text-primary;
+    flex-shrink: 0;
+  }
+
+  // ---------------------------------------------------------------------
+  // Tabs
+  // ---------------------------------------------------------------------
+  &__tabs {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    background: $color-bg;
+    border: 1px solid $color-border;
+    border-radius: $radius-md;
+    padding: 4px;
+  }
+
+  &__tab {
+    border: none;
+    background: transparent;
+    padding: 8px 14px;
+    border-radius: $radius-sm;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-medium;
+    color: $color-text-secondary;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background-color 0.15s ease, color 0.15s ease;
+
+    &:hover {
+      color: $color-text-primary;
+    }
+
+    &--active {
+      background: $color-surface;
+      color: $color-text-primary;
+      box-shadow: $shadow-card;
+    }
+  }
+
+  // ---------------------------------------------------------------------
+  // Busca
+  // ---------------------------------------------------------------------
+  &__search {
+    position: relative;
+    display: flex;
+    align-items: center;
+
+    input {
+      font-family: $font-family-base;
+      border: 1px solid $color-border;
+      border-radius: $radius-md;
+      padding: 9px 14px 9px 36px;
+      font-size: $font-size-sm;
+      color: $color-text-primary;
+      background: $color-surface;
+      width: 280px;
+      max-width: 100%;
+
+      &::placeholder {
+        color: $color-text-muted;
+      }
+
+      &:focus {
+        outline: none;
+        border-color: $color-primary;
+      }
+    }
+  }
+
+  &__search-icon {
+    position: absolute;
+    left: 12px;
+    color: $color-text-muted;
+    pointer-events: none;
+  }
+
+  &__table-wrap {
+    overflow-x: auto;
+  }
+}
+
+// ---------------------------------------------------------------------
+// Tabela de usuários
+// ---------------------------------------------------------------------
+.users-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: $font-size-sm;
+
+  thead th {
+    text-align: left;
+    padding: $space-sm $space-sm $space-sm 0;
+    border-bottom: 1px solid $color-border;
+    color: $color-text-secondary;
+    font-weight: $font-weight-medium;
+    white-space: nowrap;
+  }
+
+  tbody td {
+    padding: $space-md $space-sm $space-md 0;
+    border-bottom: 1px solid $color-border;
+    vertical-align: middle;
+    white-space: nowrap;
+  }
+
+  tbody tr:last-child td {
+    border-bottom: none;
+  }
+
+  &__name {
+    font-weight: $font-weight-medium;
+  }
+
+  &__muted {
+    color: $color-text-secondary;
+  }
+
+  &__link {
+    color: $color-accent-blue;
+    text-decoration: underline;
+
+    &:hover {
+      color: $color-primary-dark;
+    }
+  }
+
+  &__badge {
+    display: inline-flex;
+    align-items: center;
+    border-radius: $radius-full;
+    padding: 3px 12px;
+    font-size: $font-size-xs;
+    font-weight: $font-weight-medium;
+
+    &--type {
+      background: $color-accent-blue-bg;
+      color: $color-accent-blue;
+    }
+
+    &--status {
+      background: $color-accent-blue-bg;
+      color: $color-accent-blue;
+    }
+  }
+
+  &__empty {
+    text-align: center;
+    color: $color-text-muted;
+    padding: $space-xl 0;
+    white-space: normal;
+  }
+}

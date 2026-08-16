@@ -41,6 +41,15 @@ function AdminSidebar() {
           <span>Usuários</span>
         </Link>
 
+        <Link
+          to="/dashboard/admin/perfil"
+          className="sidebar__link"
+        >
+          <Users />
+          <span>Perfil</span>
+        </Link>
+
+
       </nav>
 
     </aside>
