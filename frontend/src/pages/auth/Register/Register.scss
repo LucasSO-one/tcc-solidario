@@ -1,267 +1,315 @@
-$primary: #2f8a57;
-$primary-dark: #256f46;
-$primary-light: #e9f6ee;
-$text: #26323d;
-$text-light: #6f7d87;
-$border: #cfd9d2;
-$bg: #f6f8fa;
+// Fontes — mesma família usada em Login.scss, + Manrope para o heading.
+// Se já estiver carregada globalmente (index.html), remova esta linha.
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Inter:wght@400;500;600&display=swap');
 
-.register-container {
-  min-height: 100vh;
-  display: flex;
-  background: $bg;
-}
+$font-heading: "Manrope", sans-serif;
+$font-body: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 
-.register-wrapper {
+$color-primary: #2f4a35;
+$color-primary-dark: #24382a;
+$color-primary-light: #e6f0e3;
+$color-bg-content: #f7faf2;
+$color-text-dark: #1f2a22;
+$color-text-muted: #6b756c;
+$color-border: #e2e7dd;
+$color-white: #ffffff;
+
+$radius-sm: 6px;
+$radius-md: 14px;
+$radius-pill: 999px;
+
+.register-layout {
   display: flex;
+  height: 100vh;
   width: 100%;
-}
+  overflow: hidden;
+  font-family: $font-body;
 
-.register-left {
-  width: 50%;
-  background: linear-gradient(180deg, $primary 0%, $primary-dark 100%);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-  padding: 4rem;
-}
+  &__brand {
+    position: relative;
+    flex: 1 1 50%;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 48px;
+    overflow: hidden;
+    color: $color-white;
 
-.brand {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
 
-.brand-title img{
-  width: 80px;
-  margin-bottom: 20px;
-}
-
-.brand-subtitle {
-  color: white;
-  font-size: 1.5rem;
-  max-width: 480px;
-  line-height: 1.4;
-}
-
-.illustration {
-  display: none;
-}
-
-.register-right {
-  width: 50%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 2rem;
-}
-
-.register-form {
-  width: 100%;
-}
-
-.register-header {
-  margin-bottom: 2rem;
-
-  h2 {
-    font-size: 2.2rem;
-    color: $text;
-    margin-bottom: .3rem;
-  }
-
-  p {
-    color: $text-light;
-  }
-}
-
-.register-right > div,
-.register-right form,
-.register-footer {
-  width: 100%;
-  max-width: 470px;
-}
-
-.register-right {
-  flex-direction: column;
-}
-
-.register-right::before {
-  content: "";
-}
-
-.register-right>* {
-  z-index: 2;
-}
-
-.register-right {
-  position: relative;
-}
-
-.register-right .register-form,
-.register-header,
-.register-footer {
-  background: transparent;
-}
-
-.register-right {
-  .register-form {
-    background: white;
-    border: 2px solid rgba($primary,.20);
-    border-radius: 24px;
-    padding: 2rem;
-    box-shadow: 0 18px 45px rgba($primary,.12);
-  }
-}
-
-.form-group {
-  display: flex;
-  flex-direction: column;
-  margin-bottom: 1.25rem;
-
-  label {
-    font-weight: 600;
-    margin-bottom: .5rem;
-    color: $text;
-  }
-}
-
-.user-type-selector {
-  display: grid;
-  grid-template-columns: repeat(3,1fr);
-  gap: 1rem;
-}
-
-.type-btn {
-  height: 82px;
-  border: 2px solid $border;
-  border-radius: 14px;
-  background: white;
-  cursor: pointer;
-  transition: .2s;
-
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  gap: .5rem;
-
-  svg {
-    font-size: 1.4rem;
-    color: #6f7d87;
-  }
-
-  span {
-    color: #5b6770;
-    font-weight: 500;
-  }
-
-  &:hover {
-    border-color: $primary;
-  }
-
-  &.active {
-    background: $primary-light;
-    border-color: $primary;
-
-    svg,
-    span {
-      color: $primary;
+    @media (max-width: 900px) {
+      display: none;
     }
   }
-}
 
-.input-wrapper {
-  position: relative;
-
-  .input-icon {
+  &__overlay {
     position: absolute;
-    left: 16px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #97a3ab;
+    inset: 0;
+    background: linear-gradient(
+      180deg,
+      rgba(15, 26, 15, 0.15) 0%,
+      rgba(15, 26, 15, 0.6) 100%
+    );
+    pointer-events: none;
   }
 
-  input {
-    width: 100%;
-    height: 52px;
-    border: 2px solid $border;
-    border-radius: 12px;
-    padding-left: 46px;
-    font-size: .95rem;
-    transition: .2s;
+  &__header {
+    position: relative;
+    z-index: 1;
+  }
 
-    &:focus {
-      outline: none;
-      border-color: $primary;
-      box-shadow: 0 0 0 4px rgba($primary,.10);
+  &__logo {
+    height: 32px;
+    width: auto;
+  }
+
+  &__copy {
+    position: relative;
+    z-index: 1;
+    max-width: 480px;
+  }
+
+  &__tagline {
+    font-family: $font-heading;
+    font-size: 2.1rem;
+    line-height: 1.25;
+    font-weight: 700;
+    margin: 0 0 24px;
+  }
+
+  &__divider {
+    display: block;
+    width: 48px;
+    height: 2px;
+    background: rgba(255, 255, 255, 0.5);
+    margin-bottom: 16px;
+  }
+
+  &__quote {
+    font-family: $font-body;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    color: rgba(255, 255, 255, 0.85);
+    margin: 0;
+  }
+
+  &__content {
+    flex: 1 1 50%;
+    height: 100vh;
+    overflow-y: auto;
+    background-color: $color-bg-content;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 24px 32px;
+    box-sizing: border-box;
+
+    @media (max-width: 900px) {
+      flex: 1 1 100%;
     }
   }
 }
 
-.password-hint {
-  color: $text-light;
-  margin-top: .4rem;
-  font-size: .8rem;
-}
-
-.submit-btn {
+.register-card {
   width: 100%;
-  height: 54px;
-  margin-top: .5rem;
-  border: none;
-  border-radius: 12px;
-  background: $primary;
-  color: white;
-  font-size: 1rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: .2s;
+  max-width: 460px;
+  height: fit-content;
+  font-family: $font-body;
 
-  &:hover {
-    background: $primary-dark;
-  }
-}
-
-.register-footer {
-  text-align: center;
-  margin-top: 1.8rem;
-
-  p {
-    color: $text-light;
+  &__title {
+    font-family: $font-heading;
+    font-size: 2.50rem;
+    font-weight: 300;
+    color: $color-text-dark;
+    margin: 0 0 4px;
   }
 
-  a {
-    color: $primary;
+  &__subtitle {
+    font-size: 0.9rem;
+    color: $color-text-muted;
+    margin: 0 0 18px;
+  }
+
+  &__field {
+    margin-bottom: 14px;
+
+    // input "solto" (nome, email, tipo de usuário)
+    input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1px solid $color-border;
+      border-radius: $radius-md;
+      background: $color-white;
+      font-family: $font-body;
+      font-size: 0.95rem;
+      color: $color-text-dark;
+      box-sizing: border-box;
+      transition: border-color 0.15s ease;
+
+      &::placeholder {
+        color: #a9b0a5;
+      }
+
+      &:focus {
+        outline: none;
+        border-color: $color-primary;
+      }
+    }
+  }
+
+  &__input-wrapper {
+    position: relative;
+
+    input {
+      width: 100%;
+      padding: 12px 44px 12px 16px; // espaço à direita pro botão de olho
+      border: 1px solid $color-border;
+      border-radius: $radius-md;
+      background: $color-white;
+      font-family: $font-body;
+      font-size: 0.95rem;
+      color: $color-text-dark;
+      box-sizing: border-box;
+      transition: border-color 0.15s ease;
+
+      &::placeholder {
+        color: #a9b0a5;
+      }
+
+      &:focus {
+        outline: none;
+        border-color: $color-primary;
+      }
+    }
+  }
+
+  &__toggle-visibility {
+    position: absolute;
+    top: 50%;
+    right: 14px;
+    transform: translateY(-50%);
+    border: none;
+    background: transparent;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: $color-text-muted;
+    cursor: pointer;
+    transition: color 0.15s ease;
+
+    svg {
+      font-size: 1rem;
+    }
+
+    &:hover {
+      color: $color-primary;
+    }
+
+    &:focus-visible {
+      outline: 2px solid $color-primary;
+      outline-offset: 2px;
+      border-radius: $radius-sm;
+    }
+  }
+
+  &__label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: $color-text-dark;
+    margin-bottom: 5px;
+  }
+
+  &__hint {
+    display: block;
+    margin-top: 4px;
+    font-size: 0.78rem;
+    color: $color-text-muted;
+  }
+
+  &__type-selector {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+
+  &__type-btn {
+    height: 68px;
+    border: 1px solid $color-border;
+    border-radius: $radius-md;
+    background: $color-white;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: border-color 0.15s ease, background 0.15s ease;
+
+    svg {
+      font-size: 1.1rem;
+      color: $color-text-muted;
+    }
+
+    span {
+      font-family: $font-body;
+      font-size: 0.82rem;
+      color: $color-text-muted;
+    }
+
+    &:hover {
+      border-color: $color-primary;
+    }
+
+    &--active {
+      background: $color-primary-light;
+      border-color: $color-primary;
+
+      svg,
+      span {
+        color: $color-primary;
+      }
+    }
+  }
+
+  &__submit {
+    width: 100%;
+    padding: 13px;
+    margin-top: 4px;
+    border: none;
+    border-radius: $radius-pill;
+    background: $color-primary;
+    color: $color-white;
+    font-family: $font-body;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 10px 24px rgba(47, 74, 53, 0.3);
+    transition: background 0.15s ease;
+
+    &:hover {
+      background: $color-primary-dark;
+    }
+  }
+
+  &__footer {
+    text-align: center;
+    margin-top: 16px;
+    font-size: 0.9rem;
+    color: $color-text-muted;
+  }
+
+  &__footer-link {
+    color: $color-primary;
+    font-weight: 600;
     text-decoration: none;
-    font-weight: 700;
-  }
-}
 
-@media (max-width:900px){
-
-  .register-wrapper{
-    flex-direction:column;
-  }
-
-  .register-left,
-  .register-right{
-    width:100%;
-  }
-
-  .register-left{
-    min-height:280px;
-  }
-
-  .brand-title{
-    font-size:4rem;
-  }
-
-  .brand-subtitle{
-    font-size:1.4rem;
-  }
-
-  .user-type-selector{
-    grid-template-columns:1fr;
+    &:hover {
+      text-decoration: underline;
+    }
   }
 }

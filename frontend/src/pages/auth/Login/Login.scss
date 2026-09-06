@@ -1,164 +1,278 @@
-$primary: #2f8a57;
-$primary-dark: #246d45;
-$primary-light: #eaf7ef;
-$text: #25323d;
-$text-light: #6f7d87;
-$border: #c8d9ce;
-$bg: #f7faf8;
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600&display=swap');
+
+$font-heading: "Manrope", sans-serif;
+$font-body: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+
+$color-primary: #2f4a35;
+$color-primary-dark: #24382a;
+$color-bg-content: #f7faf2;
+$color-text-dark: #1f2a22;
+$color-text-muted: #6b756c;
+$color-border: #e2e7dd;
+$color-white: #ffffff;
+
+$radius-sm: 6px;
+$radius-md: 14px;
+$radius-pill: 999px;
 
 .auth-layout {
   display: flex;
   min-height: 100vh;
-  background: $bg;
+  width: 100%;
+  font-family: $font-body;
 
   &__brand {
-    width: 50%;
-    background: linear-gradient(180deg, $primary 0%, $primary-dark 100%);
+    position: relative;
+    flex: 1 1 50%;
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    padding: 4rem;
-    text-align: center;
+    justify-content: space-between;
+    padding: 48px;
+    overflow: hidden;
+    color: $color-white;
+
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+
+    @media (max-width: 900px) {
+      display: none;
+    }
   }
 
-  &__logo img {
-    width: 170px;
-    margin-bottom: 2rem;
+  &__overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      180deg,
+      rgba(15, 26, 15, 0.2) 0%,
+      rgba(15, 26, 15, 0.6) 100%
+    );
+    pointer-events: none;
+  }
+
+  &__header {
+    position: relative;
+    z-index: 1;
+  }
+
+  &__logo {
+    height: 32px;
+    width: auto;
+  }
+
+  &__copy {
+    position: relative;
+    z-index: 1;
+    max-width: 460px;
   }
 
   &__tagline {
-    color: white;
-    font-size: 1.5rem;
-    font-weight: 500;
-    line-height: 1.4;
-    max-width: 520px;
+    font-family: $font-heading;
+    font-size: 2.25rem;
+    line-height: 1.25;
+    font-weight: 600;
+    margin: 0 0 24px;
+  }
+
+  &__divider {
+    display: block;
+    width: 48px;
+    height: 2px;
+    background: rgba(255, 255, 255, 0.5);
+    margin-bottom: 16px;
+  }
+
+  &__quote {
+    font-family: $font-body;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    color: rgba(255, 255, 255, 0.85);
+    margin: 0;
   }
 
   &__content {
-    width: 50%;
+    flex: 1 1 50%;
     display: flex;
-    justify-content: center;
     align-items: center;
-    background: $bg;
-    padding: 2rem;
+    justify-content: center;
+    background-color: $color-bg-content;
+    padding: 32px;
+
+    @media (max-width: 900px) {
+      flex: 1 1 100%;
+    }
   }
 }
 
 .auth-card {
   width: 100%;
-  max-width: 470px;
-  background: white;
-  border: 2px solid rgba($primary, .25);
-  border-radius: 24px;
-  padding: 2.8rem;
-  box-shadow: 0 18px 45px rgba($primary, .12);
+  max-width: 400px;
+  font-family: $font-body;
 
   &__title {
-    color: $text;
-    font-size: 2rem;
-    font-weight: 700;
-    margin-bottom: .3rem;
+    font-family: $font-heading;
+    font-size: 2.50rem;
+    color: $color-text-dark;
+    margin: 0 0 8px;
+    font-weight: 300;
   }
 
   &__subtitle {
-    color: $text-light;
-    margin-bottom: 2rem;
+    font-family: $font-body;
+    font-size: 0.95rem;
+    color: $color-text-muted;
+    margin: 0 0 32px;
   }
 
   &__field {
-    margin-bottom: 1.3rem;
+    margin-bottom: 20px;
+
+    input {
+      width: 100%;
+      padding: 14px 16px;
+      border: 1px solid $color-border;
+      border-radius: $radius-md;
+      background: $color-white;
+      font-family: $font-body;
+      font-size: 0.95rem;
+      color: $color-text-dark;
+      box-sizing: border-box;
+      transition: border-color 0.15s ease;
+
+      &::placeholder {
+        color: #a9b0a5;
+      }
+
+      &:focus {
+        outline: none;
+        border-color: $color-primary;
+      }
+    }
+  }
+
+  &__input-wrapper {
+    position: relative;
+
+    input {
+      width: 100%;
+      padding: 14px 44px 14px 16px; // espaço à direita pro botão de olho
+      border: 1px solid $color-border;
+      border-radius: $radius-md;
+      background: $color-white;
+      font-family: $font-body;
+      font-size: 0.95rem;
+      color: $color-text-dark;
+      box-sizing: border-box;
+      transition: border-color 0.15s ease;
+
+      &::placeholder {
+        color: #a9b0a5;
+      }
+
+      &:focus {
+        outline: none;
+        border-color: $color-primary;
+      }
+    }
+  }
+
+  &__toggle-visibility {
+    position: absolute;
+    top: 50%;
+    right: 14px;
+    transform: translateY(-50%);
+    border: none;
+    background: transparent;
+    padding: 4px;
     display: flex;
-    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: $color-text-muted;
+    cursor: pointer;
+    transition: color 0.15s ease;
+
+    svg {
+      font-size: 1rem;
+    }
+
+    &:hover {
+      color: $color-primary;
+    }
+
+    &:focus-visible {
+      outline: 2px solid $color-primary;
+      outline-offset: 2px;
+      border-radius: $radius-sm;
+    }
+  }
+
+  &__label-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 6px;
   }
 
   &__label {
-    margin-bottom: .45rem;
-    color: $text;
+    display: block;
+    font-family: $font-body;
+    font-size: 0.85rem;
     font-weight: 600;
-    font-size: .9rem;
+    color: $color-text-dark;
+    margin-bottom: 6px;
   }
 
-  input {
-    height: 52px;
-    border: 2px solid $border;
-    border-radius: 12px;
-    padding: 0 16px;
-    background: white;
-    font-size: .95rem;
-    transition: .2s;
+  &__label-row &__label {
+    margin-bottom: 0;
+  }
 
-    &:focus {
-      outline: none;
-      border-color: $primary;
-      box-shadow: 0 0 0 4px rgba($primary,.12);
-    }
+  &__forgot {
+    font-family: $font-body;
+    font-size: 0.8rem;
+    color: $color-primary;
+    text-decoration: none;
 
-    &::placeholder {
-      color: #9aa6af;
+    &:hover {
+      text-decoration: underline;
     }
   }
 
   &__submit {
-    margin-top: 1rem;
     width: 100%;
-    height: 54px;
+    padding: 15px;
+    margin-top: 8px;
     border: none;
-    border-radius: 12px;
-    background: $primary;
-    color: white;
+    border-radius: $radius-pill;
+    background: $color-primary;
+    color: $color-white;
+    font-family: $font-body;
     font-size: 1rem;
-    font-weight: 700;
+    font-weight: 600;
     cursor: pointer;
-    transition: .2s;
+    box-shadow: 0 10px 24px rgba(47, 74, 53, 0.3);
+    transition: background 0.15s ease;
 
     &:hover {
-      background: $primary-dark;
-      transform: translateY(-1px);
+      background: $color-primary-dark;
     }
   }
 
   &__footer {
-    margin-top: 2rem;
     text-align: center;
-    color: $text-light;
-
-    a {
-      color: $primary;
-      text-decoration: none;
-      font-weight: 700;
-
-      &:hover {
-        color: $primary-dark;
-      }
-    }
-  }
-}
-
-@media (max-width: 900px) {
-  .auth-layout {
-    flex-direction: column;
-
-    &__brand,
-    &__content {
-      width: 100%;
-    }
-
-    &__brand {
-      min-height: 260px;
-      padding: 3rem 2rem;
-    }
-
-    &__tagline {
-      font-size: 1.5rem;
-    }
-
-    &__logo img {
-      width: 130px;
-    }
+    margin-top: 24px;
+    font-family: $font-body;
+    font-size: 0.9rem;
+    color: $color-text-muted;
   }
 
-  .auth-card {
-    max-width: 420px;
+  &__footer-link {
+    color: $color-primary;
+    font-weight: 600;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
   }
 }
