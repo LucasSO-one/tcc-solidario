@@ -1,5 +1,5 @@
 import React from 'react'
-import { IconHeart, IconMapPin, IconClock, IconInfo } from '../../../components/Icons/Icons'
+import { IconHeart, IconMapPin, IconClock, IconInfo } from '../../components/Icons/Icons'
 import './Doacoes.scss'
 
 const doacoesMock = [

@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react'
-import { IconPlus, IconSearch, IconFilter } from '../../../components/Icons/Icons'
+import { IconPlus, IconSearch, IconFilter } from '../../components/Icons/Icons'
 import './MeusProdutos.scss'
 
 const produtosMock = [

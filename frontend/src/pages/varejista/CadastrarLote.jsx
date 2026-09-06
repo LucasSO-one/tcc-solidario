@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { IconPlus } from '../../../components/Icons/Icons'
+import { IconPlus } from '../../components/Icons/Icons'
 import './CadastrarLote.scss'
 
 const categorias = ['Padaria', 'Hortifruti', 'Laticínios', 'Mercearia', 'Congelados', 'Outros']

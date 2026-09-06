@@ -1,5 +1,5 @@
 import React from 'react'
-import { IconPlus, IconAlertTriangle, IconBox, IconHeart, IconTrendingUp, IconLeaf, IconUsers, IconStore, IconBell } from '../../../components/Icons/Icons'
+import { IconPlus, IconAlertTriangle, IconBox, IconHeart, IconTrendingUp, IconLeaf, IconUsers, IconStore, IconBell } from '../../components/Icons/Icons'
 import './DashboardVarejista.scss'
 
 const stats = [

@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { IconClipboard, IconQrCode, IconCheckCircle, IconBox } from '../../../components/Icons/Icons'
+import { IconClipboard, IconQrCode, IconCheckCircle, IconBox } from '../../components/Icons/Icons'
 import './ValidarRetirada.scss'
 
 const validacoesMock = [
