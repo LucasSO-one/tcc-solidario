@@ -1,8 +1,7 @@
-@import '../../../styles/variables';
+@import '../../../styles/variables.scss';
 
 .dashboard-varejista {
-  font-family: $font-base;
-  color: $color-text;
+
   display: flex;
   flex-direction: column;
   gap: 20px;
@@ -47,17 +46,17 @@
 
   &--primary {
     background: $color-primary;
-    color: $color-white;
+    color: $color-surface;
   }
 
   &--danger {
-    background: $color-danger;
-    color: $color-white;
+    background: $color-primary-dark;
+    color: $color-surface;
   }
 
   &--ghost {
-    background: $color-white;
-    color: $color-text;
+    background: $color-surface;
+    color: $color-text-primary;
     border: 1px solid $color-border;
   }
 }
@@ -67,13 +66,13 @@
   display: flex;
   align-items: flex-start;
   gap: 12px;
-  background: $color-danger-bg;
-  border: 1px solid rgba($color-danger, 0.2);
+  background: $color-alert-bg;
+  border: 1px solid rgba($color-primary-dark, 0.2);
   border-radius: $radius-md;
   padding: 14px 16px;
 
   &__icon {
-    color: $color-danger;
+    color: $color-primary-dark;
     flex-shrink: 0;
     margin-top: 2px;
   }
@@ -83,10 +82,10 @@
     margin: 0;
     font-size: 13px;
     line-height: 1.5;
-    color: darken($color-danger, 10%);
+    color: darken($color-primary-dark, 10%);
 
     strong {
-      color: $color-danger;
+      color: $color-primary-dark;
     }
   }
 
@@ -96,7 +95,7 @@
     flex-shrink: 0;
   }
 
-  @media (max-width: $bp-tablet) {
+  @media (max-width: $breakpoint-tablet) {
     flex-direction: column;
 
     &__actions {
@@ -116,7 +115,7 @@
   grid-template-columns: repeat(3, 1fr);
   gap: 16px;
 
-  @media (max-width: $bp-tablet) {
+  @media (max-width: $breakpoint-tablet) {
     grid-template-columns: 1fr;
   }
 }
@@ -156,7 +155,7 @@
     width: 36px;
     height: 36px;
     border-radius: $radius-sm;
-    background: $color-success-bg;
+    background: $color-primary-light;
     color: $color-primary;
     flex-shrink: 0;
   }
@@ -174,7 +173,7 @@
     margin: 0 0 16px;
     font-size: 15px;
     font-weight: 700;
-    color: $color-text;
+    color: $color-text-primary;
   }
 }
 
@@ -194,14 +193,14 @@
     color: $color-text-muted;
     font-weight: 600;
     font-size: 12px;
-    border-bottom: 1px solid $color-border-soft;
+    border-bottom: 1px solid $color-border;
     white-space: nowrap;
   }
 
   td {
     padding: 12px;
-    border-bottom: 1px solid $color-border-soft;
-    color: $color-text;
+    border-bottom: 1px solid $color-border;
+    color: $color-text-primary;
   }
 
   tr:last-child td {
@@ -218,27 +217,27 @@
   @include badge;
 
   &--warning {
-    background: $color-warning-bg;
-    color: $color-warning;
+    background: $color-accent-blue-bg;
+    color: $color-accent-blue;
   }
 
   &--success {
-    background: $color-success-bg;
-    color: $color-success;
+    background: $color-primary-light;
+    color: $color-primary;
   }
 
   &--danger {
-    background: $color-danger-bg;
-    color: $color-danger;
+    background: $color-alert-bg;
+    color: $color-primary-dark;
   }
 
   &--info {
-    background: $color-info-bg;
-    color: $color-info;
+    background: $color-accent-blue-bg;
+    color: $color-accent-blue;
   }
 
   &--neutral {
-    background: $color-border-soft;
+    background: $color-border;
     color: $color-text-muted;
   }
 }
@@ -249,7 +248,7 @@
   grid-template-columns: repeat(3, 1fr);
   gap: 16px;
 
-  @media (max-width: $bp-tablet) {
+  @media (max-width: $breakpoint-tablet) {
     grid-template-columns: 1fr;
   }
 }
@@ -258,7 +257,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  background: $color-success-bg;
+  background: $color-primary-light;
   border-radius: $radius-md;
   padding: 14px 16px;
 
@@ -269,7 +268,7 @@
     width: 34px;
     height: 34px;
     border-radius: 50%;
-    background: rgba($color-white, 0.6);
+    background: rgba($color-surface, 0.6);
     color: $color-primary;
     flex-shrink: 0;
   }
@@ -301,11 +300,11 @@
   align-items: center;
   gap: 10px;
   padding: 10px 12px;
-  background: $color-info-bg;
+  background: $color-accent-blue-bg;
   border-radius: $radius-sm;
 
   &__text {
     font-size: 13px;
-    color: $color-text;
+    color: $color-text-primary;
   }
 }

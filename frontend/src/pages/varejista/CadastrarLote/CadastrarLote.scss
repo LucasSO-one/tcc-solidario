@@ -1,8 +1,7 @@
-@import '../../../styles/variables';
+@import '../../../styles/variables.scss';
 
 .cadastrar-lote {
-  font-family: $font-base;
-  color: $color-text;
+
   display: flex;
   flex-direction: column;
   gap: 20px;
@@ -47,7 +46,7 @@
     grid-template-columns: 1fr 1fr;
     gap: 16px;
 
-    @media (max-width: $bp-mobile) {
+    @media (max-width: $breakpoint-mobile) {
       grid-template-columns: 1fr;
     }
   }
@@ -77,8 +76,8 @@
     border-radius: $radius-sm;
     font-size: 13px;
     font-family: inherit;
-    color: $color-text;
-    background: $color-white;
+    color: $color-text-primary;
+    background: $color-surface;
     resize: vertical;
 
     &:focus {
@@ -88,7 +87,7 @@
     }
 
     &::placeholder {
-      color: $color-text-soft;
+      color: $color-text-secondary;
     }
   }
 
@@ -109,7 +108,7 @@
   align-items: flex-start;
   gap: 12px;
   padding: 14px 16px;
-  background: $color-success-bg;
+  background: $color-primary-light;
   border-radius: $radius-md;
   cursor: pointer;
 
@@ -149,7 +148,7 @@
       height: 18px;
       left: 2px;
       top: 2px;
-      background: $color-white;
+      background: $color-surface;
       border-radius: 50%;
       transition: transform 0.15s ease;
       box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
@@ -188,7 +187,7 @@
 
   &--primary {
     background: $color-primary;
-    color: $color-white;
+    color: $color-surface;
   }
 
   &--block {

@@ -1,8 +1,7 @@
-@import '../../../styles/variables';
+@import '../../../styles/variables.scss';
 
 .doacoes {
-  font-family: $font-base;
-  color: $color-text;
+
   display: flex;
   flex-direction: column;
   gap: 20px;
@@ -30,7 +29,7 @@
   grid-template-columns: repeat(2, 1fr);
   gap: 16px;
 
-  @media (max-width: $bp-tablet) {
+  @media (max-width: $breakpoint-mobile) {
     grid-template-columns: 1fr;
   }
 }
@@ -44,7 +43,7 @@
   transition: box-shadow 0.15s ease;
 
   &:hover {
-    box-shadow: $shadow-card-hover;
+    box-shadow: $shadow-card;
   }
 
   &__top {
@@ -91,7 +90,7 @@
     display: flex;
     align-items: flex-start;
     gap: 6px;
-    background: $color-success-bg;
+    background: $color-primary-light;
     color: $color-primary-dark;
     font-size: 12px;
     line-height: 1.4;
@@ -109,8 +108,8 @@
   @include badge;
 
   &--danger {
-    background: $color-danger-bg;
-    color: $color-danger;
+    background: $color-alert-bg;
+    color: $color-primary-dark;
   }
 }
 
@@ -132,7 +131,7 @@
 
   &--primary {
     background: $color-primary;
-    color: $color-white;
+    color: $color-surface;
   }
 
   &--block {

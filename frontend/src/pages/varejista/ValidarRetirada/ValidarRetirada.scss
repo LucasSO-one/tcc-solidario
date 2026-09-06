@@ -1,8 +1,7 @@
-@import '../../../styles/variables';
+@import '../../../styles/variables.scss';
 
 .validar-retirada {
-  font-family: $font-base;
-  color: $color-text;
+
   display: flex;
   flex-direction: column;
   gap: 20px;
@@ -37,7 +36,7 @@
 .field-label {
   font-size: 13px;
   font-weight: 600;
-  color: $color-text;
+  color: $color-text-primary;
 }
 
 .code-input {
@@ -50,11 +49,11 @@
   font-weight: 600;
   letter-spacing: 1px;
   text-align: center;
-  color: $color-text;
+  color: $color-text-primary;
   font-family: inherit;
 
   &::placeholder {
-    color: $color-text-soft;
+    color: $color-text-secondary;
     font-weight: 500;
   }
 
@@ -70,7 +69,7 @@
   display: flex;
   gap: 12px;
 
-  @media (max-width: $bp-mobile) {
+  @media (max-width: $breakpoint-mobile) {
     flex-direction: column;
   }
 }
@@ -99,12 +98,12 @@
 
   &--primary {
     background: $color-primary;
-    color: $color-white;
+    color: $color-surface;
   }
 
   &--outline {
-    background: $color-white;
-    color: $color-text;
+    background: $color-surface;
+    color: $color-text-primary;
     border: 1px solid $color-border;
   }
 }
@@ -137,7 +136,7 @@
     width: 32px;
     height: 32px;
     border-radius: 50%;
-    background: $color-success-bg;
+    background: $color-primary-light;
     color: $color-primary;
     flex-shrink: 0;
   }

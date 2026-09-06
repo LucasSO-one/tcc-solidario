@@ -1,8 +1,7 @@
-@import '../../../styles/variables';
+@import '../../../styles/variables.scss';
 
 .meus-produtos {
-  font-family: $font-base;
-  color: $color-text;
+
   display: flex;
   flex-direction: column;
   gap: 20px;
@@ -46,12 +45,12 @@
 
   &--primary {
     background: $color-primary;
-    color: $color-white;
+    color: $color-surface;
   }
 
   &--ghost {
-    background: $color-white;
-    color: $color-text;
+    background: $color-surface;
+    color: $color-text-primary;
     border: 1px solid $color-border;
   }
 }
@@ -62,7 +61,7 @@
   align-items: center;
   gap: 12px;
 
-  @media (max-width: $bp-mobile) {
+  @media (max-width: $breakpoint-mobile) {
     flex-direction: column;
     align-items: stretch;
   }
@@ -77,7 +76,7 @@
     left: 12px;
     top: 50%;
     transform: translateY(-50%);
-    color: $color-text-soft;
+    color: $color-text-secondary;
   }
 
   input {
@@ -87,8 +86,8 @@
     border-radius: $radius-sm;
     font-size: 13px;
     font-family: inherit;
-    color: $color-text;
-    background: $color-white;
+    color: $color-text-primary;
+    background: $color-surface;
 
     &:focus {
       outline: none;
@@ -97,7 +96,7 @@
     }
 
     &::placeholder {
-      color: $color-text-soft;
+      color: $color-text-secondary;
     }
   }
 }
@@ -124,14 +123,14 @@
     color: $color-text-muted;
     font-weight: 600;
     font-size: 12px;
-    border-bottom: 1px solid $color-border-soft;
+    border-bottom: 1px solid $color-border;
     white-space: nowrap;
   }
 
   td {
     padding: 12px;
-    border-bottom: 1px solid $color-border-soft;
-    color: $color-text;
+    border-bottom: 1px solid $color-border;
+    color: $color-text-primary;
   }
 
   tr:last-child td {
@@ -158,17 +157,17 @@
   @include badge;
 
   &--warning {
-    background: $color-warning-bg;
-    color: $color-warning;
+    background: $color-accent-blue-bg;
+    color: $color-accent-blue;
   }
 
   &--success {
-    background: $color-success-bg;
-    color: $color-success;
+    background: $color-primary-light;
+    color: $color-primary;
   }
 
   &--neutral {
-    background: $color-border-soft;
+    background: $color-border;
     color: $color-text-muted;
   }
 }
