@@ -1,0 +1,173 @@
+@import '../../../styles/variables.scss';
+
+.meus-produtos {
+
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+
+  &__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+
+    h1 {
+      margin: 0;
+      font-size: 22px;
+      font-weight: 700;
+    }
+
+    .subtitle {
+      margin: 4px 0 0;
+      font-size: 13px;
+      color: $color-text-muted;
+    }
+  }
+}
+
+// ---------- Botões ----------
+.btn {
+  @include btn-reset;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 16px;
+  border-radius: $radius-sm;
+  font-size: 13px;
+  font-weight: 600;
+  transition: opacity 0.15s ease;
+
+  &:hover {
+    opacity: 0.92;
+  }
+
+  &--primary {
+    background: $color-primary;
+    color: $color-surface;
+  }
+
+  &--ghost {
+    background: $color-surface;
+    color: $color-text-primary;
+    border: 1px solid $color-border;
+  }
+}
+
+// ---------- Toolbar ----------
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  @media (max-width: $breakpoint-mobile) {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+.search-input {
+  position: relative;
+  flex: 1;
+
+  &__icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: $color-text-secondary;
+  }
+
+  input {
+    width: 100%;
+    padding: 10px 12px 10px 36px;
+    border: 1px solid $color-border;
+    border-radius: $radius-sm;
+    font-size: 13px;
+    font-family: inherit;
+    color: $color-text-primary;
+    background: $color-surface;
+
+    &:focus {
+      outline: none;
+      border-color: $color-primary-light;
+      box-shadow: 0 0 0 3px rgba($color-primary-light, 0.15);
+    }
+
+    &::placeholder {
+      color: $color-text-secondary;
+    }
+  }
+}
+
+// ---------- Painel ----------
+.panel {
+  @include card;
+  padding: 20px;
+}
+
+// ---------- Tabela ----------
+.table-wrapper {
+  overflow-x: auto;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+
+  th {
+    text-align: left;
+    padding: 8px 12px;
+    color: $color-text-muted;
+    font-weight: 600;
+    font-size: 12px;
+    border-bottom: 1px solid $color-border;
+    white-space: nowrap;
+  }
+
+  td {
+    padding: 12px;
+    border-bottom: 1px solid $color-border;
+    color: $color-text-primary;
+  }
+
+  tr:last-child td {
+    border-bottom: none;
+  }
+
+  &__strong {
+    font-weight: 600;
+  }
+
+  &__link {
+    color: $color-primary-light;
+  }
+
+  &__empty {
+    text-align: center;
+    color: $color-text-muted;
+    padding: 24px 12px;
+  }
+}
+
+// ---------- Badges ----------
+.badge {
+  @include badge;
+
+  &--warning {
+    background: $color-accent-blue-bg;
+    color: $color-accent-blue;
+  }
+
+  &--success {
+    background: $color-primary-light;
+    color: $color-primary;
+  }
+
+  &--neutral {
+    background: $color-border;
+    color: $color-text-muted;
+  }
+}
