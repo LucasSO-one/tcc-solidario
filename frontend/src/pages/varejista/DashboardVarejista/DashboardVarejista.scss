@@ -1,0 +1,310 @@
+@import '../../../styles/variables.scss';
+
+.dashboard-varejista {
+
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+
+  // ---------- Header ----------
+  &__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+
+    h1 {
+      margin: 0;
+      font-size: 22px;
+      font-weight: 700;
+    }
+
+    .subtitle {
+      margin: 4px 0 0;
+      font-size: 13px;
+      color: $color-text-muted;
+    }
+  }
+}
+
+// ---------- Botões ----------
+.btn {
+  @include btn-reset;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 16px;
+  border-radius: $radius-sm;
+  font-size: 13px;
+  font-weight: 600;
+  transition: opacity 0.15s ease, background-color 0.15s ease;
+
+  &:hover {
+    opacity: 0.92;
+  }
+
+  &--primary {
+    background: $color-primary;
+    color: $color-surface;
+  }
+
+  &--danger {
+    background: $color-primary-dark;
+    color: $color-surface;
+  }
+
+  &--ghost {
+    background: $color-surface;
+    color: $color-text-primary;
+    border: 1px solid $color-border;
+  }
+}
+
+// ---------- Banner de alerta ----------
+.alert-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  background: $color-alert-bg;
+  border: 1px solid rgba($color-primary-dark, 0.2);
+  border-radius: $radius-md;
+  padding: 14px 16px;
+
+  &__icon {
+    color: $color-primary-dark;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  &__text {
+    flex: 1;
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.5;
+    color: darken($color-primary-dark, 10%);
+
+    strong {
+      color: $color-primary-dark;
+    }
+  }
+
+  &__actions {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+
+  @media (max-width: $breakpoint-tablet) {
+    flex-direction: column;
+
+    &__actions {
+      width: 100%;
+
+      .btn {
+        flex: 1;
+        justify-content: center;
+      }
+    }
+  }
+}
+
+// ---------- Cards de estatística ----------
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+
+  @media (max-width: $breakpoint-tablet) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.stat-card {
+  @include card;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 16px 18px;
+
+  &__info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  &__label {
+    font-size: 12px;
+    color: $color-text-muted;
+  }
+
+  &__value {
+    font-size: 24px;
+    font-weight: 700;
+  }
+
+  &__delta {
+    font-size: 11px;
+    color: $color-primary-light;
+  }
+
+  &__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: $radius-sm;
+    background: $color-primary-light;
+    color: $color-primary;
+    flex-shrink: 0;
+  }
+}
+
+// ---------- Painéis genéricos ----------
+.panel {
+  @include card;
+  padding: 20px;
+
+  &__title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 16px;
+    font-size: 15px;
+    font-weight: 700;
+    color: $color-text-primary;
+  }
+}
+
+// ---------- Tabela ----------
+.table-wrapper {
+  overflow-x: auto;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+
+  th {
+    text-align: left;
+    padding: 8px 12px;
+    color: $color-text-muted;
+    font-weight: 600;
+    font-size: 12px;
+    border-bottom: 1px solid $color-border;
+    white-space: nowrap;
+  }
+
+  td {
+    padding: 12px;
+    border-bottom: 1px solid $color-border;
+    color: $color-text-primary;
+  }
+
+  tr:last-child td {
+    border-bottom: none;
+  }
+
+  &__strong {
+    font-weight: 600;
+  }
+}
+
+// ---------- Badges ----------
+.badge {
+  @include badge;
+
+  &--warning {
+    background: $color-accent-blue-bg;
+    color: $color-accent-blue;
+  }
+
+  &--success {
+    background: $color-primary-light;
+    color: $color-primary;
+  }
+
+  &--danger {
+    background: $color-alert-bg;
+    color: $color-primary-dark;
+  }
+
+  &--info {
+    background: $color-accent-blue-bg;
+    color: $color-accent-blue;
+  }
+
+  &--neutral {
+    background: $color-border;
+    color: $color-text-muted;
+  }
+}
+
+// ---------- Impacto ----------
+.impact-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+
+  @media (max-width: $breakpoint-tablet) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.impact-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: $color-primary-light;
+  border-radius: $radius-md;
+  padding: 14px 16px;
+
+  &__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: rgba($color-surface, 0.6);
+    color: $color-primary;
+    flex-shrink: 0;
+  }
+
+  &__value {
+    font-size: 17px;
+    font-weight: 700;
+    color: $color-primary-dark;
+  }
+
+  &__label {
+    font-size: 11px;
+    color: $color-primary-light;
+  }
+}
+
+// ---------- Notificações ----------
+.notification-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.notification-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: $color-accent-blue-bg;
+  border-radius: $radius-sm;
+
+  &__text {
+    font-size: 13px;
+    color: $color-text-primary;
+  }
+}
