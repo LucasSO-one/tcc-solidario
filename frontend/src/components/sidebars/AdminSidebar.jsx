@@ -1,59 +1,16 @@
-import { Link } from "react-router-dom";
-import {
-  LayoutDashboard,
-  ShieldCheck,
-  Users,
-} from "lucide-react";
+// AdminSidebar.jsx
+import { LayoutDashboard, ShieldCheck, Users, UserCog } from "lucide-react";
+import Sidebar from "../Sidebar/Sidebar";
 
-import Logo from "../../assets/Logo_nome.png";
+const items = [
+  { to: "/dashboard/admin", icon: LayoutDashboard, label: "Dashboard", end: true },
+  { to: "/dashboard/admin/approvals", icon: ShieldCheck, label: "Aprovações" },
+  { to: "/dashboard/admin/users", icon: Users, label: "Usuários" },
+  { to: "/dashboard/admin/perfil", icon: UserCog, label: "Perfil" },
+];
 
 function AdminSidebar() {
-  return (
-    <aside className="sidebar">
-
-      <div className="sidebar__logo">
-        <img src={Logo} alt="VittaFlow" />
-      </div>
-
-      <nav className="sidebar__nav">
-
-        <Link
-          to="/dashboard/admin"
-          className="sidebar__link"
-        >
-          <LayoutDashboard />
-          <span>Dashboard</span>
-        </Link>
-
-        <Link
-          to="/dashboard/admin/approvals"
-          className="sidebar__link"
-        >
-          <ShieldCheck />
-          <span>Aprovações</span>
-        </Link>
-
-        <Link
-          to="/dashboard/admin/users"
-          className="sidebar__link"
-        >
-          <Users />
-          <span>Usuários</span>
-        </Link>
-
-        <Link
-          to="/dashboard/admin/perfil"
-          className="sidebar__link"
-        >
-          <Users />
-          <span>Perfil</span>
-        </Link>
-
-
-      </nav>
-
-    </aside>
-  );
+  return <Sidebar items={items} />;
 }
 
 export default AdminSidebar;

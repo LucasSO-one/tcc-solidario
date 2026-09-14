@@ -1,5 +1,5 @@
 import "./MinhasReservas.scss";
-import ReservationCard from "../../../components/ReservationCard/ReservationCard";
+// import ReservationCard from "../../../components/ReservationCard/ReservationCard";
 // import reservas from "../../../data/reservasConsumidor";
 
 function MinhasReservas() {

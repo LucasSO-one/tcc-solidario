@@ -1,51 +1,15 @@
-import { Link } from "react-router-dom";
+// ConsumidorSidebar.jsx
+import { BadgePercent, ShoppingBasket, PackageCheck } from "lucide-react";
+import Sidebar from "../Sidebar/Sidebar";
 
-import {
-  BadgePercent,
-  ShoppingBasket,
-  PackageCheck,
-} from "lucide-react";
-
-import Logo from "../../assets/Logo_nome.png";
+const items = [
+  { to: "/dashboard/consumidor", icon: BadgePercent, label: "Ofertas", end: true },
+  { to: "/dashboard/consumidor/marketplace", icon: ShoppingBasket, label: "Marketplace" },
+  { to: "/dashboard/consumidor/reservas", icon: PackageCheck, label: "Minhas Reservas" },
+];
 
 function ConsumidorSidebar() {
-  return (
-    <aside className="sidebar">
-
-      <div className="sidebar__logo">
-        <img src={Logo} alt="VittaFlow" />
-      </div>
-
-      <nav className="sidebar__nav">
-
-        <Link
-          to="/dashboard/consumidor"
-          className="sidebar__link"
-        >
-          <BadgePercent />
-          <span>Ofertas</span>
-        </Link>
-
-        <Link
-          to="/dashboard/consumidor/marketplace"
-          className="sidebar__link"
-        >
-          <ShoppingBasket />
-          <span>Marketplace</span>
-        </Link>
-
-        <Link
-          to="/dashboard/consumidor/reservas"
-          className="sidebar__link"
-        >
-          <PackageCheck />
-          <span>Minhas Reservas</span>
-        </Link>
-
-      </nav>
-
-    </aside>
-  );
+  return <Sidebar items={items} />;
 }
 
 export default ConsumidorSidebar;

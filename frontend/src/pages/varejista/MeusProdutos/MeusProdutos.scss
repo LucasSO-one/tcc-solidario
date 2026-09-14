@@ -1,30 +1,54 @@
 @import '../../../styles/variables.scss';
 
-.meus-produtos {
+// Mesmos acentos extras usados no DashboardVarejista.scss — os tokens fornecidos
+// só têm verde e azul. Se já tiver movido $color-accent-amber para o
+// variables.scss, pode apagar essas duas linhas e só manter a do vermelho.
+$color-accent-amber: #b45309;
+$color-accent-amber-bg: #fdf1e0;
+$color-accent-red: #b42318;
+$color-accent-red-bg: #fdeceb;
 
+.meus-produtos {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: $space-lg;
+  font-family: $font-family-base;
+  color: $color-text-primary;
 
   &__header {
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
-    gap: 16px;
+    gap: $space-md;
     flex-wrap: wrap;
+    padding-bottom: $space-lg;
+    border-bottom: 1px solid $color-border;
+  }
+
+  &__heading {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
 
     h1 {
-      margin: 0;
-      font-size: 22px;
-      font-weight: 700;
+      margin: 4px 0 0;
+      font-size: $font-size-2xl;
+      font-weight: $font-weight-bold;
     }
 
     .subtitle {
-      margin: 4px 0 0;
-      font-size: 13px;
-      color: $color-text-muted;
+      margin: $space-xs 0 0;
+      font-size: $font-size-sm;
+      color: $color-text-secondary;
     }
   }
+}
+
+.eyebrow {
+  font-size: $font-size-xs;
+  font-weight: $font-weight-semibold;
+  letter-spacing: 0.06em;
+  color: $color-text-muted;
 }
 
 // ---------- Botões ----------
@@ -32,18 +56,24 @@
   @include btn-reset;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
-  padding: 9px 16px;
+  width: auto;
+  flex: 0 0 auto;
+  padding: 10px 16px;
   border-radius: $radius-sm;
-  font-size: 13px;
-  font-weight: 600;
-  transition: opacity 0.15s ease;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  transition: opacity 0.15s ease, background-color 0.15s ease;
+  white-space: nowrap;
 
   &:hover {
     opacity: 0.92;
   }
 
   &--primary {
+    padding: 8px 14px;
+    font-size: $font-size-xs;
     background: $color-primary;
     color: $color-surface;
   }
@@ -55,11 +85,31 @@
   }
 }
 
+.icon-btn {
+  @include btn-reset;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: $radius-sm;
+  background: transparent;
+  color: $color-text-muted;
+
+  &:hover {
+    background: $color-bg;
+    color: $color-text-primary;
+  }
+}
+
 // ---------- Toolbar ----------
 .toolbar {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: $space-sm;
+  padding-bottom: $space-md;
+  margin-bottom: $space-md;
+  border-bottom: 1px solid $color-border;
 
   @media (max-width: $breakpoint-mobile) {
     flex-direction: column;
@@ -84,15 +134,15 @@
     padding: 10px 12px 10px 36px;
     border: 1px solid $color-border;
     border-radius: $radius-sm;
-    font-size: 13px;
+    font-size: $font-size-sm;
     font-family: inherit;
     color: $color-text-primary;
     background: $color-surface;
 
     &:focus {
       outline: none;
-      border-color: $color-primary-light;
-      box-shadow: 0 0 0 3px rgba($color-primary-light, 0.15);
+      border-color: $color-primary;
+      box-shadow: 0 0 0 3px rgba($color-primary, 0.12);
     }
 
     &::placeholder {
@@ -104,7 +154,7 @@
 // ---------- Painel ----------
 .panel {
   @include card;
-  padding: 20px;
+  padding: $space-lg;
 }
 
 // ---------- Tabela ----------
@@ -115,22 +165,23 @@
 .data-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 13px;
+  font-size: $font-size-sm;
 
   th {
     text-align: left;
-    padding: 8px 12px;
+    padding: $space-sm;
     color: $color-text-muted;
-    font-weight: 600;
-    font-size: 12px;
+    font-weight: $font-weight-semibold;
+    font-size: $font-size-xs;
     border-bottom: 1px solid $color-border;
     white-space: nowrap;
   }
 
   td {
-    padding: 12px;
+    padding: $space-sm;
     border-bottom: 1px solid $color-border;
     color: $color-text-primary;
+    vertical-align: middle;
   }
 
   tr:last-child td {
@@ -138,17 +189,25 @@
   }
 
   &__strong {
-    font-weight: 600;
+    display: block;
+    font-weight: $font-weight-semibold;
   }
 
-  &__link {
-    color: $color-primary-light;
+  &__muted {
+    display: block;
+    font-size: $font-size-xs;
+    color: $color-text-muted;
+  }
+
+  &__actions {
+    width: 32px;
+    text-align: right;
   }
 
   &__empty {
     text-align: center;
     color: $color-text-muted;
-    padding: 24px 12px;
+    padding: $space-lg $space-sm;
   }
 }
 
@@ -157,13 +216,23 @@
   @include badge;
 
   &--warning {
-    background: $color-accent-blue-bg;
-    color: $color-accent-blue;
+    background: $color-accent-amber-bg;
+    color: $color-accent-amber;
   }
 
   &--success {
     background: $color-primary-light;
     color: $color-primary;
+  }
+
+  &--info {
+    background: $color-accent-blue-bg;
+    color: $color-accent-blue;
+  }
+
+  &--danger {
+    background: $color-accent-red-bg;
+    color: $color-accent-red;
   }
 
   &--neutral {

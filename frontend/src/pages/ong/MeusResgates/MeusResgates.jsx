@@ -17,7 +17,7 @@ function MeusResgates() {
 
             <h2>Reservas Ativas</h2>
 
-            {
+            {/* {
                 reservas
                     .filter(reserva => !reserva.concluido)
                     .map(reserva => (
@@ -32,13 +32,13 @@ function MeusResgates() {
                             }}
                         />
                     ))
-            }
+            } */}
 
             <h2 className="concluidos">
                 Concluídos
             </h2>
 
-            {
+            {/* {
                 reservas
                     .filter(reserva => reserva.concluido)
                     .map(reserva => (
@@ -51,7 +51,7 @@ function MeusResgates() {
                             concluido={true}
                         />
                     ))
-            }
+            } */}
         </main>
     );
 }

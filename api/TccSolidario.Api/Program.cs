@@ -6,6 +6,7 @@ using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using TccSolidario.Api.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -44,6 +45,10 @@ builder.Services.AddSwaggerGen(c =>
 
 builder.Services.AddScoped<ICnpjValidatorService, CnpjValidatorService>();
 builder.Services.AddScoped<ICpfValidatorService, CpfValidatorService>();
+builder.Services.AddScoped<IUsuarioRegistrationService, UsuarioRegistrationService>();
+builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddScoped<IProdutoService, ProdutoService>();
+
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -86,6 +91,17 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("Frontend", policy =>
+    {
+        policy
+            .WithOrigins("http://localhost:5173")
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
+
 var app = builder.Build();
 
 
@@ -95,11 +111,16 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
 app.UseHttpsRedirection();
 
+app.UseMiddleware<ExceptionMiddleware>();
+
+app.UseCors("Frontend");
+app.UseStaticFiles(); 
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.MapControllers();
 
 app.MapControllers();
 

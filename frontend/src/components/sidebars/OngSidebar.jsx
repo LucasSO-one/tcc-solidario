@@ -1,51 +1,15 @@
-import { Link } from "react-router-dom";
+// OngSidebar.jsx
+import { Store, HandHeart, ClipboardList } from "lucide-react";
+import Sidebar from "../Sidebar/Sidebar";
 
-import {
-  Store,
-  HandHeart,
-  ClipboardList,
-} from "lucide-react";
-
-import Logo from "../../assets/Logo_nome.png";
+const items = [
+  { to: "/dashboard/ong", icon: Store, label: "Vitrine ONG", end: true },
+  { to: "/dashboard/ong/resgates", icon: HandHeart, label: "Meus Resgates" },
+  { to: "/dashboard/ong/solicitacoes", icon: ClipboardList, label: "Solicitações" },
+];
 
 function OngSidebar() {
-  return (
-    <aside className="sidebar">
-
-      <div className="sidebar__logo">
-        <img src={Logo} alt="VittaFlow" />
-      </div>
-
-      <nav className="sidebar__nav">
-
-        <Link
-          to="/dashboard/ong"
-          className="sidebar__link"
-        >
-          <Store />
-          <span>Vitrine ONG</span>
-        </Link>
-
-        <Link
-          to="/dashboard/ong/resgates"
-          className="sidebar__link"
-        >
-          <HandHeart />
-          <span>Meus Resgates</span>
-        </Link>
-
-        <Link
-          to="/dashboard/ong/solicitacoes"
-          className="sidebar__link"
-        >
-          <ClipboardList />
-          <span>Solicitações</span>
-        </Link>
-
-      </nav>
-
-    </aside>
-  );
+  return <Sidebar items={items} />;
 }
 
 export default OngSidebar;

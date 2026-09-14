@@ -1,54 +1,92 @@
 @import '../../../styles/variables.scss';
 
 .cadastrar-lote {
-
   display: flex;
   flex-direction: column;
-  gap: 20px;
-  max-width: 760px;
+  gap: $space-lg;
+  width: 100%;
+  font-family: $font-family-base;
+  color: $color-text-primary;
 
   &__header {
+    padding-bottom: $space-lg;
+    border-bottom: 1px solid $color-border;
+
     h1 {
-      margin: 0;
-      font-size: 22px;
-      font-weight: 700;
+      margin: 4px 0 0;
+      font-size: $font-size-2xl;
+      font-weight: $font-weight-bold;
     }
 
     .subtitle {
-      margin: 4px 0 0;
-      font-size: 13px;
-      color: $color-text-muted;
+      margin: $space-xs 0 0;
+      font-size: $font-size-sm;
+      color: $color-text-secondary;
     }
   }
 }
 
+.eyebrow {
+  font-size: $font-size-xs;
+  font-weight: $font-weight-semibold;
+  letter-spacing: 0.06em;
+  color: $color-text-muted;
+}
+
 .panel {
   @include card;
-  padding: 24px;
+  padding: $space-lg;
 }
 
 .form {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: $space-lg;
 
-  &__title {
+  &__intro {
     display: flex;
     align-items: center;
-    gap: 8px;
-    font-size: 14px;
-    font-weight: 700;
+    gap: $space-sm;
+    padding-bottom: $space-md;
+    border-bottom: 1px solid $color-border;
+  }
+
+  &__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: $radius-sm;
+    background: $color-primary-light;
     color: $color-primary;
+    flex-shrink: 0;
+  }
+
+  &__title {
+    margin: 0;
+    font-size: $font-size-lg;
+    font-weight: $font-weight-bold;
+  }
+
+  &__subtitle {
+    margin: 2px 0 0;
+    font-size: $font-size-sm;
+    color: $color-text-secondary;
+  }
+
+  &__erro {
+    margin: 0;
+    padding: $space-sm $space-md;
+    border-radius: $radius-sm;
+    background: $color-accent-blue-bg;
+    color: $color-accent-blue;
+    font-size: $font-size-sm;
   }
 
   &__grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-
-    @media (max-width: $breakpoint-mobile) {
-      grid-template-columns: 1fr;
-    }
+    gap: $space-md;
   }
 }
 
@@ -62,9 +100,9 @@
   }
 
   label {
-    font-size: 12px;
-    font-weight: 600;
-    color: $color-text-muted;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-medium;
+    color: $color-text-primary;
   }
 
   input,
@@ -74,7 +112,7 @@
     padding: 10px 12px;
     border: 1px solid $color-border;
     border-radius: $radius-sm;
-    font-size: 13px;
+    font-size: $font-size-sm;
     font-family: inherit;
     color: $color-text-primary;
     background: $color-surface;
@@ -82,23 +120,77 @@
 
     &:focus {
       outline: none;
-      border-color: $color-primary-light;
-      box-shadow: 0 0 0 3px rgba($color-primary-light, 0.15);
+      border-color: $color-primary;
+      box-shadow: 0 0 0 3px rgba($color-primary, 0.12);
     }
 
     &::placeholder {
       color: $color-text-secondary;
     }
   }
+}
 
-  input[type='file'] {
-    padding: 8px;
-    font-size: 12px;
+// 4 colunas: Nome/Categoria e Preços ocupam 2 cada (metade da linha);
+// Quantidade ocupa metade, Data de validade e Horário 1 coluna cada
+.form__grid {
+  grid-template-columns: repeat(4, 1fr);
+
+  .field:not(.field--full):not(.field--third) {
+    grid-column: span 2;
   }
 
-  &__hint {
-    font-size: 12px;
-    color: $color-primary-light;
+  .field--third {
+    grid-column: span 1;
+  }
+
+  @media (max-width: $breakpoint-mobile) {
+    grid-template-columns: 1fr;
+
+    .field:not(.field--full),
+    .field--third {
+      grid-column: span 1;
+    }
+  }
+}
+
+// ---------- Prefixo de moeda ----------
+.input-prefix {
+  position: relative;
+
+  &__symbol {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: $font-size-sm;
+    color: $color-text-secondary;
+    pointer-events: none;
+  }
+
+  input {
+    padding-left: 34px;
+  }
+}
+
+// ---------- Dropzone de imagem ----------
+.dropzone {
+  @include btn-reset;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: $space-sm;
+  width: 100%;
+  padding: $space-xl $space-md;
+  border: 1px dashed $color-border;
+  border-radius: $radius-md;
+  background: $color-bg;
+  color: $color-text-secondary;
+  font-size: $font-size-sm;
+  transition: border-color 0.15s ease, color 0.15s ease;
+
+  &:hover {
+    border-color: $color-primary;
+    color: $color-primary;
   }
 }
 
@@ -106,7 +198,7 @@
 .toggle-row {
   display: flex;
   align-items: flex-start;
-  gap: 12px;
+  gap: $space-sm;
   padding: 14px 16px;
   background: $color-primary-light;
   border-radius: $radius-md;
@@ -159,11 +251,11 @@
     display: flex;
     flex-direction: column;
     gap: 2px;
-    font-size: 12px;
+    font-size: $font-size-xs;
     color: $color-primary-dark;
 
     strong {
-      font-size: 13px;
+      font-size: $font-size-sm;
     }
   }
 }
@@ -175,14 +267,21 @@
   align-items: center;
   justify-content: center;
   gap: 6px;
+  width: auto;
+  flex: 0 0 auto;
   padding: 12px 16px;
   border-radius: $radius-sm;
-  font-size: 14px;
-  font-weight: 600;
+  font-size: $font-size-base;
+  font-weight: $font-weight-semibold;
   transition: opacity 0.15s ease;
 
   &:hover {
     opacity: 0.92;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
   }
 
   &--primary {

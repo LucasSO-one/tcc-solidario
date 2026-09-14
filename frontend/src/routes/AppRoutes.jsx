@@ -24,10 +24,10 @@ import Ofertas from "../pages/consumidor/Ofertas/Ofertas";
 import Marketplace from "../pages/consumidor/Marketplace/Marketplace";
 import MinhasReservas from "../pages/consumidor/MinhasReservas/MinhasReservas";
 
-// ONG
-import VitrineONG from "../pages/ong/VitrineOng/VitrineONG";
-import MeusResgates from "../pages/ong/MeusResgates/MeusResgates";
-import Solicitacoes from "../pages/ong/Solicitacoes/Solicitacoes";
+// // ONG
+// import VitrineONG from "../pages/ong/VitrineOng/VitrineONG";
+// import MeusResgates from "../pages/ong/MeusResgates/MeusResgates";
+// import Solicitacoes from "../pages/ong/Solicitacoes/Solicitacoes";
 
 // Auth
 import Register from "../pages/auth/Register/Register";
@@ -57,11 +57,11 @@ function AppRoutes() {
         <Route path="reservas" element={<MinhasReservas />} />
       </Route>
 
-      <Route path="/dashboard/ong" element={<OngLayout />}>
+      {/* <Route path="/dashboard/ong" element={<OngLayout />}>
         <Route index element={<VitrineONG />} />
         <Route path="resgates" element={<MeusResgates />} />
         <Route path="solicitacoes" element={<Solicitacoes />} />
-      </Route>
+      </Route> */}
 
       <Route path="/dashboard/varejista" element={<VarejistaLayout />}>
         <Route index element={<DashboardVarejista />} />

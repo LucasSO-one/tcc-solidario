@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   FaUserFriends,
   FaHandsHelping,
@@ -11,6 +11,7 @@ import Logo from "../../../assets/Logo.png";
 import "./Register.scss";
 
 import ilustracao from "../../../assets/harmony-produce2.png";
+import { register } from "../../../service/auth";
 
 const USER_TYPES = [
   { value: "consumidor", label: "Consumidor", icon: FaUserFriends },
@@ -18,26 +19,91 @@ const USER_TYPES = [
   { value: "varejista", label: "Varejista", icon: FaStore },
 ];
 
+// Campos específicos de cada tipo — controla o que é renderizado E o que é
+// obrigatório, então fica fácil adicionar um novo tipo de usuário no futuro
+const CAMPOS_POR_TIPO = {
+  consumidor: [
+    { name: "cpf", label: "CPF", placeholder: "000.000.000-00", maxLength: 14 },
+    { name: "telefone", label: "Telefone", placeholder: "(11) 91234-5678" },
+  ],
+  ong: [
+    { name: "nomeFantasia", label: "Nome da ONG", placeholder: "Nome fantasia da instituição" },
+    { name: "cnpj", label: "CNPJ", placeholder: "00.000.000/0000-00", maxLength: 18 },
+    { name: "telefone", label: "Telefone", placeholder: "(11) 91234-5678" },
+  ],
+  varejista: [
+    { name: "razaoSocial", label: "Razão Social", placeholder: "Razão social da empresa" },
+    { name: "cnpj", label: "CNPJ", placeholder: "00.000.000/0000-00", maxLength: 18 },
+  ],
+};
+
+const CAMPOS_INICIAIS = {
+  nome: "",
+  email: "",
+  senha: "",
+  confirmarSenha: "",
+  cpf: "",
+  telefone: "",
+  cnpj: "",
+  razaoSocial: "",
+  nomeFantasia: "",
+};
+
 const Register = () => {
+  const navigate = useNavigate();
   const [userType, setUserType] = useState("consumidor");
-  const [formData, setFormData] = useState({
-    nome: "",
-    email: "",
-    senha: "",
-    confirmarSenha: "",
-  });
+  const [formData, setFormData] = useState(CAMPOS_INICIAIS);
   const [showSenha, setShowSenha] = useState(false);
   const [showConfirmarSenha, setShowConfirmarSenha] = useState(false);
+  const [erro, setErro] = useState("");
+  const [carregando, setCarregando] = useState(false);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log("Dados do cadastro:", { ...formData, userType });
+  // Ao trocar de tipo, limpa os campos específicos do tipo anterior
+  // (evita mandar, por exemplo, um CPF preenchido junto de um cadastro de ONG)
+  const handleUserTypeChange = (novoTipo) => {
+    setUserType(novoTipo);
+    setFormData((prev) => ({
+      ...prev,
+      cpf: "",
+      telefone: "",
+      cnpj: "",
+      razaoSocial: "",
+      nomeFantasia: "",
+    }));
+    setErro("");
   };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setErro("");
+
+    if (formData.senha !== formData.confirmarSenha) {
+      setErro("As senhas não coincidem.");
+      return;
+    }
+
+    setCarregando(true);
+    try {
+      const resultado = await register(userType, formData);
+      navigate("/login", {
+        replace: true,
+        state: { mensagem: resultado.Mensagem },
+      });
+    } catch (err) {
+      setErro(err.response?.data?.Erro ?? "Não foi possível concluir o cadastro. Tente novamente.");
+    } finally {
+      setCarregando(false);
+    }
+  };
+
+  const campoIdentificacao =
+    userType === "consumidor" ? "nome" : userType === "ong" ? "nomeFantasia" : "razaoSocial";
+  const camposExtras = CAMPOS_POR_TIPO[userType].filter((c) => c.name !== campoIdentificacao);
 
   return (
     <div className="register-layout">
@@ -74,6 +140,8 @@ const Register = () => {
             Selecione o tipo e preencha os dados
           </p>
 
+          {erro && <p className="register-card__error">{erro}</p>}
+
           <div className="register-card__field">
             <label className="register-card__label">Tipo de usuário</label>
             <div className="register-card__type-selector">
@@ -84,7 +152,7 @@ const Register = () => {
                   className={`register-card__type-btn${
                     userType === value ? " register-card__type-btn--active" : ""
                   }`}
-                  onClick={() => setUserType(value)}
+                  onClick={() => handleUserTypeChange(value)}
                 >
                   <Icon />
                   <span>{label}</span>
@@ -93,20 +161,43 @@ const Register = () => {
             </div>
           </div>
 
+          {/* Nome / Razão Social / Nome Fantasia — muda o label conforme o tipo,
+              mas é sempre o mesmo campo visual pro usuário */}
           <div className="register-card__field">
-            <label htmlFor="nome" className="register-card__label">
-              Nome completo
+            <label htmlFor={campoIdentificacao} className="register-card__label">
+              {userType === "consumidor" && "Nome completo"}
+              {userType === "ong" && "Nome da ONG"}
+              {userType === "varejista" && "Razão Social"}
             </label>
             <input
               type="text"
-              id="nome"
-              name="nome"
-              placeholder="Seu nome"
-              value={formData.nome}
+              id={campoIdentificacao}
+              name={campoIdentificacao}
+              placeholder={userType === "consumidor" ? "Seu nome" : "Nome oficial da instituição"}
+              value={formData[campoIdentificacao]}
               onChange={handleInputChange}
               required
             />
           </div>
+
+          {/* Campos extras específicos do tipo (CPF/CNPJ/Telefone) */}
+          {camposExtras.map(({ name, label, placeholder, maxLength }) => (
+            <div className="register-card__field" key={name}>
+              <label htmlFor={name} className="register-card__label">
+                {label}
+              </label>
+              <input
+                type="text"
+                id={name}
+                name={name}
+                placeholder={placeholder}
+                maxLength={maxLength}
+                value={formData[name]}
+                onChange={handleInputChange}
+                required
+              />
+            </div>
+          ))}
 
           <div className="register-card__field">
             <label htmlFor="email" className="register-card__label">
@@ -132,11 +223,11 @@ const Register = () => {
                 type={showSenha ? "text" : "password"}
                 id="senha"
                 name="senha"
-                placeholder="Pelo menos 6 caracteres"
+                placeholder="Pelo menos 8 caracteres"
                 value={formData.senha}
                 onChange={handleInputChange}
                 required
-                minLength={6}
+                minLength={8}
               />
               <button
                 type="button"
@@ -148,7 +239,9 @@ const Register = () => {
                 {showSenha ? <FaEyeSlash /> : <FaEye />}
               </button>
             </div>
-            <small className="register-card__hint">Mínimo de 6 caracteres.</small>
+            <small className="register-card__hint">
+              Mínimo de 8 caracteres, com maiúscula, número e caractere especial.
+            </small>
           </div>
 
           <div className="register-card__field">
@@ -179,8 +272,8 @@ const Register = () => {
             </div>
           </div>
 
-          <button type="submit" className="register-card__submit">
-            Criar conta
+          <button type="submit" className="register-card__submit" disabled={carregando}>
+            {carregando ? "Criando conta..." : "Criar conta"}
           </button>
 
           <p className="register-card__footer">

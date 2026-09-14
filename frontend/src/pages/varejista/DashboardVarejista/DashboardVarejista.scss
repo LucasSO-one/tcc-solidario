@@ -1,31 +1,67 @@
 @import '../../../styles/variables.scss';
 
-.dashboard-varejista {
+// Acento adicional: os tokens fornecidos só têm verde e azul, mas o protótipo
+// usa um terceiro tom (âmbar) para destacar itens perto do vencimento. Ajuste
+// livremente ou mova para variables.scss se quiser reaproveitar em outras telas.
+$color-accent-amber: #b45309;
+$color-accent-amber-bg: #fdf1e0;
 
+.dashboard-varejista {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: $space-lg;
+  font-family: $font-family-base;
+  color: $color-text-primary;
 
-  // ---------- Header ----------
   &__header {
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
-    gap: 16px;
+    gap: $space-md;
     flex-wrap: wrap;
+  }
+
+  &__heading {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
 
     h1 {
-      margin: 0;
-      font-size: 22px;
-      font-weight: 700;
+      margin: 4px 0 0;
+      font-size: $font-size-2xl;
+      font-weight: $font-weight-bold;
     }
 
     .subtitle {
-      margin: 4px 0 0;
-      font-size: 13px;
-      color: $color-text-muted;
+      margin: $space-xs 0 0;
+      font-size: $font-size-sm;
+      color: $color-text-secondary;
     }
   }
+
+  &__content {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: $space-lg;
+    align-items: start;
+
+    @media (max-width: $breakpoint-tablet) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  &__side {
+    display: flex;
+    flex-direction: column;
+    gap: $space-lg;
+  }
+}
+
+.eyebrow {
+  font-size: $font-size-xs;
+  font-weight: $font-weight-semibold;
+  letter-spacing: 0.06em;
+  color: $color-text-muted;
 }
 
 // ---------- Botões ----------
@@ -33,24 +69,28 @@
   @include btn-reset;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
-  padding: 9px 16px;
+  width: fit-content;
+  flex: 0 0 auto;
+  align-self: center;
+  padding: 8px 12px;
   border-radius: $radius-sm;
-  font-size: 13px;
-  font-weight: 600;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-semibold;
   transition: opacity 0.15s ease, background-color 0.15s ease;
+  white-space: nowrap;
 
   &:hover {
-    opacity: 0.92;
+    opacity: 0.9;
   }
 
   &--primary {
+    width: auto;
+    min-width: 0;
+    padding: 8px 12px;
+    font-size: $font-size-xs;
     background: $color-primary;
-    color: $color-surface;
-  }
-
-  &--danger {
-    background: $color-primary-dark;
     color: $color-surface;
   }
 
@@ -61,50 +101,75 @@
   }
 }
 
+.link-btn {
+  @include btn-reset;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  color: $color-text-secondary;
+  flex-shrink: 0;
+
+  &:hover {
+    color: $color-primary;
+  }
+}
+
 // ---------- Banner de alerta ----------
 .alert-banner {
   display: flex;
-  align-items: flex-start;
-  gap: 12px;
+  align-items: center;
+  gap: $space-md;
   background: $color-alert-bg;
-  border: 1px solid rgba($color-primary-dark, 0.2);
-  border-radius: $radius-md;
-  padding: 14px 16px;
+  border: 1px solid rgba($color-primary-dark, 0.15);
+  border-radius: $radius-lg;
+  padding: $space-md $space-lg;
 
   &__icon {
     color: $color-primary-dark;
     flex-shrink: 0;
+    align-self: flex-start;
     margin-top: 2px;
   }
 
-  &__text {
+  &__body {
     flex: 1;
-    margin: 0;
-    font-size: 13px;
-    line-height: 1.5;
-    color: darken($color-primary-dark, 10%);
-
-    strong {
-      color: $color-primary-dark;
-    }
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
   }
 
-  &__actions {
-    display: flex;
-    gap: 8px;
-    flex-shrink: 0;
+  &__title {
+    margin: 0;
+    font-size: $font-size-base;
+    font-weight: $font-weight-semibold;
+    color: $color-primary-dark;
+  }
+
+  &__text {
+    margin: 0;
+    font-size: $font-size-sm;
+    color: $color-text-secondary;
+  }
+
+  .btn {
+    width: auto;
+    flex: 0 0 auto;
   }
 
   @media (max-width: $breakpoint-tablet) {
     flex-direction: column;
+    align-items: stretch;
 
-    &__actions {
+    &__icon {
+      align-self: auto;
+    }
+
+    .btn {
       width: 100%;
-
-      .btn {
-        flex: 1;
-        justify-content: center;
-      }
+      justify-content: center;
     }
   }
 }
@@ -112,10 +177,14 @@
 // ---------- Cards de estatística ----------
 .stat-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: $space-md;
 
   @media (max-width: $breakpoint-tablet) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @media (max-width: $breakpoint-mobile) {
     grid-template-columns: 1fr;
   }
 }
@@ -123,58 +192,90 @@
 .stat-card {
   @include card;
   display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  padding: 16px 18px;
+  flex-direction: column;
+  gap: $space-xs;
+  padding: $space-md $space-lg;
 
-  &__info {
+  &__top {
     display: flex;
-    flex-direction: column;
-    gap: 4px;
+    align-items: center;
+    justify-content: space-between;
+    gap: $space-sm;
   }
 
   &__label {
-    font-size: 12px;
+    font-size: $font-size-xs;
+    font-weight: $font-weight-semibold;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
     color: $color-text-muted;
-  }
-
-  &__value {
-    font-size: 24px;
-    font-weight: 700;
-  }
-
-  &__delta {
-    font-size: 11px;
-    color: $color-primary-light;
   }
 
   &__icon {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 36px;
-    height: 36px;
-    border-radius: $radius-sm;
+    width: 28px;
+    height: 28px;
+    border-radius: $radius-full;
     background: $color-primary-light;
     color: $color-primary;
     flex-shrink: 0;
+  }
+
+  &__value {
+    font-size: $font-size-2xl;
+    font-weight: $font-weight-bold;
+  }
+
+  &__delta {
+    font-size: $font-size-xs;
+    color: $color-text-muted;
   }
 }
 
 // ---------- Painéis genéricos ----------
 .panel {
   @include card;
-  padding: 20px;
+  padding: $space-lg;
+
+  &__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: $space-md;
+    margin-bottom: $space-md;
+  }
 
   &__title {
     display: flex;
     align-items: center;
-    gap: 8px;
-    margin: 0 0 16px;
-    font-size: 15px;
-    font-weight: 700;
-    color: $color-text-primary;
+    gap: $space-sm;
+    margin: 0;
+    font-size: $font-size-lg;
+    font-weight: $font-weight-bold;
   }
+
+  &__subtitle {
+    margin: 2px 0 $space-md;
+    font-size: $font-size-sm;
+    color: $color-text-secondary;
+  }
+
+  &--impacto .panel__title {
+    margin-top: $space-sm;
+  }
+}
+
+.panel__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: $radius-sm;
+  background: $color-primary-light;
+  color: $color-primary;
 }
 
 // ---------- Tabela ----------
@@ -185,22 +286,23 @@
 .data-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 13px;
+  font-size: $font-size-sm;
 
   th {
     text-align: left;
-    padding: 8px 12px;
+    padding: $space-sm;
     color: $color-text-muted;
-    font-weight: 600;
-    font-size: 12px;
+    font-weight: $font-weight-semibold;
+    font-size: $font-size-xs;
     border-bottom: 1px solid $color-border;
     white-space: nowrap;
   }
 
   td {
-    padding: 12px;
+    padding: $space-sm;
     border-bottom: 1px solid $color-border;
     color: $color-text-primary;
+    vertical-align: middle;
   }
 
   tr:last-child td {
@@ -208,7 +310,14 @@
   }
 
   &__strong {
-    font-weight: 600;
+    display: block;
+    font-weight: $font-weight-semibold;
+  }
+
+  &__muted {
+    display: block;
+    font-size: $font-size-xs;
+    color: $color-text-muted;
   }
 }
 
@@ -217,18 +326,13 @@
   @include badge;
 
   &--warning {
-    background: $color-accent-blue-bg;
-    color: $color-accent-blue;
+    background: $color-accent-amber-bg;
+    color: $color-accent-amber;
   }
 
   &--success {
     background: $color-primary-light;
     color: $color-primary;
-  }
-
-  &--danger {
-    background: $color-alert-bg;
-    color: $color-primary-dark;
   }
 
   &--info {
@@ -246,65 +350,55 @@
 .impact-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
-
-  @media (max-width: $breakpoint-tablet) {
-    grid-template-columns: 1fr;
-  }
+  gap: $space-sm;
 }
 
 .impact-card {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 12px;
-  background: $color-primary-light;
-  border-radius: $radius-md;
-  padding: 14px 16px;
-
-  &__icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 34px;
-    height: 34px;
-    border-radius: 50%;
-    background: rgba($color-surface, 0.6);
-    color: $color-primary;
-    flex-shrink: 0;
-  }
+  gap: 4px;
+  text-align: center;
+  color: $color-primary;
 
   &__value {
-    font-size: 17px;
-    font-weight: 700;
-    color: $color-primary-dark;
+    font-size: $font-size-lg;
+    font-weight: $font-weight-bold;
+    color: $color-text-primary;
   }
 
   &__label {
-    font-size: 11px;
-    color: $color-primary-light;
+    font-size: $font-size-xs;
+    color: $color-text-muted;
   }
 }
 
-// ---------- Notificações ----------
-.notification-list {
+// ---------- Atualizações ----------
+.update-list {
   list-style: none;
   margin: 0;
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: $space-sm;
 }
 
-.notification-item {
+.update-item {
   display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 12px;
-  background: $color-accent-blue-bg;
+  flex-direction: column;
+  gap: 2px;
+  padding: $space-sm $space-md;
+  border-left: 3px solid $color-primary;
+  background: $color-bg;
   border-radius: $radius-sm;
 
-  &__text {
-    font-size: 13px;
-    color: $color-text-primary;
+  &__title {
+    font-size: $font-size-sm;
+    font-weight: $font-weight-semibold;
+  }
+
+  &__detail {
+    font-size: $font-size-xs;
+    color: $color-text-muted;
   }
 }

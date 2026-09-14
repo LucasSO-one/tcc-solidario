@@ -1,22 +1,47 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import Logo from "../../../assets/Logo.png";
 import './Login.scss';
 
 import ilustracao from '../../../assets/harmony-produce.png';
+import { login } from '../../../service/auth';
+import { ROTA_POR_TIPO } from '../../../utils/rotasPorTipo';
 
 export default function Login() {
+  const navigate = useNavigate();
   const [form, setForm] = useState({ email: '', senha: '' });
   const [showSenha, setShowSenha] = useState(false);
+  const [erro, setErro] = useState('');
+  const [carregando, setCarregando] = useState(false);
 
   const handleChange = (field) => (e) => {
     setForm((prev) => ({ ...prev, [field]: e.target.value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log(form);
+    setErro('');
+    setCarregando(true);
+
+    try {
+      const { token, usuario } = await login(form);
+
+      localStorage.setItem('token', token);
+      localStorage.setItem('usuario', JSON.stringify(usuario));
+
+      const rota = ROTA_POR_TIPO[usuario.tipo] ?? '/login';
+
+      // console.log('LOGIN RESPONSE:', { token, usuario });
+      // console.log('TIPO:', usuario.tipo);
+      // console.log('ROTA:', rota);
+
+      navigate(rota, { replace: true });
+    } catch (err) {
+      setErro(err.response?.data?.Erro ?? 'Não foi possível entrar. Tente novamente.');
+    } finally {
+      setCarregando(false);
+    }
   };
 
   return (
@@ -52,6 +77,8 @@ export default function Login() {
           <p className="auth-card__subtitle">
             Acesse sua conta e continue de onde parou.
           </p>
+
+          {erro && <p className="auth-card__error">{erro}</p>}
 
           <div className="auth-card__field">
             <label className="auth-card__label" htmlFor="email">
@@ -98,8 +125,8 @@ export default function Login() {
             </div>
           </div>
 
-          <button type="submit" className="auth-card__submit">
-            Entrar
+          <button type="submit" className="auth-card__submit" disabled={carregando}>
+            {carregando ? 'Entrando...' : 'Entrar'}
           </button>
 
           <p className="auth-card__footer">

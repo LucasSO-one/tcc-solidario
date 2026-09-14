@@ -33,6 +33,9 @@ public class Varejista : Usuario
 {
     [Required, StringLength(14)]
     public string CNPJ { get; set; } = string.Empty;
+    
+    [Required, StringLength(150)]
+    public string NomeEstabelecimento { get; set; } = string.Empty;
     public string RazaoSocial { get; set; } = string.Empty;
     public string? HorarioFuncionamento { get; set; }
 }

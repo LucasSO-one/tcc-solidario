@@ -81,12 +81,25 @@ namespace TccSolidario.Api.Migrations
                     b.Property<bool>("AlertaPreDoacaoEnviado")
                         .HasColumnType("boolean");
 
+                    b.Property<string>("Categoria")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<DateTime>("DataValidade")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Descricao")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<bool>("FrutaFeia")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("ImagemUrl")
+                        .HasColumnType("text");
+
+                    b.Property<bool?>("IsOferta")
+                        .HasColumnType("boolean");
 
                     b.Property<decimal>("PrecoOriginal")
                         .HasColumnType("decimal(18,2)");
@@ -256,6 +269,11 @@ namespace TccSolidario.Api.Migrations
 
                     b.Property<string>("HorarioFuncionamento")
                         .HasColumnType("text");
+
+                    b.Property<string>("NomeEstabelecimento")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)");
 
                     b.Property<string>("RazaoSocial")
                         .IsRequired()

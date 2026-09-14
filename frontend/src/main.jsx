@@ -5,7 +5,6 @@ import App from './App.jsx'
 import "./styles/variables.scss";
 import "./styles/global.scss";
 import "./styles/layout.scss";
-import "./styles/sidebar.scss";
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
