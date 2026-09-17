@@ -56,6 +56,15 @@ export const listarOfertas = async ({ busca = '', signal } = {}) => {
     },
     signal,
   })
+  return data
+}
 
+export const listarDoacoes = async ({ busca = '', signal } = {}) => {
+  const { data } = await api.get('/produtos/doacoes', {
+    params: {
+      busca: busca || undefined,
+    },
+    signal,
+  })
   return data
 }

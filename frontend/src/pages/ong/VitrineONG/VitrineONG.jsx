@@ -1,71 +1,186 @@
-// import "./VitrineONG.scss";
-// import ProductCard from "../../../components/ProductCard/ProductCard";
-// // import produtos from "../../../data/produtos";
+import React, { useEffect, useMemo, useState } from 'react'
+import { Search, ShoppingCart, Recycle } from 'lucide-react'
+import { listarDoacoes } from '../../../service/produtoService'
+import './VitrineONG.scss'
 
-// function VitrineONG() {
-//   return (
-//     <main className="vitrine">
+const formatarPreco = (valor) =>
+  valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
 
-//       <h1>Vitrine para ONGs</h1>
+const formatarDiasRestantes = (dias) => {
+  if (dias <= 0) return 'Vence hoje'
+  if (dias === 1) return '1 dia restante'
+  return `${dias} dias restantes`
+}
 
-//       <p className="descricao">
-//         Alimentos disponíveis para resgate — janela de reserva libera
-//         24h antes da validade.
-//       </p>
+const ProdutoCard = ({ produto, onReservar }) => (
+  <article className={`produto-card ${produto.frutaFeia ? 'produto-card--feia' : ''}`}>
+    {produto.frutaFeia && (
+      <div className="produto-card__banner">
+        <Recycle size={13} />
+        Fruta Feia
+      </div>
+    )}
 
-//       <div className="info-box">
+    <div className="produto-card__body">
+      <div className="produto-card__imagem">
+        {produto.imagemUrl ? (
+          <img src={produto.imagemUrl} alt={produto.nome} />
+        ) : (
+          <span className="produto-card__imagem-placeholder">{produto.categoria?.[0] ?? '?'}</span>
+        )}
+      </div>
 
-//         <div className="info-icon">
-//           ℹ️
-//         </div>
+      <h3 className="produto-card__nome">{produto.nome}</h3>
+      <p className="produto-card__varejista">{produto.nomeVarejista}</p>
 
-//         <span>
-//           Como funciona: produtos com até 24h para vencer ficam
-//           liberados para reserva imediata. Entre 24h e 36h aparecem
-//           bloqueados com contagem para liberação.
-//         </span>
+      <span className="produto-card__validade">
+        {formatarDiasRestantes(produto.diasRestantes)}
+      </span>
 
-//       </div>
+      {produto.frutaFeia && (
+        <div className="produto-card__mensagem">
+          <Recycle size={14} />
+          Ao comprar, você valoriza alimentos imperfeitos e reduz o desperdício
+        </div>
+      )}
 
-//       <div className="search-box">
+      <div className="produto-card__preco">
+        {produto.precoDesconto != null && (
+          <span className="produto-card__preco-original">{formatarPreco(produto.precoOriginal)}</span>
+        )}
+        <span className="produto-card__preco-atual">
+          {formatarPreco(produto.precoDesconto ?? produto.precoOriginal)}
+        </span>
+        {produto.descontoPercentual != null && (
+          <span className="produto-card__desconto">{produto.descontoPercentual}%</span>
+        )}
+      </div>
 
-//         <input
-//           type="text"
-//           placeholder="Buscar alimento..."
-//         />
+      <button type="button" className="btn btn--primary btn--block" onClick={() => onReservar?.(produto)}>
+        <ShoppingCart size={16} />
+        Reservar
+      </button>
+    </div>
+  </article>
+)
 
-//       </div>
+const VitrineONG = ({ onReservar }) => {
+  const [produtos, setProdutos] = useState([])
+  const [carregando, setCarregando] = useState(true)
+  const [erro, setErro] = useState(null)
+  const [busca, setBusca] = useState('')
+  const [filtro, setFiltro] = useState('todas') // 'todas' | 'frutas-feias'
 
-//       <div className="categories">
+  useEffect(() => {
+    const controller = new AbortController()
 
-//         <button className="active">Todos</button>
-//         <button>Carnes</button>
-//         <button>Laticínios</button>
-//         <button>Hortifruti</button>
-//         <button>Padaria</button>
+    async function carregar() {
+      setCarregando(true)
+      setErro(null)
+      try {
+        const data = await listarDoacoes({
+          busca,
+          apenasFrutasFeias: filtro === 'frutas-feias',
+          signal: controller.signal,
+        })
+        setProdutos(data)
+      } catch (err) {
+        if (err.name !== 'CanceledError' && err.name !== 'AbortError') {
+          setErro('Não foi possível carregar a vitrine.')
+        }
+      } finally {
+        setCarregando(false)
+      }
+    }
 
-//       </div>
+    const debounce = setTimeout(carregar, 300)
+    return () => {
+      clearTimeout(debounce)
+      controller.abort()
+    }
+  }, [busca, filtro])
 
-//       <div className="produtos">
+  const { frutasFeias, demaisProdutos } = useMemo(() => {
+    return {
+      frutasFeias: produtos.filter((p) => p.frutaFeia),
+      demaisProdutos: produtos.filter((p) => !p.frutaFeia),
+    }
+  }, [produtos])
 
-//         {produtos.map((produto) => (
+  return (
+    <div className="vitrine-produtos">
+      <header className="vitrine-produtos__header">
+        <h1>Vitrine para ONGs</h1>
+        <p className="subtitle">Alimentos disponíveis para resgate - janela de reserva libera 24h antes da validade</p>
+      </header>
 
-//           <ProductCard
-//             key={produto.id}
-//             imagem={produto.imagem}
-//             nome={produto.nome}
-//             categoria={produto.categoria}
-//             estabelecimento={produto.estabelecimento}
-//             quantidade={produto.quantidade}
-//             validade={produto.validade}
-//           />
+      <div className="search-input search-input--lg">
+        <Search size={18} className="search-input__icon" />
+        <input
+          type="text"
+          placeholder="Buscar oferta ou estabelecimento..."
+          value={busca}
+          onChange={(e) => setBusca(e.target.value)}
+        />
+      </div>
 
-//         ))}
+      <div className="filter-tabs">
+        <button
+          type="button"
+          className={`filter-tabs__btn ${filtro === 'todas' ? 'is-active' : ''}`}
+          onClick={() => setFiltro('todas')}
+        >
+          Todas
+        </button>
+        <button
+          type="button"
+          className={`filter-tabs__btn ${filtro === 'frutas-feias' ? 'is-active' : ''}`}
+          onClick={() => setFiltro('frutas-feias')}
+        >
+          <Recycle size={14} />
+          Frutas Feias
+        </button>
+      </div>
 
-//       </div>
+      {carregando && <p className="vitrine-produtos__status">Carregando ofertas...</p>}
+      {!carregando && erro && <p className="vitrine-produtos__status">{erro}</p>}
 
-//     </main>
-//   );
-// }
+      {!carregando && !erro && (
+        <>
+          {frutasFeias.length > 0 && (
+            <section className="vitrine-produtos__section">
+              <h2 className="section-title">
+                <Recycle size={16} />
+                Frutas Feias — Mesma qualidade, preço especial
+              </h2>
+              <div className="produto-grid">
+                {frutasFeias.map((produto) => (
+                  <ProdutoCard key={produto.id} produto={produto} onReservar={onReservar} />
+                ))}
+              </div>
+            </section>
+          )}
 
-// export default VitrineONG;
+          {filtro === 'todas' && demaisProdutos.length > 0 && (
+            <section className="vitrine-produtos__section">
+              <h2 className="section-title">Todos os produtos</h2>
+              <div className="produto-grid">
+                {demaisProdutos.map((produto) => (
+                  <ProdutoCard key={produto.id} produto={produto} onReservar={onReservar} />
+                ))}
+              </div>
+            </section>
+          )}
+
+          {produtos.length === 0 && (
+            <p className="vitrine-produtos__status">
+              Nenhuma oferta encontrada{busca ? ` para "${busca}"` : ''}.
+            </p>
+          )}
+        </>
+      )}
+    </div>
+  )
+}
+
+export default VitrineONG

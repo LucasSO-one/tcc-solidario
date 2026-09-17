@@ -10,12 +10,14 @@ namespace TccSolidario.Api.Services;
 public class ProdutoService : IProdutoService
 {
     private readonly AppDbContext _context;
+    private readonly INotificacaoService _notificacaoService;
     private readonly IWebHostEnvironment _env;
 
-    public ProdutoService(AppDbContext context, IWebHostEnvironment env)
+    public ProdutoService(AppDbContext context, IWebHostEnvironment env, INotificacaoService notificacaoService)
     {
         _context = context;
         _env = env;
+        _notificacaoService = notificacaoService;
     }
 
     public async Task<Produto> CadastrarLoteAsync(Guid varejistaId, CadastrarLoteRequest request)
@@ -150,13 +152,45 @@ public class ProdutoService : IProdutoService
 
         return produtos.Select(MapParaVitrine).ToList();
     }
+    public async Task<List<ProdutoVitrineResponse>> ListarDoacoesAsync(string? busca)
+    {
+        var agora = DateTime.UtcNow;
+        var limite36Horas = agora.AddHours(36);
 
+        var query = _context.Produtos
+            .Include(p => p.Varejista)
+            .Where(p =>
+                p.Status == StatusProduto.DisponivelParaDoacao &&
+                p.DataValidade > agora &&
+                p.DataValidade <= limite36Horas
+            );
+
+        if (!string.IsNullOrWhiteSpace(busca))
+        {
+            var termo = busca.Trim().ToLower();
+
+            query = query.Where(p =>
+                p.Titulo.ToLower().Contains(termo) ||
+                p.Varejista.NomeEstabelecimento.ToLower().Contains(termo));
+        }
+
+        var produtos = await query
+            .OrderBy(p => p.DataValidade)
+            .ToListAsync();
+
+        return produtos.Select(MapParaDoacao).ToList();
+    }
     private static ProdutoVitrineResponse MapParaVitrine(Produto p)
     {
-        var diasRestantes = (int)Math.Ceiling((p.DataValidade - DateTime.Now).TotalDays);
+        var diasRestantes = (int)Math.Ceiling(
+            (p.DataValidade - DateTime.UtcNow).TotalDays
+        );
 
         decimal? percentual = p.PrecoVenda.HasValue && p.PrecoOriginal > 0
-            ? Math.Round((1 - (p.PrecoVenda.Value / p.PrecoOriginal)) * 100, 0)
+            ? Math.Round(
+                (1 - (p.PrecoVenda.Value / p.PrecoOriginal)) * 100,
+                0
+            )
             : null;
 
         return new ProdutoVitrineResponse
@@ -175,5 +209,63 @@ public class ProdutoService : IProdutoService
         };
     }
 
+    private static ProdutoVitrineResponse MapParaDoacao(Produto p)
+    {
+        var horasRestantes = Math.Max(
+            0,
+            (p.DataValidade - DateTime.UtcNow).TotalHours
+        );
 
+        return new ProdutoVitrineResponse
+        {
+            Id = p.Id,
+            Nome = p.Titulo,
+            Categoria = p.Categoria,
+            ImagemUrl = p.ImagemUrl,
+            NomeVarejista = p.Varejista?.NomeEstabelecimento ?? "Estabelecimento",
+
+            // Doação é gratuita
+            PrecoOriginal = p.PrecoOriginal,
+            PrecoDesconto = 0,
+            DescontoPercentual = 100,
+
+            DiasRestantes = (int)Math.Ceiling(horasRestantes / 24),
+
+            FrutaFeia = p.FrutaFeia,
+            Status = p.Status.ToString()
+        };
+    }
+
+    public async Task VerificarValidadesAsync()
+    {
+        var agora = DateTime.UtcNow;
+
+        // Produtos ainda ativos comercialmente (não vendidos, não doados, não já transferidos)
+        var produtosAtivos = await _context.Produtos
+            .Include(p => p.Varejista)
+            .Where(p => p.Status == StatusProduto.Disponivel || p.Status == StatusProduto.EmDesconto)
+            .ToListAsync();
+
+        foreach (var produto in produtosAtivos)
+        {
+            var horasRestantes = (produto.DataValidade - agora).TotalHours;
+
+            // Regra 1: <= 36h e ainda não avisou o varejista
+            if (horasRestantes <= 36 && !produto.AlertaPreDoacaoEnviado)
+            {
+                await _notificacaoService.EnviarAlertaValidadeAsync(produto);
+                produto.AlertaPreDoacaoEnviado = true;
+            }
+
+            // Regra 2: <= 24h e não vendido -> transfere pra doação
+            if (horasRestantes <= 24)
+            {
+                produto.Status = StatusProduto.DisponivelParaDoacao;
+                produto.PrecoVenda = null;
+                produto.IsOferta = false;
+            }
+        }
+
+        await _context.SaveChangesAsync();
+    }
 }

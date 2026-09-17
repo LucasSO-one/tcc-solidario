@@ -1,6 +1,7 @@
 namespace TccSolidario.Api.DTOs.Ong;
 
 using System.ComponentModel.DataAnnotations;
+using System.Text.RegularExpressions;
 
 public class RegistroOngRequest
 {
@@ -13,7 +14,6 @@ public class RegistroOngRequest
     public string NomeFantasia { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "O telefone de contato e obrigatorio.")]
-    [RegularExpression(@"^\(\d{2}\) 9\d{4}-\d{4}$", ErrorMessage = "O telefone deve estar no formato (XX) 9XXXX-XXXX.")]
     public string Telefone { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "O e-mail e obrigatorio.")]
@@ -21,7 +21,22 @@ public class RegistroOngRequest
     public string Email { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "A senha e obrigatoria.")]
-    [RegularExpression(@"^(?=.*[A-Z])(?=.*\d)(?=.*[\W_])[A-Za-z\d\W_]{8,}$", 
+    [RegularExpression(@"^(?=.*[A-Z])(?=.*\d)(?=.*[\W_])[A-Za-z\d\W_]{8,}$",
         ErrorMessage = "A senha deve ter no minimo 8 caracteres, contendo pelo menos uma letra maiuscula, um numero e um caractere especial.")]
     public string Senha { get; set; } = string.Empty;
+
+    public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+    {
+        var telefoneLimpo = Regex.Replace(Telefone ?? string.Empty, @"\D", "");
+
+        if (telefoneLimpo.Length != 11 || telefoneLimpo[2] != '9')
+        {
+            yield return new ValidationResult(
+                "Informe um celular válido com DDD e 9 dígitos.",
+                new[] { nameof(Telefone) }
+            );
+        }
+
+        Telefone = telefoneLimpo;
+    }
 }

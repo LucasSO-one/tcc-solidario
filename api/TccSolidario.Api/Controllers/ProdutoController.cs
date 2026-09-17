@@ -49,21 +49,7 @@ public class ProdutoController : ControllerBase
             return Unauthorized(new { message = "Usuário inválido." });
         }
 
-        var produtos = await _context.Produtos
-            .Where(p => p.VarejistaId == varejistaId)
-            .OrderByDescending(p => p.DataValidade)
-            .Select(p => new ProdutoResumoResponse
-            {
-                Id = p.Id,
-                Titulo = p.Titulo,
-                Categoria = p.Categoria,
-                Quantidade = p.Quantidade,
-                DataValidade = p.DataValidade,
-                Status = p.Status.ToString(),
-                ImagemUrl = p.ImagemUrl
-            })
-            .ToListAsync();
-
+        var produtos = await _produtoService.ListarPorVarejistaAsync(varejistaId);
         return Ok(produtos);
     }
 
@@ -84,5 +70,14 @@ public class ProdutoController : ControllerBase
         var ofertas = await _produtoService.ListarOfertasAsync(busca);
 
         return Ok(ofertas);
+    }
+
+    [HttpGet("doacoes")]
+    [AllowAnonymous]
+    public async Task<IActionResult> ListarDoacoes([FromQuery] string? busca)
+    {
+        var doacoes = await _produtoService.ListarDoacoesAsync(busca);
+
+        return Ok(doacoes);
     }
 }

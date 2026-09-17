@@ -1,13 +1,13 @@
-import ResgateCard from "../../../components/ResgateCard/ResgateCard";
+
 // import reservas from "../../../data/reservas";
-import { FaHandHoldingHeart } from "react-icons/fa";
+// import { FaHandHoldingHeart } from "react-icons/fa";
 import './MeusResgate.scss';
 
 function MeusResgates() {
     return (
         <main className="meus-resgates">
             <div className="titulo">
-                <FaHandHoldingHeart className="titulo-icon"/>
+                {/* <FaHandHoldingHeart className="titulo-icon"/> */}
                 <h1>Meus Resgates</h1>
             </div>
 

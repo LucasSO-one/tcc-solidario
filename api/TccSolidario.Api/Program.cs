@@ -48,7 +48,9 @@ builder.Services.AddScoped<ICpfValidatorService, CpfValidatorService>();
 builder.Services.AddScoped<IUsuarioRegistrationService, UsuarioRegistrationService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IProdutoService, ProdutoService>();
-
+builder.Services.AddHostedService<VerificacaoValidadeProdutosWorker>();
+builder.Services.AddScoped<INotificacaoService, NotificacaoService>();
+builder.Services.AddScoped<IReservaService, ReservaService>();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
