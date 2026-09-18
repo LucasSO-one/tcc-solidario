@@ -1,6 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { Search, ShoppingCart, Recycle } from 'lucide-react'
 import { listarDoacoes } from '../../../service/produtoService'
+import { reservarProduto } from '../../../service/reserva'
+import { QRCodeSVG } from 'qrcode.react'
 import './VitrineONG.scss'
 
 const formatarPreco = (valor) =>
@@ -56,7 +58,11 @@ const ProdutoCard = ({ produto, onReservar }) => (
         )}
       </div>
 
-      <button type="button" className="btn btn--primary btn--block" onClick={() => onReservar?.(produto)}>
+      <button
+        type="button"
+        className="btn btn--primary btn--block"
+        onClick={() => onReservar?.(produto)}
+      >
         <ShoppingCart size={16} />
         Reservar
       </button>
@@ -64,12 +70,14 @@ const ProdutoCard = ({ produto, onReservar }) => (
   </article>
 )
 
-const VitrineONG = ({ onReservar }) => {
+const VitrineONG = () => {
   const [produtos, setProdutos] = useState([])
   const [carregando, setCarregando] = useState(true)
   const [erro, setErro] = useState(null)
   const [busca, setBusca] = useState('')
   const [filtro, setFiltro] = useState('todas') // 'todas' | 'frutas-feias'
+  const [reservaCriada, setReservaCriada] = useState(null)
+  const [reservando, setReservando] = useState(false)
 
   useEffect(() => {
     const controller = new AbortController()
@@ -106,6 +114,24 @@ const VitrineONG = ({ onReservar }) => {
       demaisProdutos: produtos.filter((p) => !p.frutaFeia),
     }
   }, [produtos])
+
+  const handleReservar = async (produto) => {
+    try {
+      setReservando(true)
+
+      const reserva = await reservarProduto(produto.id)
+
+      setReservaCriada({
+        ...reserva,
+        produto,
+      })
+    } catch (err) {
+      console.error(err)
+      setErro('Não foi possível realizar a reserva.')
+    } finally {
+      setReservando(false)
+    }
+  }
 
   return (
     <div className="vitrine-produtos">
@@ -166,7 +192,10 @@ const VitrineONG = ({ onReservar }) => {
               <h2 className="section-title">Todos os produtos</h2>
               <div className="produto-grid">
                 {demaisProdutos.map((produto) => (
-                  <ProdutoCard key={produto.id} produto={produto} onReservar={onReservar} />
+                  <ProdutoCard
+                    key={produto.id}
+                    produto={produto}
+                    onReservar={handleReservar} />
                 ))}
               </div>
             </section>

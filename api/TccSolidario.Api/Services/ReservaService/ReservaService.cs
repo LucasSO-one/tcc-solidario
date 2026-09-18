@@ -108,8 +108,8 @@ public class ReservaService : IReservaService
     }
 
     public async Task<Transacao> ValidarRetiradaAsync(
-        Guid varejistaId,
-        string codigo)
+     Guid ongId,
+     string codigo)
     {
         var codigoNormalizado = codigo
             .Trim()
@@ -131,9 +131,10 @@ public class ReservaService : IReservaService
                 "Produto da transação não encontrado."
             );
 
-        if (transacao.Produto.VarejistaId != varejistaId)
+        // A reserva precisa pertencer à ONG que está confirmando a retirada.
+        if (transacao.OngId != ongId)
             throw new InvalidOperationException(
-                "Este código não pertence a um produto do seu estabelecimento."
+                "Este código não pertence a uma reserva da sua ONG."
             );
 
         // O produto precisa estar reservado.
@@ -142,7 +143,6 @@ public class ReservaService : IReservaService
                 "Este produto não está mais reservado."
             );
 
-        transacao.DataTransacao = DateTime.UtcNow;
         transacao.DataRetirada = DateTime.UtcNow;
 
         // Depois da retirada:
@@ -175,6 +175,23 @@ public class ReservaService : IReservaService
             .ToList();
     }
 
+    public async Task<List<ReservaResponse>> ListarReservasPendentesAsync(
+        Guid varejistaId)
+    {
+        var transacoes = await _context.Transacoes
+            .Include(t => t.Produto)
+            .Where(t =>
+                t.Produto!.VarejistaId == varejistaId &&
+                t.Produto.Status == StatusProduto.Reservado
+            )
+            .OrderByDescending(t => t.DataTransacao)
+            .ToListAsync();
+
+        return transacoes
+            .Select(MapParaResponse)
+            .ToList();
+    }
+
     public async Task<List<ReservaResponse>> ListarValidacoesRecentesAsync(
         Guid varejistaId)
     {
@@ -195,6 +212,8 @@ public class ReservaService : IReservaService
             .Select(MapParaResponse)
             .ToList();
     }
+
+
 
     private async Task<string> GerarCodigoUnicoAsync()
     {

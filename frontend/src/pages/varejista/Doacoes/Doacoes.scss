@@ -1,0 +1,499 @@
+@import '../../../styles/variables.scss';
+
+// ==========================================================================
+// Doações (Varejista) — Vitrine de alimentos para ONGs
+// ==========================================================================
+
+.doacoes {
+  display: flex;
+  flex-direction: column;
+  gap: $space-lg;
+  max-width: 1080px;
+  padding: $space-xl $space-lg;
+  margin: 0 auto;
+  font-family: $font-family-base;
+  color: $color-text-primary;
+
+  // ----------------------------------------------------------------------
+  // Header
+  // ----------------------------------------------------------------------
+  &__header {
+    display: flex;
+    flex-direction: column;
+    gap: $space-lg;
+
+    @media (min-width: $breakpoint-tablet) {
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+    }
+  }
+
+  &__header-info {
+    display: flex;
+    align-items: flex-start;
+    gap: $space-md;
+
+    h1 {
+      margin: 0;
+      font-size: $font-size-2xl;
+      font-weight: $font-weight-bold;
+      line-height: 1.2;
+      color: $color-text-primary;
+    }
+
+    .subtitle {
+      margin: 4px 0 0;
+      font-size: $font-size-base;
+      color: $color-text-secondary;
+      line-height: 1.5;
+      max-width: 520px;
+    }
+  }
+
+  &__header-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    border-radius: $radius-md;
+    background: $color-primary-light;
+    color: $color-primary;
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+
+  // ----------------------------------------------------------------------
+  // Stats
+  // ----------------------------------------------------------------------
+  &__stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: $space-sm;
+
+    @media (max-width: $breakpoint-mobile) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .doacoes-stat {
+    @include card;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: $space-md $space-lg;
+    min-width: 100px;
+
+    strong {
+      font-size: $font-size-xl;
+      font-weight: $font-weight-bold;
+      line-height: 1;
+      color: $color-text-primary;
+    }
+
+    span {
+      font-size: $font-size-xs;
+      font-weight: $font-weight-medium;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: $color-text-muted;
+    }
+
+    &--disponivel {
+      background: $color-primary-light;
+      border-color: rgba($color-primary, 0.25);
+
+      strong { color: $color-primary-dark; }
+      span   { color: $color-primary-dark; opacity: 0.8; }
+    }
+
+    &--doada {
+      strong { color: $color-text-primary; }
+    }
+  }
+
+  // ----------------------------------------------------------------------
+  // Busca
+  // ----------------------------------------------------------------------
+  &__busca {
+    display: flex;
+    align-items: center;
+    gap: $space-sm;
+    padding: 0 $space-md;
+    background: $color-surface;
+    border: 1px solid $color-border;
+    border-radius: $radius-md;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+
+    svg {
+      color: $color-text-muted;
+      font-size: 15px;
+      flex-shrink: 0;
+    }
+
+    input {
+      flex: 1;
+      width: 100%;
+      padding: 14px 0;
+      border: 0;
+      background: transparent;
+      font-family: inherit;
+      font-size: $font-size-base;
+      color: $color-text-primary;
+
+      &::placeholder {
+        color: $color-text-muted;
+      }
+
+      &:focus {
+        outline: none;
+      }
+    }
+
+    &:focus-within {
+      border-color: $color-primary;
+      box-shadow: 0 0 0 3px rgba($color-primary, 0.12);
+    }
+  }
+
+  // ----------------------------------------------------------------------
+  // Filtros
+  // ----------------------------------------------------------------------
+  &__filtros {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $space-sm;
+  }
+
+  &__filtro {
+    @include btn-reset;
+    padding: 8px 14px;
+    border-radius: $radius-full;
+    background: $color-surface;
+    border: 1px solid $color-border;
+    color: $color-text-secondary;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-medium;
+    transition: all 0.15s ease;
+
+    &:hover {
+      border-color: rgba($color-primary, 0.4);
+      color: $color-primary-dark;
+    }
+
+    &.is-active {
+      background: $color-primary;
+      border-color: $color-primary;
+      color: #fff;
+    }
+
+    &:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba($color-primary, 0.2);
+    }
+  }
+
+  // ----------------------------------------------------------------------
+  // Estados
+  // ----------------------------------------------------------------------
+  &__estado,
+  &__vazio {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: $space-sm;
+    padding: $space-xl;
+    text-align: center;
+    background: $color-bg;
+    border: 1px dashed $color-border;
+    border-radius: $radius-md;
+    color: $color-text-muted;
+    font-size: $font-size-sm;
+
+    svg {
+      font-size: 28px;
+      opacity: 0.6;
+    }
+
+    p { margin: 0; }
+
+    &--erro {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-style: solid;
+      color: #b91c1c;
+    }
+  }
+
+  &__spinner {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 3px solid rgba($color-primary, 0.2);
+    border-top-color: $color-primary;
+    animation: doacoes-spin 0.8s linear infinite;
+  }
+
+  // ----------------------------------------------------------------------
+  // Grid de cards
+  // ----------------------------------------------------------------------
+  .doacoes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: $space-md;
+
+    @media (max-width: $breakpoint-mobile) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  // ----------------------------------------------------------------------
+  // Rodapé de impacto
+  // ----------------------------------------------------------------------
+  &__impacto {
+    display: flex;
+    align-items: center;
+    gap: $space-sm;
+    padding: $space-md $space-lg;
+    background: $color-primary-light;
+    border: 1px solid rgba($color-primary, 0.2);
+    border-radius: $radius-md;
+    color: $color-primary-dark;
+    font-size: $font-size-sm;
+    line-height: 1.5;
+
+    svg {
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+
+    strong {
+      font-weight: $font-weight-bold;
+    }
+  }
+}
+
+// ==========================================================================
+// Card de doação
+// ==========================================================================
+.doacao-card {
+  @include card;
+  display: flex;
+  flex-direction: column;
+  gap: $space-sm;
+  padding: $space-lg;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease;
+
+  &:hover {
+    border-color: rgba($color-primary, 0.35);
+    box-shadow: 0 6px 16px rgba(16, 24, 40, 0.07);
+    transform: translateY(-1px);
+  }
+
+  // ----------------------------------------------------------------------
+  // Topo: produto + status
+  // ----------------------------------------------------------------------
+  &__top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: $space-sm;
+  }
+
+  &__top-info {
+    min-width: 0;
+
+    h3 {
+      margin: 0;
+      font-size: $font-size-base;
+      font-weight: $font-weight-semibold;
+      line-height: 1.3;
+      color: $color-text-primary;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+
+  &__unidades {
+    display: inline-block;
+    margin-top: 2px;
+    font-size: $font-size-xs;
+    color: $color-text-muted;
+  }
+
+  // ----------------------------------------------------------------------
+  // Status badge
+  // ----------------------------------------------------------------------
+  &__status {
+    @include badge;
+    flex-shrink: 0;
+    gap: 4px;
+
+    svg {
+      font-size: 11px;
+    }
+
+    &--disponivel {
+      background: $color-primary-light;
+      color: $color-primary-dark;
+    }
+
+    &--reservado {
+      background: $color-accent-blue-bg;
+      color: $color-accent-blue;
+    }
+
+    &--doado {
+      background: $color-bg;
+      color: $color-text-muted;
+      border: 1px solid $color-border;
+    }
+  }
+
+  // ----------------------------------------------------------------------
+  // Estabelecimento
+  // ----------------------------------------------------------------------
+  &__estabelecimento {
+    margin: 0;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-medium;
+    color: $color-text-secondary;
+  }
+
+  // ----------------------------------------------------------------------
+  // Meta (local + validade)
+  // ----------------------------------------------------------------------
+  &__meta {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: $space-xs;
+
+    span {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: $font-size-xs;
+      color: $color-text-secondary;
+
+      svg {
+        font-size: 11px;
+        color: $color-text-muted;
+        flex-shrink: 0;
+      }
+    }
+
+    &-validade {
+      color: $color-text-primary !important;
+      font-weight: $font-weight-medium;
+    }
+  }
+
+  // ----------------------------------------------------------------------
+  // Aviso social
+  // ----------------------------------------------------------------------
+  &__notice {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+    margin-top: $space-sm;
+    padding: $space-sm $space-md;
+    background: $color-primary-light;
+    border-radius: $radius-sm;
+    font-size: $font-size-xs;
+    color: $color-primary-dark;
+    line-height: 1.4;
+
+    svg {
+      font-size: 11px;
+      margin-top: 2px;
+      flex-shrink: 0;
+    }
+  }
+
+  // ----------------------------------------------------------------------
+  // Botão
+  // ----------------------------------------------------------------------
+  &__btn {
+    @include btn-reset;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: $space-sm;
+    margin-top: auto;
+    padding: 12px 18px;
+    border-radius: $radius-sm;
+    background: $color-primary;
+    color: #fff;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-semibold;
+    transition: background 0.15s ease, transform 0.1s ease;
+
+    svg {
+      font-size: 13px;
+    }
+
+    &:hover {
+      background: $color-primary-dark;
+    }
+
+    &:active {
+      transform: translateY(1px);
+    }
+
+    &:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba($color-primary, 0.25);
+    }
+  }
+
+  // ----------------------------------------------------------------------
+  // Variantes por status
+  // ----------------------------------------------------------------------
+  &--doado {
+    background: linear-gradient(
+      to bottom right,
+      rgba($color-primary-light, 0.5),
+      $color-surface
+    );
+
+    .doacao-card__btn {
+      background: $color-bg;
+      color: $color-text-secondary;
+      border: 1px solid $color-border;
+
+      &:hover {
+        background: $color-border;
+        color: $color-text-primary;
+      }
+    }
+  }
+
+  &--reservado {
+    border-color: rgba($color-accent-blue, 0.3);
+  }
+}
+
+// ==========================================================================
+// Animação do spinner
+// ==========================================================================
+@keyframes doacoes-spin {
+  to { transform: rotate(360deg); }
+}
+
+// ==========================================================================
+// Responsividade global
+// ==========================================================================
+@media (max-width: $breakpoint-mobile) {
+  .doacoes {
+    padding: $space-lg $space-md;
+    max-width: 100%;
+
+    &__header-info h1 {
+      font-size: $font-size-xl;
+    }
+  }
+}

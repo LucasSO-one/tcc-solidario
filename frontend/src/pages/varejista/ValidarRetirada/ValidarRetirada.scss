@@ -1,159 +1,401 @@
 @import '../../../styles/variables.scss';
 
-.validar-retirada {
+// ==========================================================================
+// Validação de Retirada — Dashboard Administrativo
+// ==========================================================================
 
+.validacao-retirada {
   display: flex;
   flex-direction: column;
-  gap: 20px;
-  max-width: 720px;
+  gap: $space-lg;
+  max-width: 780px;
+  padding: $space-xl $space-lg;
+  margin: 0 auto;
+  font-family: $font-family-base;
+  color: $color-text-primary;
 
-  &__header {
-    h1 {
+  // ----------------------------------------------------------------------
+  // Cabeçalho da página
+  // ----------------------------------------------------------------------
+  .eyebrow {
+    display: inline-block;
+    font-size: $font-size-xs;
+    font-weight: $font-weight-semibold;
+    letter-spacing: 0.08em;
+    color: $color-primary;
+    text-transform: uppercase;
+    margin-bottom: $space-xs;
+  }
+
+  > h1 {
+    margin: 0;
+    font-size: $font-size-2xl;
+    font-weight: $font-weight-bold;
+    line-height: 1.2;
+    color: $color-text-primary;
+  }
+
+  > p {
+    margin: 0;
+    font-size: $font-size-base;
+    color: $color-text-secondary;
+    line-height: 1.5;
+  }
+
+  // ----------------------------------------------------------------------
+  // Títulos de seção reutilizáveis
+  // ----------------------------------------------------------------------
+  .section-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: $space-md;
+    margin-bottom: $space-md;
+
+    h2 {
+      margin: 0;
+      font-size: $font-size-lg;
+      font-weight: $font-weight-bold;
+      color: $color-text-primary;
+    }
+  }
+
+  h2 {
+    margin: 0;
+    font-size: $font-size-lg;
+    font-weight: $font-weight-bold;
+    color: $color-text-primary;
+  }
+
+  .subtitulo {
+    margin: 4px 0 0;
+    font-size: $font-size-sm;
+    color: $color-text-muted;
+    line-height: 1.5;
+  }
+
+  .estado-vazio {
+    margin: 0;
+    padding: $space-lg;
+    text-align: center;
+    font-size: $font-size-sm;
+    color: $color-text-muted;
+    background: $color-bg;
+    border: 1px dashed $color-border;
+    border-radius: $radius-md;
+  }
+
+  // ----------------------------------------------------------------------
+  // Reservas aguardando retirada
+  // ----------------------------------------------------------------------
+  .reservas-pendentes {
+    display: flex;
+    flex-direction: column;
+
+    .lista-reservas {
+      display: flex;
+      flex-direction: column;
+      gap: $space-md;
+    }
+  }
+
+  .card-reserva {
+    @include card;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: $space-md;
+    padding: $space-md $space-lg;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+
+    &:hover {
+      border-color: rgba($color-primary, 0.35);
+      box-shadow: 0 4px 12px rgba(16, 24, 40, 0.06);
+    }
+
+    &__info {
       display: flex;
       align-items: center;
-      gap: 8px;
-      margin: 0;
-      font-size: 22px;
-      font-weight: 700;
+      gap: $space-md;
+      min-width: 0;
+      flex: 1;
+
+      h3 {
+        margin: 0;
+        font-size: $font-size-base;
+        font-weight: $font-weight-semibold;
+        color: $color-text-primary;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      p {
+        margin: 2px 0 0;
+        font-size: $font-size-sm;
+        color: $color-text-secondary;
+
+        strong {
+          color: $color-text-primary;
+          font-weight: $font-weight-semibold;
+        }
+      }
+
+      span {
+        display: inline-block;
+        margin-top: 4px;
+        font-size: $font-size-xs;
+        color: $color-text-muted;
+      }
     }
 
-    .subtitle {
-      margin: 6px 0 0;
-      font-size: 13px;
-      color: $color-text-muted;
+    @media (max-width: $breakpoint-mobile) {
+      flex-direction: column;
+      align-items: stretch;
     }
   }
-}
 
-.panel {
-  @include card;
-  padding: 24px;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-
-.field-label {
-  font-size: 13px;
-  font-weight: 600;
-  color: $color-text-primary;
-}
-
-.code-input {
-  width: 100%;
-  padding: 18px 16px;
-  border: 1px dashed $color-border;
-  border-radius: $radius-md;
-  background: $color-bg;
-  font-size: 18px;
-  font-weight: 600;
-  letter-spacing: 1px;
-  text-align: center;
-  color: $color-text-primary;
-  font-family: inherit;
-
-  &::placeholder {
-    color: $color-text-secondary;
-    font-weight: 500;
-  }
-
-  &:focus {
-    outline: none;
-    border-style: solid;
-    border-color: $color-primary-light;
-    box-shadow: 0 0 0 3px rgba($color-primary-light, 0.15);
-  }
-}
-
-.actions-row {
-  display: flex;
-  gap: 12px;
-
-  @media (max-width: $breakpoint-mobile) {
-    flex-direction: column;
-  }
-}
-
-// .btn {
-//   @include btn-reset;
-//   display: inline-flex;
-//   align-items: center;
-//   justify-content: center;
-//   gap: 6px;
-//   padding: 12px 18px;
-//   border-radius: $radius-sm;
-//   font-size: 13px;
-//   font-weight: 600;
-//   flex: 1;
-//   transition: opacity 0.15s ease;
-
-//   &:hover:not(:disabled) {
-//     opacity: 0.92;
-//   }
-
-//   &:disabled {
-//     opacity: 0.5;
-//     cursor: not-allowed;
-//   }
-
-//   &--primary {
-//     background: $color-primary;
-//     color: $color-surface;
-//   }
-
-//   &--outline {
-//     background: $color-surface;
-//     color: $color-text-primary;
-//     border: 1px solid $color-border;
-//   }
-// }
-
-.recent {
-  h2 {
-    margin: 0 0 12px;
-    font-size: 15px;
-    font-weight: 700;
-  }
-}
-
-.recent-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.recent-item {
-  @include card;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 14px 16px;
-
-  &__icon {
+  // Ícone reutilizável (card-reserva + item-recente)
+  .item-icon {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
+    width: 42px;
+    height: 42px;
+    border-radius: $radius-md;
     background: $color-primary-light;
     color: $color-primary;
+    font-size: 18px;
     flex-shrink: 0;
   }
 
-  &__title {
-    font-size: 14px;
-    font-weight: 700;
+  // ----------------------------------------------------------------------
+  // Botão QR Code
+  // ----------------------------------------------------------------------
+  .btn-qrcode {
+    @include btn-reset;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: $space-sm;
+    padding: 10px 16px;
+    border-radius: $radius-sm;
+    background: $color-primary;
+    color: #fff;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-semibold;
+    white-space: nowrap;
+    flex-shrink: 0;
+    transition: background 0.15s ease, transform 0.1s ease;
+
+    svg {
+      font-size: 14px;
+    }
+
+    &:hover {
+      background: $color-primary-dark;
+    }
+
+    &:active {
+      transform: translateY(1px);
+    }
+
+    &:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba($color-primary, 0.25);
+    }
+
+    @media (max-width: $breakpoint-mobile) {
+      width: 100%;
+    }
   }
 
-  &__subtitle {
-    font-size: 12px;
-    color: $color-text-muted;
-    margin-top: 2px;
+  // ----------------------------------------------------------------------
+  // Validações recentes
+  // ----------------------------------------------------------------------
+  .validacoes-recentes {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .lista-recentes {
+    display: flex;
+    flex-direction: column;
+    gap: $space-sm;
+    margin-top: $space-md;
+  }
+
+  .item-recente {
+    @include card;
+    display: flex;
+    align-items: center;
+    gap: $space-md;
+    padding: $space-md;
+    transition: border-color 0.15s ease;
+
+    &:hover {
+      border-color: rgba($color-primary, 0.25);
+    }
+
+    h3 {
+      margin: 0;
+      font-size: $font-size-sm;
+      font-weight: $font-weight-semibold;
+      color: $color-text-primary;
+    }
+
+    p {
+      margin: 2px 0 0;
+      font-size: $font-size-xs;
+      color: $color-text-muted;
+    }
+  }
+
+  // ----------------------------------------------------------------------
+  // Modal do QR Code
+  // ----------------------------------------------------------------------
+  .modal-qrcode {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: $space-lg;
+    background: rgba(20, 24, 31, 0.55);
+    backdrop-filter: blur(4px);
+    animation: fadeIn 0.15s ease;
+
+    &__content {
+      @include card;
+      position: relative;
+      width: 100%;
+      max-width: 380px;
+      padding: $space-xl $space-lg;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: $space-sm;
+      animation: slideUp 0.2s ease;
+
+      h2 {
+        margin: $space-xs 0 0;
+        font-size: $font-size-xl;
+        font-weight: $font-weight-bold;
+      }
+
+      > p {
+        margin: 0;
+        font-size: $font-size-sm;
+        color: $color-text-secondary;
+        line-height: 1.5;
+      }
+    }
+
+    &__produto {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      width: 100%;
+      padding: $space-md;
+      margin-top: $space-sm;
+      background: $color-primary-light;
+      border-radius: $radius-md;
+
+      strong {
+        font-size: $font-size-base;
+        font-weight: $font-weight-semibold;
+        color: $color-text-primary;
+      }
+
+      span {
+        font-size: $font-size-xs;
+        color: $color-primary-dark;
+        font-weight: $font-weight-medium;
+      }
+    }
+
+    &__qr {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: $space-md;
+      margin-top: $space-sm;
+      background: #fff;
+      border: 1px solid $color-border;
+      border-radius: $radius-md;
+    }
+
+    &__codigo {
+      width: 100%;
+      padding: 10px;
+      margin-top: $space-xs;
+      background: $color-bg;
+      border: 1px dashed $color-border;
+      border-radius: $radius-sm;
+      font-family: 'SFMono-Regular', Menlo, Consolas, monospace;
+      font-size: $font-size-sm;
+      font-weight: $font-weight-semibold;
+      letter-spacing: 0.08em;
+      color: $color-text-primary;
+      word-break: break-all;
+    }
+
+    button {
+      @include btn-reset;
+      width: 100%;
+      margin-top: $space-md;
+      padding: 12px 18px;
+      border-radius: $radius-sm;
+      background: $color-text-primary;
+      color: #fff;
+      font-size: $font-size-sm;
+      font-weight: $font-weight-semibold;
+      transition: background 0.15s ease;
+
+      &:hover {
+        background: #000;
+      }
+
+      &:focus-visible {
+        outline: none;
+        box-shadow: 0 0 0 3px rgba($color-text-primary, 0.2);
+      }
+    }
   }
 }
 
-.recent-empty {
-  font-size: 13px;
-  color: $color-text-muted;
+// --------------------------------------------------------------------------
+// Animações
+// --------------------------------------------------------------------------
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+// --------------------------------------------------------------------------
+// Responsividade global
+// --------------------------------------------------------------------------
+@media (max-width: $breakpoint-mobile) {
+  .validacao-retirada {
+    padding: $space-lg $space-md;
+    max-width: 100%;
+
+    > h1 {
+      font-size: $font-size-xl;
+    }
+  }
 }

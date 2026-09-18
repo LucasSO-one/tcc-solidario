@@ -36,7 +36,7 @@ public class ReservaController : ControllerBase
             return Ok(new
             {
                 transacao.Id,
-                transacao.CodigoRetirada
+                message = "Reserva realizada com sucesso.",
             });
         }
         catch (InvalidOperationException ex)
@@ -46,24 +46,24 @@ public class ReservaController : ControllerBase
     }
 
     [HttpPost("validar")]
-    [Authorize(Roles = "Varejista")]
+    [Authorize(Roles = "ONG")]
     public async Task<IActionResult> ValidarRetirada(
-        [FromBody] ValidarRetiradaRequest request)
+    [FromBody] ValidarRetiradaRequest request)
     {
-        var varejistaId = Guid.Parse(
+        var ongId = Guid.Parse(
             User.FindFirstValue(ClaimTypes.NameIdentifier)!
         );
 
         try
         {
             var transacao = await _reservaService.ValidarRetiradaAsync(
-                varejistaId,
+                ongId,
                 request.Codigo
             );
 
             return Ok(new
             {
-                message = "Retirada validada com sucesso.",
+                message = "Retirada confirmada com sucesso.",
                 transacao.Id,
                 Produto = transacao.Produto!.Titulo
             });
@@ -99,5 +99,19 @@ public class ReservaController : ControllerBase
             .ListarValidacoesRecentesAsync(varejistaId);
 
         return Ok(validacoes);
+    }
+
+    [HttpGet("reservas-pendentes")]
+    [Authorize(Roles = "Varejista")]
+    public async Task<IActionResult> ListarReservasPendentes()
+    {
+        var varejistaId = Guid.Parse(
+            User.FindFirstValue(ClaimTypes.NameIdentifier)!
+        );
+
+        var reservas = await _reservaService
+            .ListarReservasPendentesAsync(varejistaId);
+
+        return Ok(reservas);
     }
 }

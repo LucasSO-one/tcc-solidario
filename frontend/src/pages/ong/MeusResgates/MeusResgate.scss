@@ -1,0 +1,263 @@
+@import '../../../styles/variables.scss';
+
+// ==========================================================================
+// Meus Resgates (ONG) — Histórico e reservas ativas
+// ==========================================================================
+
+.meus-resgates {
+  display: flex;
+  flex-direction: column;
+  gap: $space-xl;
+  max-width: 820px;
+  padding: $space-xl $space-lg;
+  margin: 0 auto;
+  font-family: $font-family-base;
+  color: $color-text-primary;
+
+  // ----------------------------------------------------------------------
+  // Header
+  // ----------------------------------------------------------------------
+  .mr-header {
+    display: flex;
+    flex-direction: column;
+    gap: $space-lg;
+
+    &__titulo {
+      display: flex;
+      align-items: flex-start;
+      gap: $space-md;
+
+      h1 {
+        margin: 0;
+        font-size: $font-size-2xl;
+        font-weight: $font-weight-bold;
+        line-height: 1.2;
+        color: $color-text-primary;
+      }
+
+      p {
+        margin: 4px 0 0;
+        font-size: $font-size-base;
+        color: $color-text-secondary;
+        line-height: 1.5;
+      }
+    }
+
+    &__icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 48px;
+      height: 48px;
+      border-radius: $radius-md;
+      background: $color-primary-light;
+      color: $color-primary;
+      font-size: 22px;
+      flex-shrink: 0;
+    }
+
+    &__stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: $space-sm;
+
+      @media (max-width: $breakpoint-mobile) {
+        grid-template-columns: 1fr;
+      }
+    }
+  }
+
+  .mr-stat {
+    @include card;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: $space-md $space-lg;
+
+    strong {
+      font-size: $font-size-2xl;
+      font-weight: $font-weight-bold;
+      line-height: 1;
+      color: $color-text-primary;
+    }
+
+    span {
+      font-size: $font-size-xs;
+      font-weight: $font-weight-medium;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: $color-text-muted;
+    }
+
+    &--ativa {
+      background: $color-primary-light;
+      border-color: rgba($color-primary, 0.25);
+
+      strong { color: $color-primary-dark; }
+      span   { color: $color-primary-dark; opacity: 0.8; }
+    }
+
+    &--concluida {
+      strong { color: $color-text-primary; }
+    }
+  }
+
+  // ----------------------------------------------------------------------
+  // Seções
+  // ----------------------------------------------------------------------
+  .mr-secao {
+    display: flex;
+    flex-direction: column;
+
+    &__header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: $space-md;
+      margin-bottom: $space-md;
+
+      h2 {
+        margin: 0;
+        font-size: $font-size-lg;
+        font-weight: $font-weight-bold;
+        color: $color-text-primary;
+      }
+
+      p {
+        margin: 4px 0 0;
+        font-size: $font-size-sm;
+        color: $color-text-muted;
+        line-height: 1.5;
+      }
+    }
+  }
+
+  .mr-badge {
+    @include badge;
+    min-width: 28px;
+    justify-content: center;
+    font-weight: $font-weight-semibold;
+    flex-shrink: 0;
+
+    &--ativa {
+      background: $color-primary;
+      color: #fff;
+    }
+
+    &--concluida {
+      background: $color-bg;
+      color: $color-text-secondary;
+      border: 1px solid $color-border;
+    }
+  }
+
+  // ----------------------------------------------------------------------
+  // Lista
+  // ----------------------------------------------------------------------
+  .mr-lista {
+    display: flex;
+    flex-direction: column;
+    gap: $space-sm;
+  }
+
+  // ----------------------------------------------------------------------
+  // Estados (carregando / erro / vazio)
+  // ----------------------------------------------------------------------
+  .mr-estado {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: $space-sm;
+    padding: $space-xl;
+    border-radius: $radius-md;
+    background: $color-bg;
+    border: 1px dashed $color-border;
+    color: $color-text-secondary;
+    font-size: $font-size-sm;
+
+    p {
+      margin: 0;
+    }
+
+    &--erro {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-style: solid;
+      color: #b91c1c;
+
+      button {
+        @include btn-reset;
+        margin-top: $space-xs;
+        padding: 8px 16px;
+        border-radius: $radius-sm;
+        background: #b91c1c;
+        color: #fff;
+        font-size: $font-size-sm;
+        font-weight: $font-weight-semibold;
+
+        &:hover { background: #991b1b; }
+      }
+    }
+  }
+
+  .mr-spinner {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 3px solid rgba($color-primary, 0.2);
+    border-top-color: $color-primary;
+    animation: mr-spin 0.8s linear infinite;
+  }
+
+  .mr-vazio {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: $space-sm;
+    padding: $space-xl $space-lg;
+    text-align: center;
+    background: $color-bg;
+    border: 1px dashed $color-border;
+    border-radius: $radius-md;
+    color: $color-text-muted;
+
+    svg {
+      font-size: 28px;
+      opacity: 0.6;
+    }
+
+    p {
+      margin: 0;
+      font-size: $font-size-sm;
+    }
+  }
+}
+
+// --------------------------------------------------------------------------
+// Animação do spinner
+// --------------------------------------------------------------------------
+@keyframes mr-spin {
+  to { transform: rotate(360deg); }
+}
+
+// --------------------------------------------------------------------------
+// Responsividade
+// --------------------------------------------------------------------------
+@media (max-width: $breakpoint-mobile) {
+  .meus-resgates {
+    padding: $space-lg $space-md;
+    max-width: 100%;
+
+    .mr-header__titulo h1 {
+      font-size: $font-size-xl;
+    }
+
+    .mr-header__icon {
+      width: 40px;
+      height: 40px;
+      font-size: 18px;
+    }
+  }
+}
