@@ -33,6 +33,7 @@ function montarPayloadRegistro(userType, formData) {
         ...base,
         razaoSocial: formData.razaoSocial,
         cnpj: apenasDigitos(formData.cnpj),
+        nomeEstabelecimento: formData.nomeEstabelecimento,
       };
     default:
       throw new Error('Tipo de usuário inválido.');

@@ -33,6 +33,7 @@ const CAMPOS_POR_TIPO = {
   ],
   varejista: [
     { name: "razaoSocial", label: "Razão Social", placeholder: "Razão social da empresa" },
+    { name: "nomeEstabelecimento", label: "Nome do Estabelecimento", placeholder: "Nome fantasia (ex: Mercadinho do Bairro)" },
     { name: "cnpj", label: "CNPJ", placeholder: "00.000.000/0000-00", maxLength: 18 },
   ],
 };
@@ -47,6 +48,7 @@ const CAMPOS_INICIAIS = {
   cnpj: "",
   razaoSocial: "",
   nomeFantasia: "",
+  nomeEstabelecimento: "",
 };
 
 const Register = () => {
@@ -74,6 +76,7 @@ const Register = () => {
       cnpj: "",
       razaoSocial: "",
       nomeFantasia: "",
+      nomeEstabelecimento: "",
     }));
     setErro("");
   };
