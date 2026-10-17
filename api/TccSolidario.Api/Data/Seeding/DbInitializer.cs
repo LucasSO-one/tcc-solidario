@@ -1,33 +1,35 @@
-using TccSolidario.Api.Models; 
+using TccSolidario.Api.Models;
 using TccSolidario.Api.Models.Enums;
-
 namespace TccSolidario.Api.Data.Seeding;
+
 public static class DbInitializer
 {
     public static void Initialize(AppDbContext context, IConfiguration configuration)
     {
-        // 2. Verifica se já existe algum Admin
-        if (context.Usuarios.Any(u => u.Tipo == TipoUsuario.Admin))
+        var existentes = context.Admins.ToList();
+        if (existentes.Count > 0)
         {
-            return; // O banco já foi semeado, não faz nada
+            // O inicializador antigo podia gravar a senha em texto. Preserva a senha,
+            // convertendo apenas a representação para BCrypt, sem redefini-la.
+            foreach (var admin in existentes)
+                if (!string.IsNullOrWhiteSpace(admin.SenhaHash) && !admin.SenhaHash.StartsWith("$2"))
+                    admin.SenhaHash = BCrypt.Net.BCrypt.HashPassword(admin.SenhaHash);
+            context.SaveChanges();
+            return;
         }
-
-        // 3. Lê as credenciais do "ambiente" (appsettings ou secrets)
         var email = configuration["AdminSettings:Email"];
         var senha = configuration["AdminSettings:SenhaPadrao"];
-        var nome = configuration["AdminSettings:Nome"];
-
-        // 4. Cria o Admin
-        var admin = new Admin
+        if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(senha))
+            throw new InvalidOperationException("Configure AdminSettings:Email e AdminSettings:SenhaPadrao para criar o primeiro administrador.");
+        context.Admins.Add(new Admin
         {
-            Nome = nome ?? "Admin Padrão",
-            Email = email ?? "admin@admin.com",
+            Nome = configuration["AdminSettings:Nome"] ?? "Administrador",
+            Email = email,
             Tipo = TipoUsuario.Admin,
-            SenhaHash = senha, // NOTA: Em produção, aqui você usaria BCrypt.HashPassword(senha)
+            StatusAprovacao = StatusAprovacao.Aprovado,
+            SenhaHash = senha.StartsWith("$2") ? senha : BCrypt.Net.BCrypt.HashPassword(senha),
             DataCriacao = DateTime.UtcNow
-        };
-
-        context.Usuarios.Add(admin);
+        });
         context.SaveChanges();
     }
 }

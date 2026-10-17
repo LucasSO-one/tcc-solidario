@@ -1,7 +1,7 @@
 import { NavLink } from "react-router-dom";
 import { useState } from "react";
 import { Menu } from "lucide-react";
-import {BotaoLogout} from "../../components/BotaoLogout/BotaoLogout.jsx";
+import BotaoLogout from "../BotaoLogout/BotaoLogout.jsx";
 
 import Logo from "../../assets/Logo_nome.png";
 

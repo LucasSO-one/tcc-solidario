@@ -8,6 +8,26 @@ public class AppDbContext : DbContext
     {
     }
 
+    public override int SaveChanges(bool acceptAllChangesOnSuccess)
+    {
+        AtualizarVersoes();
+        return base.SaveChanges(acceptAllChangesOnSuccess);
+    }
+
+    public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
+    {
+        AtualizarVersoes();
+        return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
+    }
+
+    private void AtualizarVersoes()
+    {
+        foreach (var entry in ChangeTracker.Entries<Produto>().Where(e => e.State == EntityState.Modified))
+            entry.Entity.Versao = Guid.NewGuid();
+        foreach (var entry in ChangeTracker.Entries<Transacao>().Where(e => e.State == EntityState.Modified))
+            entry.Entity.Versao = Guid.NewGuid();
+    }
+
     // --- Tabelas (DbSets) ---
 
     // Hierarquia de Usuários (TPH - Vai virar uma tabela 'Usuarios' com coluna Discriminator)
@@ -28,6 +48,12 @@ public class AppDbContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+        modelBuilder.Entity<Transacao>().Property(t => t.StatusReserva).HasConversion<string>();
+        modelBuilder.Entity<Transacao>().HasIndex(t => t.ProdutoId)
+            .IsUnique().HasFilter("\"StatusReserva\" = 'Ativa'");
+        modelBuilder.Entity<Transacao>().HasIndex(t => t.CodigoRetirada)
+            .IsUnique().HasFilter("\"CodigoRetirada\" <> ''");
+        modelBuilder.Entity<Transacao>().HasIndex(t => new { t.StatusReserva, t.DataExpiracao });
 
         // O EF vai criar uma coluna "TipoUsuarioString" para saber quem é quem
         modelBuilder.Entity<Usuario>()

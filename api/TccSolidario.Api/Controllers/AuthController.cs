@@ -1,11 +1,13 @@
 namespace TccSolidario.Api.Controllers;
 
+using System.Net.Http.Headers;
 using Microsoft.AspNetCore.Authorization; // <-- Adicionado para o [Authorize]
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TccSolidario.Api.Data;
 using TccSolidario.Api.DTOs.Auth;
 using TccSolidario.Api.Models.Enums;
+using TccSolidario.Api.Models;
 using TccSolidario.Api.Services;
 using TccSolidario.Api.Services.Auth; // <-- Adicionado para localizar o ILogoutService
 
@@ -41,16 +43,10 @@ public class AuthController : ControllerBase
             return Unauthorized(new { Sucesso = false, Erro = "Credenciais inválidas." });
         }
 
-        //Comentado por enquanto !
-
-        // if (usuario.Tipo != TipoUsuario.Admin)
-        // {
-        //     if (usuario.StatusAprovacao == StatusAprovacao.Pendente)
-        //         return Unauthorized(new { Sucesso = false, Erro = "Sua conta ainda está em análise pela nossa equipe." });
-
-        //     if (usuario.StatusAprovacao == StatusAprovacao.Rejeitado)
-        //         return Unauthorized(new { Sucesso = false, Erro = "Sua solicitação de cadastro foi rejeitada." });
-        // }
+        if (!RegrasAcesso.PodeAcessar(usuario))
+            return Unauthorized(new { Sucesso = false, Erro = usuario.StatusAprovacao == StatusAprovacao.Rejeitado
+                ? "Sua solicitação de cadastro foi rejeitada."
+                : "Sua conta ainda está em análise pela nossa equipe." });
 
         var token = _tokenService.GerarTokenJwt(usuario);
 
@@ -76,13 +72,15 @@ public class AuthController : ControllerBase
         // 1. Pega o token que vem no cabeçalho (Header) da requisição
         var authHeader = Request.Headers["Authorization"].ToString();
         
-        if (string.IsNullOrEmpty(authHeader) || !authHeader.StartsWith("Bearer "))
+        if (!AuthenticationHeaderValue.TryParse(authHeader, out var authorization)
+            || !string.Equals(authorization.Scheme, "Bearer", StringComparison.OrdinalIgnoreCase)
+            || string.IsNullOrWhiteSpace(authorization.Parameter))
         {
             return BadRequest(new { Sucesso = false, Erro = "Token não fornecido ou em formato inválido." });
         }
 
         // 2. Remove a palavra "Bearer " para ficar apenas com a string do JWT
-        var token = authHeader.Replace("Bearer ", "").Trim();
+        var token = authorization.Parameter;
 
         // 3. Manda o token para a lista negra
         _logoutService.InvalidarToken(token);

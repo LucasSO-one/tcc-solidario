@@ -28,6 +28,10 @@ public class Transacao
     public string CodigoRetirada { get; set; } = string.Empty;
 
     public DateTime? DataRetirada { get; set; }
+    public DateTime DataExpiracao { get; set; }
+    public StatusReserva StatusReserva { get; set; } = StatusReserva.Ativa;
+    [ConcurrencyCheck]
+    public Guid Versao { get; set; } = Guid.NewGuid();
 
     public Guid? ConsumidorId { get; set; }
     public Consumidor? Consumidor { get; set; }

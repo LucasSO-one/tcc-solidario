@@ -44,7 +44,7 @@ const MeusProdutos = ({ onNovoProduto, onAbrirFiltros, onAbrirAcoes }) => {
       try {
         const data = await listarMeusProdutos()
         setProdutos(data)
-      } catch (err) {
+      } catch {
         setErro('Não foi possível carregar os produtos.')
       } finally {
         setCarregando(false)

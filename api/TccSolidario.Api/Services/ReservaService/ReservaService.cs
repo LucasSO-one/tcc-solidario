@@ -1,3 +1,4 @@
+using System.Security.Cryptography;
 using Microsoft.EntityFrameworkCore;
 using TccSolidario.Api.Data;
 using TccSolidario.Api.Dtos.Reserva;
@@ -6,245 +7,128 @@ using TccSolidario.Api.Models.Enums;
 
 namespace TccSolidario.Api.Services;
 
-public class ReservaService : IReservaService
+public class ReservaService(AppDbContext context, CicloVidaService ciclo, TimeProvider clock) : IReservaService
 {
-    private readonly AppDbContext _context;
-
-    public ReservaService(AppDbContext context)
-    {
-        _context = context;
-    }
-
-    public static class CodigoRetiradaGenerator
-    {
-        private const string Caracteres = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // sem 0,O,1,I
-        private static readonly Random _random = new();
-
-        public static string Gerar()
-        {
-            Span<char> buffer = stackalloc char[7]; // XXX-XXX
-            for (int i = 0; i < 3; i++)
-                buffer[i] = Caracteres[_random.Next(Caracteres.Length)];
-
-            buffer[3] = '-';
-
-            for (int i = 4; i < 7; i++)
-                buffer[i] = Caracteres[_random.Next(Caracteres.Length)];
-
-            return new string(buffer);
-        }
-    }
-
     public async Task<Transacao> ReservarAsync(Guid usuarioId, Guid produtoId)
     {
-        var produto = await _context.Produtos
-            .FirstOrDefaultAsync(p => p.Id == produtoId);
+        var usuario = await context.Usuarios.SingleOrDefaultAsync(u => u.Id == usuarioId);
+        if (usuario is null || !RegrasAcesso.PodeAcessar(usuario))
+            throw new InvalidOperationException("Cadastro não autorizado para realizar reservas.");
+        if (usuario.Tipo is not (TipoUsuario.Consumidor or TipoUsuario.ONG))
+            throw new InvalidOperationException("Apenas consumidores e ONGs podem reservar alimentos.");
 
-        if (produto is null)
-            throw new InvalidOperationException("Produto não encontrado.");
+        await ciclo.AtualizarAsync();
+        var produto = await context.Produtos.Include(p => p.Varejista).SingleOrDefaultAsync(p => p.Id == produtoId)
+            ?? throw new InvalidOperationException("Produto não encontrado.");
+        var agora = clock.GetUtcNow().UtcDateTime;
+        RegrasCicloVida.AtualizarProduto(produto, agora);
+        if (produto.DataValidade <= agora)
+            throw new InvalidOperationException("Este alimento já venceu e não pode ser reservado.");
+        if (produto.Varejista is null || !RegrasAcesso.PodeAcessar(produto.Varejista))
+            throw new InvalidOperationException("Estabelecimento indisponível.");
+        var doacao = produto.Status == StatusProduto.DisponivelParaDoacao;
+        if (!doacao && !RegrasCicloVida.Comercial(produto))
+            throw new InvalidOperationException("Este produto não está mais disponível para reserva.");
+        if (usuario.Tipo == TipoUsuario.Consumidor && doacao)
+            throw new InvalidOperationException("Doações são exclusivas para ONGs aprovadas.");
+        if (usuario.Tipo == TipoUsuario.ONG && !doacao)
+            throw new InvalidOperationException("Aguarde a liberação do alimento para doação.");
 
-        var statusReservaveis = new[]
-        {
-            StatusProduto.Disponivel,
-            StatusProduto.EmDesconto,
-            StatusProduto.DisponivelParaDoacao
-        };
-
-        if (!statusReservaveis.Contains(produto.Status))
-            throw new InvalidOperationException(
-                "Este produto não está mais disponível para reserva."
-            );
-
-        var tipo = produto.Status == StatusProduto.DisponivelParaDoacao
-            ? TipoTransacao.Doacao
-            : TipoTransacao.Venda;
-
-        var transacao = new Transacao
+        var reserva = new Transacao
         {
             ProdutoId = produto.Id,
-
-            Tipo = tipo,
-
+            Produto = produto,
+            Tipo = doacao ? TipoTransacao.Doacao : TipoTransacao.Venda,
             CodigoRetirada = await GerarCodigoUnicoAsync(),
-
-            DataTransacao = DateTime.UtcNow,
-
-            ValorFinal = tipo == TipoTransacao.Doacao
-                ? 0
-                : produto.PrecoVenda ?? produto.PrecoOriginal
+            DataTransacao = agora,
+            DataExpiracao = agora.AddHours(2),
+            StatusReserva = StatusReserva.Ativa,
+            ValorFinal = doacao ? 0m : produto.PrecoVenda ?? produto.PrecoOriginal,
+            ConsumidorId = usuario.Tipo == TipoUsuario.Consumidor ? usuarioId : null,
+            OngId = usuario.Tipo == TipoUsuario.ONG ? usuarioId : null
         };
-
-        // Define quem realizou a reserva.
-        // Aqui precisamos identificar se o usuário é Consumidor ou ONG.
-        var consumidor = await _context.Consumidores
-            .AnyAsync(c => c.Id == usuarioId);
-
-        if (consumidor)
-        {
-            transacao.ConsumidorId = usuarioId;
-        }
-        else
-        {
-            var ong = await _context.Ongs
-                .AnyAsync(o => o.Id == usuarioId);
-
-            if (!ong)
-                throw new InvalidOperationException(
-                    "Usuário não encontrado como consumidor ou ONG."
-                );
-
-            transacao.OngId = usuarioId;
-        }
-
-        // O alimento deixa de estar disponível
-        // enquanto estiver reservado.
         produto.Status = StatusProduto.Reservado;
-
-        _context.Transacoes.Add(transacao);
-
-        await _context.SaveChangesAsync();
-
-        return transacao;
+        produto.AlertaPreDoacaoEnviado = false;
+        context.Transacoes.Add(reserva);
+        // A versão do produto e o índice único de reserva ativa protegem a concorrência.
+        await context.SaveChangesAsync();
+        return reserva;
     }
 
-    public async Task<Transacao> ValidarRetiradaAsync(
-     Guid ongId,
-     string codigo)
+    public async Task<Transacao> ValidarRetiradaAsync(Guid varejistaId, string codigo)
     {
-        var codigoNormalizado = codigo
-            .Trim()
-            .ToUpperInvariant();
-
-        var transacao = await _context.Transacoes
-            .Include(t => t.Produto)
-            .FirstOrDefaultAsync(
-                t => t.CodigoRetirada == codigoNormalizado
-            );
-
-        if (transacao is null)
-            throw new InvalidOperationException(
-                "Código de retirada inválido."
-            );
-
-        if (transacao.Produto is null)
-            throw new InvalidOperationException(
-                "Produto da transação não encontrado."
-            );
-
-        // A reserva precisa pertencer à ONG que está confirmando a retirada.
-        if (transacao.OngId != ongId)
-            throw new InvalidOperationException(
-                "Este código não pertence a uma reserva da sua ONG."
-            );
-
-        // O produto precisa estar reservado.
-        if (transacao.Produto.Status != StatusProduto.Reservado)
-            throw new InvalidOperationException(
-                "Este produto não está mais reservado."
-            );
-
-        transacao.DataRetirada = DateTime.UtcNow;
-
-        // Depois da retirada:
-        // Venda -> Vendido
-        // Doação -> Doado
-        transacao.Produto.Status =
-            transacao.Tipo == TipoTransacao.Doacao
-                ? StatusProduto.Doado
-                : StatusProduto.Vendido;
-
-        await _context.SaveChangesAsync();
-
-        return transacao;
+        var varejista = await context.Varejistas.SingleOrDefaultAsync(v => v.Id == varejistaId);
+        if (varejista is null || !RegrasAcesso.PodeAcessar(varejista))
+            throw new InvalidOperationException("Varejista não autorizado.");
+        await ciclo.AtualizarAsync();
+        var normalizado = (codigo ?? string.Empty).Trim().ToUpperInvariant();
+        var reserva = await context.Transacoes.Include(t => t.Produto)
+            .SingleOrDefaultAsync(t => t.CodigoRetirada == normalizado && normalizado != "");
+        if (reserva?.Produto is null || reserva.Produto.VarejistaId != varejistaId)
+            throw new InvalidOperationException("Código inválido para este estabelecimento.");
+        var agora = clock.GetUtcNow().UtcDateTime;
+        if (RegrasCicloVida.ExpirarReserva(reserva, agora)) await context.SaveChangesAsync();
+        if (reserva.StatusReserva != StatusReserva.Ativa || reserva.DataRetirada.HasValue)
+            throw new InvalidOperationException("Esta reserva já foi concluída ou expirou.");
+        if (reserva.DataExpiracao <= agora || reserva.Produto.DataValidade <= agora ||
+            reserva.Produto.Status != StatusProduto.Reservado)
+            throw new InvalidOperationException("Reserva indisponível ou alimento vencido.");
+        reserva.StatusReserva = StatusReserva.Concluida;
+        reserva.DataRetirada = agora;
+        reserva.Produto.Status = reserva.Tipo == TipoTransacao.Doacao ? StatusProduto.Doado : StatusProduto.Vendido;
+        await context.SaveChangesAsync();
+        return reserva;
     }
 
-    public async Task<List<ReservaResponse>> ListarMinhasReservasAsync(
-        Guid usuarioId)
+    private IQueryable<Transacao> Consulta() => context.Transacoes.AsNoTracking()
+        .Include(t => t.Produto).ThenInclude(p => p!.Varejista)
+        .Include(t => t.Ong).Include(t => t.Consumidor);
+
+    public async Task<List<ReservaResponse>> ListarMinhasReservasAsync(Guid usuarioId)
     {
-        var transacoes = await _context.Transacoes
-            .Include(t => t.Produto)
-            .Where(t =>
-                t.ConsumidorId == usuarioId ||
-                t.OngId == usuarioId
-            )
-            .OrderByDescending(t => t.DataTransacao)
-            .ToListAsync();
-
-        return transacoes
-            .Select(MapParaResponse)
-            .ToList();
+        await ciclo.AtualizarAsync();
+        var reservas = await Consulta().Where(t => t.ConsumidorId == usuarioId || t.OngId == usuarioId)
+            .OrderByDescending(t => t.DataTransacao).ToListAsync();
+        return reservas.Select(t => MapParaResponse(t, true)).ToList();
     }
 
-    public async Task<List<ReservaResponse>> ListarReservasPendentesAsync(
-        Guid varejistaId)
+    public async Task<List<ReservaResponse>> ListarReservasPendentesAsync(Guid varejistaId)
     {
-        var transacoes = await _context.Transacoes
-            .Include(t => t.Produto)
-            .Where(t =>
-                t.Produto!.VarejistaId == varejistaId &&
-                t.Produto.Status == StatusProduto.Reservado
-            )
-            .OrderByDescending(t => t.DataTransacao)
-            .ToListAsync();
-
-        return transacoes
-            .Select(MapParaResponse)
-            .ToList();
+        await ciclo.AtualizarAsync();
+        var reservas = await Consulta().Where(t => t.Produto!.VarejistaId == varejistaId &&
+            t.StatusReserva == StatusReserva.Ativa).OrderBy(t => t.DataExpiracao).ToListAsync();
+        return reservas.Select(t => MapParaResponse(t, false)).ToList();
     }
 
-    public async Task<List<ReservaResponse>> ListarValidacoesRecentesAsync(
-        Guid varejistaId)
+    public async Task<List<ReservaResponse>> ListarValidacoesRecentesAsync(Guid varejistaId)
     {
-        var transacoes = await _context.Transacoes
-            .Include(t => t.Produto)
-            .Where(t =>
-                t.Produto!.VarejistaId == varejistaId &&
-                (
-                    t.Produto.Status == StatusProduto.Vendido ||
-                    t.Produto.Status == StatusProduto.Doado
-                )
-            )
-            .OrderByDescending(t => t.DataRetirada)
-            .Take(20)
-            .ToListAsync();
-
-        return transacoes
-            .Select(MapParaResponse)
-            .ToList();
+        var reservas = await Consulta().Where(t => t.Produto!.VarejistaId == varejistaId &&
+            t.StatusReserva == StatusReserva.Concluida).OrderByDescending(t => t.DataRetirada)
+            .Take(20).ToListAsync();
+        return reservas.Select(t => MapParaResponse(t, false)).ToList();
     }
-
-
 
     private async Task<string> GerarCodigoUnicoAsync()
     {
+        const string caracteres = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
         string codigo;
-        bool existe;
-
         do
         {
-            codigo = CodigoRetiradaGenerator.Gerar();
-
-            existe = await _context.Transacoes
-                .AnyAsync(t => t.CodigoRetirada == codigo);
-
-        } while (existe);
-
+            var letras = Enumerable.Range(0, 8).Select(_ => caracteres[RandomNumberGenerator.GetInt32(caracteres.Length)]);
+            codigo = new string(letras.ToArray()).Insert(4, "-");
+        } while (await context.Transacoes.AnyAsync(t => t.CodigoRetirada == codigo));
         return codigo;
     }
 
-    private static ReservaResponse MapParaResponse(Transacao t)
+    private static ReservaResponse MapParaResponse(Transacao t, bool mostrarCodigo) => new()
     {
-        return new ReservaResponse
-        {
-            Id = t.Id,
-            ProdutoId = t.ProdutoId,
-            ProdutoNome = t.Produto!.Titulo,
-            CodigoRetirada = t.CodigoRetirada,
-            Tipo = t.Tipo.ToString(),
-            Status = t.Produto.Status.ToString(),
-            ValorFinal = t.ValorFinal,
-            DataReserva = t.DataTransacao,
-            DataRetirada = t.DataRetirada
-        };
-    }
+        Id = t.Id, ProdutoId = t.ProdutoId, ProdutoNome = t.Produto!.Titulo,
+        CodigoRetirada = mostrarCodigo && t.StatusReserva == StatusReserva.Ativa ? t.CodigoRetirada : "",
+        Tipo = t.Tipo.ToString(), Status = t.StatusReserva.ToString(),
+        ValorFinal = t.ValorFinal, DataReserva = t.DataTransacao,
+        DataExpiracao = t.DataExpiracao, DataValidade = t.Produto.DataValidade,
+        DataRetirada = t.DataRetirada,
+        NomeReceptor = t.Ong?.NomeFantasia ?? t.Consumidor?.Nome ?? "Usuário",
+        NomeVarejista = t.Produto.Varejista?.NomeEstabelecimento ?? "Estabelecimento"
+    };
 }

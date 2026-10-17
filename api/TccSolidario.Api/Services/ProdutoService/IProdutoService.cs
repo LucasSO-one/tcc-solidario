@@ -10,6 +10,7 @@ public interface IProdutoService
     Task<List<ProdutoResumoResponse>> ListarPorVarejistaAsync(Guid varejistaId);
     Task<List<ProdutoVitrineResponse>> ListarVitrineAsync(string? busca, bool apenasFrutasFeias);
     Task<List<ProdutoVitrineResponse>> ListarOfertasAsync(string? busca);
-    Task<List<ProdutoVitrineResponse>> ListarDoacoesAsync(string? busca);
+    Task<List<ProdutoVitrineResponse>> ListarDoacoesAsync(string? busca, bool apenasFrutasFeias = false);
+    Task AnteciparDoacaoAsync(Guid varejistaId, Guid produtoId);
     Task VerificarValidadesAsync();    
 }

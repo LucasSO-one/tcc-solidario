@@ -38,7 +38,7 @@ export default function Login() {
 
       navigate(rota, { replace: true });
     } catch (err) {
-      setErro(err.response?.data?.Erro ?? 'Não foi possível entrar. Tente novamente.');
+      setErro(err.response?.data?.erro ?? err.response?.data?.Erro ?? 'Não foi possível entrar. Tente novamente.');
     } finally {
       setCarregando(false);
     }

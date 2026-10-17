@@ -2,6 +2,8 @@
 namespace TccSolidario.Api.Middlewares;
 
 using TccSolidario.Api.Exceptions;
+using Microsoft.EntityFrameworkCore;
+using Npgsql;
 
 public class ExceptionMiddleware
 {
@@ -19,6 +21,16 @@ public class ExceptionMiddleware
         try
         {
             await _next(context);
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            context.Response.StatusCode = StatusCodes.Status409Conflict;
+            await context.Response.WriteAsJsonAsync(new { message = "O alimento foi atualizado por outra operação. Atualize a página e tente novamente." });
+        }
+        catch (DbUpdateException ex) when (ex.InnerException is PostgresException { SqlState: "23505" })
+        {
+            context.Response.StatusCode = StatusCodes.Status409Conflict;
+            await context.Response.WriteAsJsonAsync(new { message = "Esta operação já foi realizada. Atualize a página." });
         }
         catch (ConflictException ex)
         {

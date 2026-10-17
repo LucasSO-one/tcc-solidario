@@ -61,9 +61,7 @@ export async function logout() {
   } catch (error) {
     console.warn("Aviso no back-end durante o logout:", error);
   } finally {
-    // 2. Remove os dados de acesso do navegador
-    // ATENÇÃO: Substitua 'token' e 'usuario' pelos nomes exatos que você 
-    // usa no localStorage na hora de fazer o Login.
+    // As chaves são as mesmas usadas pela tela de login.
     localStorage.removeItem('token'); 
     localStorage.removeItem('usuario'); 
   }

@@ -8,6 +8,8 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using TccSolidario.Api.Middlewares;
 using TccSolidario.Api.Services.Auth;
+using TccSolidario.Api.Models;
+using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -52,6 +54,9 @@ builder.Services.AddScoped<IProdutoService, ProdutoService>();
 builder.Services.AddHostedService<VerificacaoValidadeProdutosWorker>();
 builder.Services.AddScoped<INotificacaoService, NotificacaoService>();
 builder.Services.AddScoped<IReservaService, ReservaService>();
+builder.Services.AddScoped<CicloVidaService>();
+builder.Services.AddSingleton(TimeProvider.System);
+builder.Services.AddHostedService<ExpiracaoReservasWorker>();
 
 // Ativa o cache de memória nativo do .NET
 builder.Services.AddMemoryCache(); 
@@ -85,6 +90,18 @@ builder.Services.AddAuthentication(options =>
 })
 .AddJwtBearer(options =>
 {
+    options.Events = new JwtBearerEvents
+    {
+        OnTokenValidated = async validation =>
+        {
+            var id = validation.Principal?.FindFirstValue(ClaimTypes.NameIdentifier);
+            var db = validation.HttpContext.RequestServices.GetRequiredService<AppDbContext>();
+            var usuario = Guid.TryParse(id, out var usuarioId)
+                ? await db.Usuarios.AsNoTracking().SingleOrDefaultAsync(u => u.Id == usuarioId) : null;
+            if (usuario is null || !RegrasAcesso.PodeAcessar(usuario))
+                validation.Fail("Cadastro sem autorização para operar.");
+        }
+    };
     options.RequireHttpsMetadata = false; // Em producao, mude para true
     options.SaveToken = true;
     options.TokenValidationParameters = new TokenValidationParameters
@@ -135,8 +152,6 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-app.MapControllers();
-
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
@@ -145,7 +160,8 @@ using (var scope = app.Services.CreateScope())
         var context = services.GetRequiredService<AppDbContext>();
         var config = services.GetRequiredService<IConfiguration>();
         
-        context.Database.Migrate();
+        if (builder.Configuration.GetValue("Database:AutoMigrate", true))
+            context.Database.Migrate();
 
         // Chama o nosso semeador
         DbInitializer.Initialize(context, config);

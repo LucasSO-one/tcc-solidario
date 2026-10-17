@@ -1,3 +1,4 @@
+using System.Net.Http.Headers;
 using Microsoft.AspNetCore.Http;
 using System.Threading.Tasks;
 using TccSolidario.Api.Services.Auth;
@@ -19,9 +20,11 @@ public class TokenBlacklistMiddleware
         // 1. Verifica se a requisição trouxe um token no cabeçalho
         var authHeader = context.Request.Headers["Authorization"].ToString();
 
-        if (!string.IsNullOrEmpty(authHeader) && authHeader.StartsWith("Bearer "))
+        if (AuthenticationHeaderValue.TryParse(authHeader, out var authorization)
+            && string.Equals(authorization.Scheme, "Bearer", StringComparison.OrdinalIgnoreCase)
+            && !string.IsNullOrWhiteSpace(authorization.Parameter))
         {
-            var token = authHeader.Replace("Bearer ", "").Trim();
+            var token = authorization.Parameter;
 
             // 2. Pergunta ao nosso serviço se esse token está na lista negra
             if (logoutService.IsTokenInvalido(token))

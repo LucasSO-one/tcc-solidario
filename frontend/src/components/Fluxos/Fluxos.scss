@@ -1,0 +1,23 @@
+.fluxo { display:grid; gap:1.25rem; max-width:1200px; margin:auto; }
+.fluxo header h1 { margin-bottom:.4rem; }
+.fluxo p { line-height:1.5; }
+.fluxo-filtros,.fluxo-acoes { display:flex; gap:.75rem; flex-wrap:wrap; align-items:center; }
+.fluxo input:not([type="checkbox"]),.fluxo select { padding:.8rem; border:1px solid #cbd5d1; border-radius:8px; min-width:180px; }
+.fluxo-grade { display:grid; grid-template-columns:repeat(auto-fill,minmax(245px,1fr)); gap:1rem; }
+.fluxo-card { background:#fff; border:1px solid #dce5df; border-radius:12px; padding:1rem; display:grid; gap:.65rem; }
+.fluxo-card h2,.fluxo-card h3 { margin:0; }
+.fluxo-card img { width:100%; height:150px; object-fit:cover; border-radius:8px; }
+.fluxo-card--urgente { border:2px solid #bd3030; }
+.fluxo-card--previa { border-style:dashed; }
+.fluxo-aviso { background:#fff4d5; padding:1rem; border-radius:8px; }
+.fluxo-erro { background:#ffe7e7; color:#942525; padding:.8rem; border-radius:8px; }
+.fluxo-sucesso { background:#e2f4e9; padding:.8rem; border-radius:8px; }
+.fluxo small { color:#53665c; }
+.fluxo button:disabled { cursor:not-allowed; opacity:.65; }
+.fluxo-status { display:inline-block; padding:.25rem .65rem; background:#edf3ef; border-radius:20px; width:fit-content; }
+.fluxo-lista { display:grid; gap:.75rem; }
+.fluxo table { width:100%; border-collapse:collapse; }
+.fluxo td,.fluxo th { padding:.75rem; text-align:left; border-bottom:1px solid #e5ece7; }
+.fluxo-tabela { overflow-x:auto; }
+
+.fluxo-filtros label { display:flex; gap:.5rem; align-items:center; }

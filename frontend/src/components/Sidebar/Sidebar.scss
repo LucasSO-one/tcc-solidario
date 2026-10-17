@@ -168,3 +168,31 @@
   justify-content: center;
   padding: 13px 0;
 }
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar__content {
+  height: auto;
+  flex: 1;
+}
+
+.sidebar-footer {
+  margin-top: 24px;
+}
+
+.btn-logout {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.btn-logout:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}

@@ -1,289 +1,44 @@
-import { useEffect, useState } from "react";
-import { FaCheckCircle, FaQrcode, FaBoxOpen, FaEye } from "react-icons/fa";
-import { QRCodeSVG } from "qrcode.react";
-import {
-    validarRetirada,
-    listarValidacoesRecentes,
-    listarReservasPendentes
-} from "../../../service/reserva";
-import "./ValidarRetirada.scss";
-
-function ValidacaoRetirada() {
-    const [codigo, setCodigo] = useState("");
-    const [mensagem, setMensagem] = useState(null);
-    const [validando, setValidando] = useState(false);
-    const [recentes, setRecentes] = useState([]);
-    const [reservasPendentes, setReservasPendentes] = useState([]);
-    const [reservaSelecionada, setReservaSelecionada] = useState(null);
-
-    useEffect(() => {
-        carregarDados();
-    }, []);
-
-    async function carregarDados() {
-        await Promise.all([
-            carregarRecentes(),
-            carregarReservasPendentes()
-        ]);
-    }
-
-    async function carregarRecentes() {
-        try {
-            const data = await listarValidacoesRecentes();
-            setRecentes(data);
-        } catch (err) {
-            console.error("Erro ao carregar validações recentes:", err);
-        }
-    }
-
-    async function carregarReservasPendentes() {
-        try {
-            const data = await listarReservasPendentes();
-            setReservasPendentes(data);
-        } catch (err) {
-            console.error("Erro ao carregar reservas pendentes:", err);
-        }
-    }
-
-    async function handleValidar(e) {
-        e.preventDefault();
-
-        if (!codigo.trim()) return;
-
-        setValidando(true);
-        setMensagem(null);
-
-        try {
-            const resultado = await validarRetirada(codigo.trim());
-
-            setMensagem({
-                tipo: "sucesso",
-                texto: `${resultado.produto} retirado com sucesso!`
-            });
-
-            setCodigo("");
-
-            await carregarDados();
-        } catch (err) {
-            const texto =
-                err.response?.data?.message ||
-                "Não foi possível validar esse código.";
-
-            setMensagem({
-                tipo: "erro",
-                texto
-            });
-        } finally {
-            setValidando(false);
-        }
-    }
-
-    return (
-        <main className="validacao-retirada">
-
-            <span className="eyebrow">RETIRADAS</span>
-
-            <h1>Validação de retirada</h1>
-
-            <p>
-                Confirme a retirada e dê baixa no estoque com segurança.
-            </p>
-
-            {/* RESERVAS PENDENTES */}
-
-            <section className="reservas-pendentes">
-
-                <div className="section-header">
-                    <div>
-                        <h2>Reservas aguardando retirada</h2>
-
-                        <p className="subtitulo">
-                            Mostre o código ou QR Code da reserva para o responsável pela ONG.
-                        </p>
-                    </div>
-                </div>
-
-                <div className="lista-reservas">
-
-                    {reservasPendentes.length === 0 && (
-                        <p className="estado-vazio">
-                            Nenhuma reserva aguardando retirada.
-                        </p>
-                    )}
-
-                    {reservasPendentes.map((reserva) => (
-
-                        <article
-                            key={reserva.id}
-                            className="card-reserva"
-                        >
-
-                            <div className="card-reserva__info">
-
-                                <div className="item-icon">
-                                    <FaBoxOpen />
-                                </div>
-
-                                <div>
-                                    <h3>{reserva.produtoNome}</h3>
-
-                                    <p>
-                                        Reservado por{" "}
-                                        <strong>{reserva.ongNome}</strong>
-                                    </p>
-
-                                    <span>
-                                        {new Date(
-                                            reserva.dataReserva
-                                        ).toLocaleString("pt-BR", {
-                                            day: "2-digit",
-                                            month: "2-digit",
-                                            hour: "2-digit",
-                                            minute: "2-digit"
-                                        })}
-                                    </span>
-                                </div>
-
-                            </div>
-
-                            <button
-                                type="button"
-                                className="btn-qrcode"
-                                onClick={() =>
-                                    setReservaSelecionada(reserva)
-                                }
-                            >
-                                <FaQrcode />
-                                Mostrar QR Code
-                            </button>
-
-                        </article>
-
-                    ))}
-
-                </div>
-
-            </section>
-
-            {/* VALIDAÇÕES RECENTES */}
-
-            <section className="validacoes-recentes">
-
-                <h2>Validações recentes</h2>
-
-                <p className="subtitulo">
-                    Últimas retiradas concluídas neste estabelecimento
-                </p>
-
-                <div className="lista-recentes">
-
-                    {recentes.length === 0 && (
-                        <p className="estado-vazio">
-                            Nenhuma retirada validada ainda.
-                        </p>
-                    )}
-
-                    {recentes.map((r) => (
-
-                        <div
-                            key={r.id}
-                            className="item-recente"
-                        >
-
-                            <div className="item-icon">
-                                <FaBoxOpen />
-                            </div>
-
-                            <div>
-                                <h3>{r.produtoNome}</h3>
-
-                                <p>
-                                    {new Date(
-                                        r.dataRetirada
-                                    ).toLocaleString("pt-BR", {
-                                        day: "2-digit",
-                                        month: "2-digit",
-                                        hour: "2-digit",
-                                        minute: "2-digit"
-                                    })}
-                                </p>
-                            </div>
-
-                        </div>
-
-                    ))}
-
-                </div>
-
-            </section>
-
-            {/* MODAL DO QR CODE */}
-
-            {reservaSelecionada && (
-
-                <div
-                    className="modal-qrcode"
-                    onClick={() => setReservaSelecionada(null)}
-                >
-
-                    <div
-                        className="modal-qrcode__content"
-                        onClick={(e) => e.stopPropagation()}
-                    >
-
-                        <span className="eyebrow">
-                            RETIRADA
-                        </span>
-
-                        <h2>
-                            Código da reserva
-                        </h2>
-
-                        <p>
-                            Mostre este QR Code para o responsável
-                            pela ONG.
-                        </p>
-
-                        <div className="modal-qrcode__produto">
-                            <strong>
-                                {reservaSelecionada.produtoNome}
-                            </strong>
-
-                            <span>
-                                ONG: {reservaSelecionada.ongNome}
-                            </span>
-                        </div>
-
-                        <div className="modal-qrcode__qr">
-                            <QRCodeSVG
-                                value={
-                                    reservaSelecionada.codigoRetirada
-                                }
-                                size={220}
-                            />
-                        </div>
-
-                        <div className="modal-qrcode__codigo">
-                            {reservaSelecionada.codigoRetirada}
-                        </div>
-
-                        <button
-                            type="button"
-                            onClick={() =>
-                                setReservaSelecionada(null)
-                            }
-                        >
-                            Fechar
-                        </button>
-
-                    </div>
-
-                </div>
-
-            )}
-
-        </main>
-    );
+import { useCallback, useEffect, useState } from 'react';
+import { validarRetirada, listarReservasPendentes, listarValidacoesRecentes } from '../../../service/reserva';
+import { mensagemErro } from '../../../utils/mensagemErro';
+import '../../../components/Fluxos/Fluxos.scss';
+
+export default function ValidarRetirada() {
+  const [codigo, setCodigo] = useState('');
+  const [pendentes, setPendentes] = useState([]);
+  const [recentes, setRecentes] = useState([]);
+  const [erro, setErro] = useState('');
+  const [sucesso, setSucesso] = useState('');
+  const [validando, setValidando] = useState(false);
+  const carregar = useCallback(async () => {
+    const [p, r] = await Promise.all([listarReservasPendentes(), listarValidacoesRecentes()]);
+    setPendentes(p); setRecentes(r);
+  }, []);
+  useEffect(() => {
+    const atualizar = () => carregar().catch(e => setErro(mensagemErro(e)));
+    atualizar(); const timer = setInterval(atualizar, 30000);
+    return () => clearInterval(timer);
+  }, [carregar]);
+  async function confirmar(e) {
+    e.preventDefault(); setValidando(true); setErro(''); setSucesso('');
+    try { const resposta = await validarRetirada(codigo.trim()); setSucesso(resposta.message); setCodigo(''); }
+    catch (e) { setErro(mensagemErro(e)); }
+    finally { setValidando(false); carregar().catch(e => setErro(mensagemErro(e))); }
+  }
+  return <main className="fluxo"><header><h1>Validar retirada</h1>
+    <p>Confira o alimento e insira o código apresentado pelo consumidor ou pela ONG.</p></header>
+    <form className="fluxo-acoes" onSubmit={confirmar}>
+      <label>Código de retirada <input required value={codigo} onChange={e => setCodigo(e.target.value)} autoComplete="off" maxLength={20} /></label>
+      <button className="btn btn--primary" disabled={validando || !codigo.trim()}>{validando ? 'Validando...' : 'Confirmar retirada'}</button>
+    </form>
+    {erro && <p role="alert" className="fluxo-erro">{erro}</p>}
+    {sucesso && <p role="status" className="fluxo-sucesso">{sucesso}</p>}
+    <section><h2>Aguardando retirada</h2><div className="fluxo-lista">{pendentes.map(r => <article className="fluxo-card" key={r.id}>
+      <h3>{r.produtoNome}</h3><p>{r.nomeReceptor} · {r.tipo === 'Doacao' ? 'Doação' : 'Compra'}</p>
+      <p>Prazo: {new Date(Math.min(new Date(r.dataExpiracao), new Date(r.dataValidade))).toLocaleString('pt-BR')}</p>
+    </article>)}</div>{!pendentes.length && <p>Nenhuma reserva aguardando retirada.</p>}</section>
+    <section><h2>Retiradas recentes</h2><div className="fluxo-lista">{recentes.map(r => <article className="fluxo-card" key={r.id}>
+      <h3>{r.produtoNome}</h3><p>{r.nomeReceptor} · {r.dataRetirada ? new Date(r.dataRetirada).toLocaleString('pt-BR') : 'Data não registrada no histórico'}</p>
+    </article>)}</div>{!recentes.length && <p>Nenhuma retirada concluída.</p>}</section>
+  </main>;
 }
-
-export default ValidacaoRetirada;

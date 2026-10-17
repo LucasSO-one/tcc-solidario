@@ -7,50 +7,35 @@ using VittaFlow.Api.DTOs;
 
 namespace TccSolidario.Api.Services;
 
-public class ProdutoService : IProdutoService
+public class ProdutoService(AppDbContext context, IWebHostEnvironment env, CicloVidaService ciclo, TimeProvider clock) : IProdutoService
 {
-    private readonly AppDbContext _context;
-    private readonly INotificacaoService _notificacaoService;
-    private readonly IWebHostEnvironment _env;
-
-    public ProdutoService(AppDbContext context, IWebHostEnvironment env, INotificacaoService notificacaoService)
-    {
-        _context = context;
-        _env = env;
-        _notificacaoService = notificacaoService;
-    }
+    private readonly IWebHostEnvironment _env = env;
 
     public async Task<Produto> CadastrarLoteAsync(Guid varejistaId, CadastrarLoteRequest request)
     {
-        var varejistaExiste = await _context.Varejistas.AnyAsync(v => v.Id == varejistaId);
-        if (!varejistaExiste)
-            throw new InvalidOperationException("Varejista não encontrado.");
-
-        string? imagemUrl = request.Imagem is { Length: > 0 }
-            ? await SalvarImagemAsync(request.Imagem)
-            : null;
-
+        var varejista = await context.Varejistas.SingleOrDefaultAsync(v => v.Id == varejistaId);
+        if (varejista is null || !RegrasAcesso.PodeAcessar(varejista))
+            throw new InvalidOperationException("Varejista não aprovado.");
+        var agora = clock.GetUtcNow().UtcDateTime;
+        var validade = request.DataValidade.Kind == DateTimeKind.Unspecified
+            ? DateTime.SpecifyKind(request.DataValidade, DateTimeKind.Utc) : request.DataValidade.ToUniversalTime();
+        if (validade <= agora) throw new InvalidOperationException("A validade deve ser posterior ao momento atual.");
+        if (string.IsNullOrWhiteSpace(request.Nome) || request.Quantidade <= 0 || request.PrecoOriginal < 0 ||
+            request.PrecoDesconto < 0 || request.PrecoDesconto > request.PrecoOriginal)
+            throw new InvalidOperationException("Confira o nome, a quantidade e os preços do alimento.");
         var produto = new Produto
         {
-            Titulo = request.Nome,
-            Categoria = request.Categoria,
-            Descricao = request.Descricao ?? string.Empty,
-            Quantidade = request.Quantidade,
-            DataValidade = request.DataValidade,
-            PrecoOriginal = request.PrecoOriginal,
-            PrecoVenda = request.PrecoDesconto,
-            IsOferta = request.IsOferta,
-            FrutaFeia = request.FrutaFeia,
-            ImagemUrl = imagemUrl,
-            VarejistaId = varejistaId,
-            Status = request.PrecoDesconto.HasValue
-                ? StatusProduto.EmDesconto
-                : StatusProduto.Disponivel,
+            Titulo = request.Nome.Trim(), Categoria = request.Categoria,
+            Descricao = request.Descricao ?? "", Quantidade = request.Quantidade,
+            DataValidade = validade, PrecoOriginal = request.PrecoOriginal,
+            PrecoVenda = request.PrecoDesconto, IsOferta = request.IsOferta,
+            FrutaFeia = request.FrutaFeia, VarejistaId = varejistaId,
+            ImagemUrl = request.Imagem is { Length: > 0 } ? await SalvarImagemAsync(request.Imagem) : null,
+            Status = request.PrecoDesconto.HasValue ? StatusProduto.EmDesconto : StatusProduto.Disponivel
         };
-
-        _context.Produtos.Add(produto);
-        await _context.SaveChangesAsync();
-
+        RegrasCicloVida.AtualizarProduto(produto, agora);
+        context.Produtos.Add(produto);
+        await context.SaveChangesAsync();
         return produto;
     }
 
@@ -71,201 +56,94 @@ public class ProdutoService : IProdutoService
         return $"/uploads/produtos/{nomeArquivo}";
     }
 
+
     public async Task<List<ProdutoResumoResponse>> ListarPorVarejistaAsync(Guid varejistaId)
     {
-        return await _context.Produtos
-            .Where(p => p.VarejistaId == varejistaId)
-            .OrderByDescending(p => p.DataValidade)
-            .Select(p => new ProdutoResumoResponse
+        await ciclo.AtualizarAsync();
+        return await context.Produtos.AsNoTracking().Where(p => p.VarejistaId == varejistaId)
+            .OrderBy(p => p.DataValidade).Select(p => new ProdutoResumoResponse
             {
-                Id = p.Id,
-                Titulo = p.Titulo,
-                Categoria = p.Categoria,
-                Quantidade = p.Quantidade,
-                DataValidade = p.DataValidade,
-                Status = p.Status.ToString(),
-                ImagemUrl = p.ImagemUrl,
-            })
-            .ToListAsync();
+                Id = p.Id, Titulo = p.Titulo, Categoria = p.Categoria, Quantidade = p.Quantidade,
+                DataValidade = p.DataValidade, Status = p.Status.ToString(), ImagemUrl = p.ImagemUrl,
+                IsOferta = p.IsOferta, AlertaPreDoacao = p.AlertaPreDoacaoEnviado,
+                AlertaVencimento = p.Status == StatusProduto.Vencido
+            }).ToListAsync();
     }
-    public async Task<List<ProdutoVitrineResponse>> ListarVitrineAsync(
-        string? busca,
-        bool apenasFrutasFeias)
+
+    private IQueryable<Produto> Consulta(string? busca)
     {
-        var statusVisiveis = new[]
-        {
-        StatusProduto.Disponivel,
-        StatusProduto.EmDesconto,
-        StatusProduto.DisponivelParaDoacao
-    };
-
-        var query = _context.Produtos
-            .Include(p => p.Varejista)
-            .Where(p => statusVisiveis.Contains(p.Status));
-
-        if (apenasFrutasFeias)
-            query = query.Where(p => p.FrutaFeia);
-
+        var query = context.Produtos.AsNoTracking().Include(p => p.Varejista)
+            .Where(p => p.Varejista!.StatusAprovacao == StatusAprovacao.Aprovado);
         if (!string.IsNullOrWhiteSpace(busca))
         {
             var termo = busca.Trim().ToLower();
-
-            query = query.Where(p =>
-                p.Titulo.ToLower().Contains(termo) ||
-                p.Varejista.NomeEstabelecimento.ToLower().Contains(termo));
+            query = query.Where(p => p.Titulo.ToLower().Contains(termo) ||
+                p.Varejista!.NomeEstabelecimento.ToLower().Contains(termo));
         }
+        return query;
+    }
 
-        var produtos = await query
-            .OrderBy(p => p.DataValidade)
-            .ToListAsync();
-
-        return produtos.Select(MapParaVitrine).ToList();
+    public async Task<List<ProdutoVitrineResponse>> ListarVitrineAsync(string? busca, bool apenasFrutasFeias)
+    {
+        await ciclo.AtualizarAsync();
+        var agora = clock.GetUtcNow().UtcDateTime;
+        var limite = agora.AddHours(24);
+        var query = Consulta(busca).Where(p =>
+            (p.Status == StatusProduto.Disponivel || p.Status == StatusProduto.EmDesconto) && p.DataValidade > limite);
+        if (apenasFrutasFeias) query = query.Where(p => p.FrutaFeia);
+        var produtos = await query.OrderBy(p => p.DataValidade).ToListAsync();
+        return produtos.Select(p => MapParaVitrine(p, agora, false)).ToList();
     }
 
     public async Task<List<ProdutoVitrineResponse>> ListarOfertasAsync(string? busca)
     {
-        var statusVisiveis = new[]
-        {
-        StatusProduto.Disponivel,
-        StatusProduto.EmDesconto,
-        StatusProduto.DisponivelParaDoacao
-    };
-
-        var query = _context.Produtos
-            .Include(p => p.Varejista)
-            .Where(p =>
-                (p.IsOferta ?? false) &&
-                statusVisiveis.Contains(p.Status));
-
-        if (!string.IsNullOrWhiteSpace(busca))
-        {
-            var termo = busca.Trim().ToLower();
-
-            query = query.Where(p =>
-                p.Titulo.ToLower().Contains(termo) ||
-                p.Varejista.NomeEstabelecimento.ToLower().Contains(termo));
-        }
-
-        var produtos = await query
-            .OrderBy(p => p.DataValidade)
-            .ToListAsync();
-
-        return produtos.Select(MapParaVitrine).ToList();
+        var produtos = await ListarVitrineAsync(busca, false);
+        return produtos.Where(p => p.IsOferta == true).ToList();
     }
-    public async Task<List<ProdutoVitrineResponse>> ListarDoacoesAsync(string? busca)
+
+    public async Task<List<ProdutoVitrineResponse>> ListarDoacoesAsync(string? busca, bool apenasFrutasFeias = false)
     {
-        var agora = DateTime.UtcNow;
-        var limite36Horas = agora.AddHours(36);
-
-        var query = _context.Produtos
-            .Include(p => p.Varejista)
-            .Where(p =>
-                p.Status == StatusProduto.DisponivelParaDoacao &&
-                p.DataValidade > agora &&
-                p.DataValidade <= limite36Horas
-            );
-
-        if (!string.IsNullOrWhiteSpace(busca))
-        {
-            var termo = busca.Trim().ToLower();
-
-            query = query.Where(p =>
-                p.Titulo.ToLower().Contains(termo) ||
-                p.Varejista.NomeEstabelecimento.ToLower().Contains(termo));
-        }
-
-        var produtos = await query
-            .OrderBy(p => p.DataValidade)
-            .ToListAsync();
-
-        return produtos.Select(MapParaDoacao).ToList();
+        await ciclo.AtualizarAsync();
+        var agora = clock.GetUtcNow().UtcDateTime;
+        var limite = agora.AddHours(36);
+        var query = Consulta(busca).Where(p => p.DataValidade > agora &&
+            (p.Status == StatusProduto.DisponivelParaDoacao ||
+             ((p.Status == StatusProduto.Disponivel || p.Status == StatusProduto.EmDesconto) && p.DataValidade <= limite)));
+        if (apenasFrutasFeias) query = query.Where(p => p.FrutaFeia);
+        var produtos = await query.OrderBy(p => p.DataValidade).ToListAsync();
+        return produtos.Select(p => MapParaVitrine(p, agora, true)).ToList();
     }
-    private static ProdutoVitrineResponse MapParaVitrine(Produto p)
+
+    public async Task AnteciparDoacaoAsync(Guid varejistaId, Guid produtoId)
     {
-        var diasRestantes = (int)Math.Ceiling(
-            (p.DataValidade - DateTime.UtcNow).TotalDays
-        );
+        await ciclo.AtualizarAsync();
+        var produto = await context.Produtos.SingleOrDefaultAsync(p => p.Id == produtoId && p.VarejistaId == varejistaId)
+            ?? throw new InvalidOperationException("Alimento não encontrado neste estabelecimento.");
+        if (!RegrasCicloVida.Comercial(produto) || produto.DataValidade <= clock.GetUtcNow().UtcDateTime)
+            throw new InvalidOperationException("Somente alimentos disponíveis e válidos podem ser destinados à doação.");
+        RegrasCicloVida.DisponibilizarDoacao(produto);
+        await context.SaveChangesAsync();
+    }
 
-        decimal? percentual = p.PrecoVenda.HasValue && p.PrecoOriginal > 0
-            ? Math.Round(
-                (1 - (p.PrecoVenda.Value / p.PrecoOriginal)) * 100,
-                0
-            )
-            : null;
-
+    private static ProdutoVitrineResponse MapParaVitrine(Produto p, DateTime agora, bool painelOng)
+    {
+        var doacao = p.Status == StatusProduto.DisponivelParaDoacao;
+        var previa = painelOng && !doacao;
+        var horas = Math.Max(0, (p.DataValidade - agora).TotalHours);
         return new ProdutoVitrineResponse
         {
-            Id = p.Id,
-            Nome = p.Titulo,
-            Categoria = p.Categoria,
-            ImagemUrl = p.ImagemUrl,
+            Id = p.Id, Nome = p.Titulo, Categoria = p.Categoria, ImagemUrl = p.ImagemUrl,
             NomeVarejista = p.Varejista?.NomeEstabelecimento ?? "Estabelecimento",
-            PrecoOriginal = p.PrecoOriginal,
-            PrecoDesconto = p.PrecoVenda,
-            DescontoPercentual = percentual,
-            DiasRestantes = Math.Max(diasRestantes, 0),
-            FrutaFeia = p.FrutaFeia,
-            Status = p.Status.ToString(),
+            PrecoOriginal = p.PrecoOriginal, PrecoDesconto = doacao ? 0m : p.PrecoVenda,
+            DescontoPercentual = doacao ? 100 : p.PrecoVenda.HasValue && p.PrecoOriginal > 0
+                ? Math.Round((1 - p.PrecoVenda.Value / p.PrecoOriginal) * 100, 0) : null,
+            IsOferta = p.IsOferta, DiasRestantes = (int)Math.Ceiling(horas / 24),
+            HorasRestantes = horas, DataValidade = p.DataValidade, FrutaFeia = p.FrutaFeia,
+            Status = p.Status.ToString(), PreviaDoacao = previa,
+            PodeReservar = p.DataValidade > agora && (painelOng ? doacao : RegrasCicloVida.Comercial(p)),
+            DisponivelParaReservaEm = previa ? p.DataValidade.AddHours(-24) : null
         };
     }
 
-    private static ProdutoVitrineResponse MapParaDoacao(Produto p)
-    {
-        var horasRestantes = Math.Max(
-            0,
-            (p.DataValidade - DateTime.UtcNow).TotalHours
-        );
-
-        return new ProdutoVitrineResponse
-        {
-            Id = p.Id,
-            Nome = p.Titulo,
-            Categoria = p.Categoria,
-            ImagemUrl = p.ImagemUrl,
-            NomeVarejista = p.Varejista?.NomeEstabelecimento ?? "Estabelecimento",
-
-            // Doação é gratuita
-            PrecoOriginal = p.PrecoOriginal,
-            PrecoDesconto = 0,
-            DescontoPercentual = 100,
-
-            DiasRestantes = (int)Math.Ceiling(horasRestantes / 24),
-
-            FrutaFeia = p.FrutaFeia,
-            Status = p.Status.ToString()
-        };
-    }
-
-    public async Task VerificarValidadesAsync()
-    {
-        var agora = DateTime.UtcNow;
-
-        // Produtos ainda ativos comercialmente (não vendidos, não doados, não já transferidos)
-        var produtosAtivos = await _context.Produtos
-            .Include(p => p.Varejista)
-            .Where(p => p.Status == StatusProduto.Disponivel || p.Status == StatusProduto.EmDesconto)
-            .ToListAsync();
-
-        foreach (var produto in produtosAtivos)
-        {
-            var horasRestantes = (produto.DataValidade - agora).TotalHours;
-
-            // Regra 1: <= 36h e ainda não avisou o varejista
-            if (horasRestantes <= 36 && !produto.AlertaPreDoacaoEnviado)
-            {
-                await _notificacaoService.EnviarAlertaValidadeAsync(produto);
-                produto.AlertaPreDoacaoEnviado = true;
-            }
-
-            // Regra 2: <= 24h e não vendido -> transfere pra doação
-            if (horasRestantes <= 24)
-            {
-                produto.Status = StatusProduto.DisponivelParaDoacao;
-                produto.PrecoVenda = null;
-                produto.IsOferta = false;
-            }
-        }
-
-        await _context.SaveChangesAsync();
-    }
+    public Task VerificarValidadesAsync() => ciclo.AtualizarAsync();
 }

@@ -19,6 +19,7 @@ public class ReservaController : ControllerBase
     }
 
     [HttpPost("reservar")]
+    [Authorize(Roles = "Consumidor,ONG")]
     public async Task<IActionResult> Reservar(
         [FromBody] CriarReservaRequest request)
     {
@@ -36,6 +37,12 @@ public class ReservaController : ControllerBase
             return Ok(new
             {
                 transacao.Id,
+                transacao.CodigoRetirada,
+                transacao.DataExpiracao,
+                DataValidade = transacao.Produto!.DataValidade,
+                ProdutoNome = transacao.Produto.Titulo,
+                Status = transacao.StatusReserva.ToString(),
+                Tipo = transacao.Tipo.ToString(),
                 message = "Reserva realizada com sucesso.",
             });
         }
@@ -46,18 +53,18 @@ public class ReservaController : ControllerBase
     }
 
     [HttpPost("validar")]
-    [Authorize(Roles = "ONG")]
+    [Authorize(Roles = "Varejista")]
     public async Task<IActionResult> ValidarRetirada(
     [FromBody] ValidarRetiradaRequest request)
     {
-        var ongId = Guid.Parse(
+        var varejistaId = Guid.Parse(
             User.FindFirstValue(ClaimTypes.NameIdentifier)!
         );
 
         try
         {
             var transacao = await _reservaService.ValidarRetiradaAsync(
-                ongId,
+                varejistaId,
                 request.Codigo
             );
 

@@ -59,12 +59,17 @@ export const listarOfertas = async ({ busca = '', signal } = {}) => {
   return data
 }
 
-export const listarDoacoes = async ({ busca = '', signal } = {}) => {
+export const listarDoacoes = async ({ busca = '', apenasFrutasFeias = false, signal } = {}) => {
   const { data } = await api.get('/produtos/doacoes', {
     params: {
       busca: busca || undefined,
+      apenasFrutasFeias,
     },
     signal,
   })
   return data
+}
+export async function anteciparDoacao(produtoId) {
+  const { data } = await api.post('/produtos/' + produtoId + '/antecipar-doacao');
+  return data;
 }

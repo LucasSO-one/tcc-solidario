@@ -11,7 +11,7 @@ function formatarData(dataISO) {
     });
 }
 
-function ResgateCard({ nome, codigo, ehDoacao, dataReserva, dataRetirada, concluido = false, onVerCodigo }) {
+function ResgateCard({ nome, ehDoacao, dataReserva, dataRetirada, concluido = false, onVerCodigo }) {
     return (
         <div className={`resgate-card ${concluido ? "concluido" : ""}`}>
             <div className="resgate-info">

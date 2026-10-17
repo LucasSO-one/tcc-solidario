@@ -31,7 +31,7 @@ public class UsuarioRegistrationService : IUsuarioRegistrationService
         usuario.SenhaHash = BCrypt.Net.BCrypt.HashPassword(senhaPura);
 
         // Admin não passa por aprovação manual; os demais tipos entram como Pendente
-        usuario.StatusAprovacao = usuario.Tipo == TipoUsuario.Admin
+        usuario.StatusAprovacao = usuario.Tipo is TipoUsuario.Admin or TipoUsuario.Consumidor
             ? StatusAprovacao.Aprovado
             : StatusAprovacao.Pendente;
 

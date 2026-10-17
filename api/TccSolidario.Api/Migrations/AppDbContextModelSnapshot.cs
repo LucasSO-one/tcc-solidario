@@ -121,6 +121,10 @@ namespace TccSolidario.Api.Migrations
                     b.Property<Guid>("VarejistaId")
                         .HasColumnType("uuid");
 
+                    b.Property<Guid>("Versao")
+                        .IsConcurrencyToken()
+                        .HasColumnType("uuid");
+
                     b.HasKey("Id");
 
                     b.HasIndex("VarejistaId");
@@ -142,6 +146,9 @@ namespace TccSolidario.Api.Migrations
                     b.Property<Guid?>("ConsumidorId")
                         .HasColumnType("uuid");
 
+                    b.Property<DateTime>("DataExpiracao")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<DateTime?>("DataRetirada")
                         .HasColumnType("timestamp with time zone");
 
@@ -158,6 +165,10 @@ namespace TccSolidario.Api.Migrations
                     b.Property<Guid>("ProdutoId")
                         .HasColumnType("uuid");
 
+                    b.Property<string>("StatusReserva")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<string>("Tipo")
                         .IsRequired()
                         .HasColumnType("text");
@@ -165,13 +176,25 @@ namespace TccSolidario.Api.Migrations
                     b.Property<decimal>("ValorFinal")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<Guid>("Versao")
+                        .IsConcurrencyToken()
+                        .HasColumnType("uuid");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("CodigoRetirada")
+                        .IsUnique()
+                        .HasFilter("\"CodigoRetirada\" <> ''");
 
                     b.HasIndex("ConsumidorId");
 
                     b.HasIndex("OngId");
 
-                    b.HasIndex("ProdutoId");
+                    b.HasIndex("ProdutoId")
+                        .IsUnique()
+                        .HasFilter("\"StatusReserva\" = 'Ativa'");
+
+                    b.HasIndex("StatusReserva", "DataExpiracao");
 
                     b.ToTable("Transacoes");
                 });

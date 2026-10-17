@@ -12,7 +12,6 @@ export async function listarReservasPendentes() {
 
 export async function listarMinhasReservas() {
     const { data } = await api.get("/reservas/minhas");
-    console.log(data)
     return data;
 }
 

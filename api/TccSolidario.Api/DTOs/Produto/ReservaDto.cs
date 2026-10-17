@@ -16,6 +16,10 @@ public class ReservaResponse
     public decimal ValorFinal { get; set; }
     public DateTime DataReserva { get; set; }
     public DateTime? DataRetirada { get; set; }
+    public DateTime DataExpiracao { get; set; }
+    public DateTime DataValidade { get; set; }
+    public string NomeReceptor { get; set; } = string.Empty;
+    public string NomeVarejista { get; set; } = string.Empty;
 }
 
 public class ValidarRetiradaRequest

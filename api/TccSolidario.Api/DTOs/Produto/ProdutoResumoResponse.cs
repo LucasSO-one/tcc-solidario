@@ -8,6 +8,8 @@ public class ProdutoResumoResponse
     public int Quantidade { get; set; }
     public DateTime DataValidade { get; set; }
     public string Status { get; set; } = string.Empty;
+    public bool AlertaPreDoacao { get; set; }
+    public bool AlertaVencimento { get; set; }
     public bool? IsOferta { get; set; }
     public string? ImagemUrl { get; set; }
 }

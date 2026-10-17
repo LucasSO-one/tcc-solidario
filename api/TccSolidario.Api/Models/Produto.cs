@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using TccSolidario.Api.Models.Enums;
 
@@ -31,37 +32,6 @@ public class Produto
     public Guid VarejistaId { get; set; }
     public Varejista? Varejista { get; set; } // propriedade de navegação
 
-    // Métodos de Domínio
-    public void VerificarGatilhoDoacao()
-    {
-        var horasRestantes = (DataValidade - DateTime.UtcNow).TotalHours;
-
-        if (horasRestantes <= 24 && Status == StatusProduto.EmDesconto)
-        {
-            Status = StatusProduto.DisponivelParaDoacao;
-            PrecoVenda = 0;
-        }
-    }
-
-    public void VerificarGatilhosDeTempo()
-    {
-        if (Status != StatusProduto.EmDesconto && Status != StatusProduto.Disponivel)
-            return;
-
-        var horasRestantes = (DataValidade - DateTime.UtcNow).TotalHours;
-
-        if (horasRestantes <= 0)
-        {
-            Status = StatusProduto.Vencido;
-        }
-        else if (horasRestantes <= 24)
-        {
-            Status = StatusProduto.DisponivelParaDoacao;
-            PrecoVenda = 0m;
-        }
-        else if (horasRestantes <= 36 && !AlertaPreDoacaoEnviado)
-        {
-            AlertaPreDoacaoEnviado = true;
-        }
-    }
+    [ConcurrencyCheck]
+    public Guid Versao { get; set; } = Guid.NewGuid();
 }

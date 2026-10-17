@@ -11,7 +11,7 @@ namespace TccSolidario.Api.Controllers;
 
 [ApiController]
 [Route("api/produtos")]
-[Authorize(Roles = "Varejista")]
+[Authorize]
 public class ProdutoController : ControllerBase
 {
     private readonly IProdutoService _produtoService;
@@ -24,6 +24,7 @@ public class ProdutoController : ControllerBase
     }
 
     [HttpPost("cadastrar-lote")]
+    [Authorize(Roles = "Varejista")]
     public async Task<IActionResult> CadastrarLote([FromForm] CadastrarLoteRequest request)
     {
         var varejistaId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
@@ -31,7 +32,7 @@ public class ProdutoController : ControllerBase
         try
         {
             var produto = await _produtoService.CadastrarLoteAsync(varejistaId, request);
-            return CreatedAtAction(nameof(CadastrarLote), new { id = produto.Id }, produto);
+            return CreatedAtAction(nameof(CadastrarLote), new { id = produto.Id }, new { produto.Id, Status = produto.Status.ToString(), produto.DataValidade });
         }
         catch (InvalidOperationException ex)
         {
@@ -40,6 +41,7 @@ public class ProdutoController : ControllerBase
     }
 
     [HttpGet("produtos")]
+    [Authorize(Roles = "Varejista")]
     public async Task<IActionResult> ListarPorVarejista()
     {
         var claimId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -73,11 +75,22 @@ public class ProdutoController : ControllerBase
     }
 
     [HttpGet("doacoes")]
-    [AllowAnonymous]
-    public async Task<IActionResult> ListarDoacoes([FromQuery] string? busca)
+    [Authorize(Roles = "ONG")]
+    public async Task<IActionResult> ListarDoacoes([FromQuery] string? busca, [FromQuery] bool apenasFrutasFeias = false)
     {
-        var doacoes = await _produtoService.ListarDoacoesAsync(busca);
+        var doacoes = await _produtoService.ListarDoacoesAsync(busca, apenasFrutasFeias);
 
         return Ok(doacoes);
+    }
+    [HttpPost("{produtoId:guid}/antecipar-doacao")]
+    [Authorize(Roles = "Varejista")]
+    public async Task<IActionResult> AnteciparDoacao(Guid produtoId)
+    {
+        try
+        {
+            await _produtoService.AnteciparDoacaoAsync(Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!), produtoId);
+            return Ok(new { message = "Alimento disponibilizado para doação." });
+        }
+        catch (InvalidOperationException ex) { return BadRequest(new { message = ex.Message }); }
     }
 }

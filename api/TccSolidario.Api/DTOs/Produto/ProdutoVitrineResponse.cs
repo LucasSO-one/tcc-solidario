@@ -20,6 +20,11 @@ namespace VittaFlow.Api.DTOs
 
         // Dias restantes até a validade (0 = vence hoje)
         public int DiasRestantes { get; set; }
+        public double HorasRestantes { get; set; }
+        public DateTime DataValidade { get; set; }
+        public bool PreviaDoacao { get; set; }
+        public bool PodeReservar { get; set; }
+        public DateTime? DisponivelParaReservaEm { get; set; }
 
         public bool FrutaFeia { get; set; }
         public string Status { get; set; } = string.Empty;
