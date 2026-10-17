@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using TccSolidario.Api.Middlewares;
+using TccSolidario.Api.Services.Auth;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -51,6 +52,12 @@ builder.Services.AddScoped<IProdutoService, ProdutoService>();
 builder.Services.AddHostedService<VerificacaoValidadeProdutosWorker>();
 builder.Services.AddScoped<INotificacaoService, NotificacaoService>();
 builder.Services.AddScoped<IReservaService, ReservaService>();
+
+// Ativa o cache de memória nativo do .NET
+builder.Services.AddMemoryCache(); 
+
+// Registra o serviço como Singleton (única instância para compartilhar a lista negra)
+builder.Services.AddSingleton<ILogoutService, LogoutService>();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -119,7 +126,11 @@ app.UseMiddleware<ExceptionMiddleware>();
 
 app.UseCors("Frontend");
 app.UseStaticFiles(); 
+
 app.UseAuthentication();
+
+app.UseMiddleware<TccSolidario.Api.Middlewares.TokenBlacklistMiddleware>();
+
 app.UseAuthorization();
 
 app.MapControllers();

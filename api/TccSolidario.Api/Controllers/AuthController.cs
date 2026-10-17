@@ -1,11 +1,13 @@
 namespace TccSolidario.Api.Controllers;
 
+using Microsoft.AspNetCore.Authorization; // <-- Adicionado para o [Authorize]
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TccSolidario.Api.Data;
 using TccSolidario.Api.DTOs.Auth;
 using TccSolidario.Api.Models.Enums;
 using TccSolidario.Api.Services;
+using TccSolidario.Api.Services.Auth; // <-- Adicionado para localizar o ILogoutService
 
 [ApiController]
 [Route("api/[controller]")]
@@ -14,12 +16,18 @@ public class AuthController : ControllerBase
     private readonly AppDbContext _context;
     private readonly ITokenService _tokenService;
     private readonly ILogger<AuthController> _logger;
+    private readonly ILogoutService _logoutService;
 
-    public AuthController(AppDbContext context, ITokenService tokenService, ILogger<AuthController> logger)
+    public AuthController(
+        AppDbContext context, 
+        ITokenService tokenService, 
+        ILogoutService logoutService, // <-- Corrigido: injetando a interface ILogoutService
+        ILogger<AuthController> logger)
     {
         _context = context;
         _tokenService = tokenService;
         _logger = logger;
+        _logoutService = logoutService;
     }
 
     [HttpPost("login")]
@@ -59,5 +67,26 @@ public class AuthController : ControllerBase
                 Tipo = usuario.Tipo.ToString()
             }
         });
+    }
+
+    [Authorize] // Garante que apenas quem tem um token válido pode acessar
+    [HttpPost("logout")]
+    public IActionResult Logout()
+    {
+        // 1. Pega o token que vem no cabeçalho (Header) da requisição
+        var authHeader = Request.Headers["Authorization"].ToString();
+        
+        if (string.IsNullOrEmpty(authHeader) || !authHeader.StartsWith("Bearer "))
+        {
+            return BadRequest(new { Sucesso = false, Erro = "Token não fornecido ou em formato inválido." });
+        }
+
+        // 2. Remove a palavra "Bearer " para ficar apenas com a string do JWT
+        var token = authHeader.Replace("Bearer ", "").Trim();
+
+        // 3. Manda o token para a lista negra
+        _logoutService.InvalidarToken(token);
+
+        return Ok(new { Sucesso = true, Mensagem = "Logout realizado com sucesso." });
     }
 }
