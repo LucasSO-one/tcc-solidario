@@ -1,6 +1,7 @@
 import { Outlet } from "react-router-dom";
 import VarejistaSidebar from "../components/sidebars/VarejistaSidebar";
 
+
 function VarejistaLayout() {
   return (
     <div className="layout">

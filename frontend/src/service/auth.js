@@ -53,3 +53,18 @@ export async function login({ email, senha }) {
   const { data } = await api.post('/auth/login', { email, senha });
   return data;
 }
+
+export async function logout() {
+  try {
+    // 1. Envia o comando para o C# invalidar o token
+    await api.post('/auth/logout');
+  } catch (error) {
+    console.warn("Aviso no back-end durante o logout:", error);
+  } finally {
+    // 2. Remove os dados de acesso do navegador
+    // ATENÇÃO: Substitua 'token' e 'usuario' pelos nomes exatos que você 
+    // usa no localStorage na hora de fazer o Login.
+    localStorage.removeItem('token'); 
+    localStorage.removeItem('usuario'); 
+  }
+}
