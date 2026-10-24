@@ -11,6 +11,7 @@ public class ReservaResponse
     public Guid ProdutoId { get; set; }
     public string ProdutoNome { get; set; } = string.Empty;
     public string CodigoRetirada { get; set; } = string.Empty;
+    public string FinalCodigo { get; set; } = string.Empty;
     public string Tipo { get; set; } = string.Empty;
     public string Status { get; set; } = string.Empty;
     public decimal ValorFinal { get; set; }

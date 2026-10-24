@@ -13,5 +13,7 @@ public class CadastrarLoteRequest
     public decimal? PrecoDesconto { get; set; }
     public bool? IsOferta { get; set; }
     public bool FrutaFeia { get; set; }
-    public IFormFile? Imagem { get; set; }
+    public IFormFile? Imagem { get; set; } // legado: uma foto só
+    public List<IFormFile> Imagens { get; set; } = new();
+    public int IndiceCapa { get; set; }
 }

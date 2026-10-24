@@ -7,6 +7,10 @@ namespace VittaFlow.Api.DTOs
         public string Nome { get; set; } = string.Empty;
         public string Categoria { get; set; } = string.Empty;
         public string? ImagemUrl { get; set; }
+        // URLs das fotos na ordem de exibição, com a capa primeiro
+        public List<string> Imagens { get; set; } = new();
+        public string Descricao { get; set; } = string.Empty;
+        public int Quantidade { get; set; }
 
         // Nome do estabelecimento/varejista que anunciou o produto
         public string NomeVarejista { get; set; } = string.Empty;

@@ -19,9 +19,9 @@ function montarFormDataCadastrarLote(form) {
     formData.append('PrecoDesconto', form.precoDesconto);
   }
   formData.append('FrutaFeia', form.frutaFeia);
-  if (form.imagem) {
-    formData.append('Imagem', form.imagem);
-  }
+  // Fotos já na ordem de exibição: a primeira é a capa
+  form.fotos.forEach((foto) => formData.append('Imagens', foto.arquivo));
+  formData.append('IndiceCapa', 0);
 
   return formData;
 }

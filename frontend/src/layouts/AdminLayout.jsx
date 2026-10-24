@@ -1,19 +1,5 @@
-import { Outlet } from "react-router-dom";
-import AdminSidebar from "../components/sidebars/AdminSidebar";
+import AppShell from "../components/AppShell/AppShell";
 
-
-function AdminLayout() {
-  return (
-    <div className="layout">
-
-      <AdminSidebar />
-
-      <main className="content">
-        <Outlet />
-      </main>
-
-    </div>
-  );
+export default function AdminLayout() {
+  return <AppShell perfil="Admin" />;
 }
-
-export default AdminLayout;

@@ -1,18 +1,5 @@
-import { Outlet } from "react-router-dom";
-import OngSidebar from "../components/sidebars/OngSidebar";
+import AppShell from "../components/AppShell/AppShell";
 
-function OngLayout() {
-  return (
-    <div className="layout">
-
-      <OngSidebar />
-
-      <main className="content">
-        <Outlet />
-      </main>
-
-    </div>
-  );
+export default function OngLayout() {
+  return <AppShell perfil="ONG" />;
 }
-
-export default OngLayout;

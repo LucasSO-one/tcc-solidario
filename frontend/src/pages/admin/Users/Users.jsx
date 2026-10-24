@@ -1,145 +1,79 @@
-import { useMemo, useState } from 'react';
-import { Users, Search } from 'lucide-react';
-import './Users.scss';
+import { useEffect, useMemo, useState } from 'react';
+import { Ban, CheckCircle2, Clock, Search, SearchX, Users as IconeUsuarios } from 'lucide-react';
+import { listarUsuarios } from '../../../service/admin';
+import { dataCurta } from '../../../utils/formatar';
+import { mascaraCnpj } from '../../../utils/mascaras';
+import { mensagemErro } from '../../../utils/mensagemErro';
+import Alert from '../../../components/ui/Alert';
+import Badge from '../../../components/ui/Badge';
+import EmptyState from '../../../components/ui/EmptyState';
+import Skeleton from '../../../components/ui/Skeleton';
+import '../../../components/Fluxos/Fluxos.scss';
 
-// --- Dados mockados — substituir por chamada à API quando disponível ---
-const users = [
-  {
-    id: 1,
-    nome: 'Supermercado Bom Preço',
-    tipo: 'Varejista',
-    documento: '12.345.678/0001-90',
-    email: 'contato@bompreco.com',
-    status: 'Ativo',
-    cadastro: '14/01/2026',
-  },
-  {
-    id: 2,
-    nome: 'Supermercado Bom Preço',
-    tipo: 'Varejista',
-    documento: '12.345.678/0001-90',
-    email: 'contato@bompreco.com',
-    status: 'Ativo',
-    cadastro: '14/01/2026',
-  },
-];
-
-const tabs = [
-  { id: 'todas', label: 'Todas' },
+const ABAS = [
+  { id: '', label: 'Todos' },
   { id: 'Varejista', label: 'Varejistas' },
   { id: 'ONG', label: 'ONGs' },
   { id: 'Consumidor', label: 'Consumidores' },
 ];
+const STATUS = {
+  Aprovado: ['success', CheckCircle2, 'Ativo'],
+  Pendente: ['warning', Clock, 'Em análise'],
+  Rejeitado: ['danger', Ban, 'Rejeitado'],
+};
 
 export default function UsuariosPlataforma() {
-  const [activeTab, setActiveTab] = useState('todas');
-  const [search, setSearch] = useState('');
+  const [usuarios, setUsuarios] = useState(null);
+  const [erro, setErro] = useState('');
+  const [aba, setAba] = useState('');
+  const [busca, setBusca] = useState('');
 
-  const filtered = useMemo(() => {
-    return users
-      .filter((u) => activeTab === 'todas' || u.tipo === activeTab)
-      .filter((u) => {
-        const term = search.trim().toLowerCase();
-        if (!term) return true;
-        return (
-          u.nome.toLowerCase().includes(term) ||
-          u.email.toLowerCase().includes(term) ||
-          u.documento.toLowerCase().includes(term)
-        );
-      });
-  }, [activeTab, search]);
+  useEffect(() => {
+    listarUsuarios().then(setUsuarios).catch(e => setErro(mensagemErro(e, 'Não foi possível carregar os usuários.')));
+  }, []);
 
-  return (
-    <div className="usuarios-plataforma">
-      <header className="usuarios-plataforma__header">
-        <h1 className="usuarios-plataforma__title">Usuários da Plataforma</h1>
-        <p className="usuarios-plataforma__subtitle">
-          Gerencie todos os usuários cadastrados no sistema
-        </p>
-      </header>
+  const filtrados = useMemo(() => {
+    const termo = busca.trim().toLowerCase();
+    return (usuarios ?? []).filter(u => (!aba || u.tipo === aba) &&
+      (!termo || [u.nome, u.email, u.documento].some(v => v?.toLowerCase().includes(termo))));
+  }, [usuarios, aba, busca]);
 
-      <section className="usuarios-plataforma__panel">
-        <div className="usuarios-plataforma__toolbar">
-          <span className="usuarios-plataforma__count">
-            <Users size={16} />
-            {users.length} usuários
-          </span>
+  return <div className="fluxo">
+    <header><span className="eyebrow">Administração</span><h1>Usuários da plataforma</h1>
+      <p>Todas as contas de varejistas, ONGs e consumidores. O CPF aparece mascarado para proteger os dados pessoais.</p></header>
 
-          <div className="usuarios-plataforma__toolbar-right">
-            <nav className="usuarios-plataforma__tabs" role="tablist" aria-label="Filtro de tipo">
-              {tabs.map((tab) => (
-                <button
-                  key={tab.id}
-                  type="button"
-                  role="tab"
-                  aria-selected={activeTab === tab.id}
-                  className={`usuarios-plataforma__tab${
-                    activeTab === tab.id ? ' usuarios-plataforma__tab--active' : ''
-                  }`}
-                  onClick={() => setActiveTab(tab.id)}
-                >
-                  {tab.label}
-                </button>
-              ))}
-            </nav>
-
-            <div className="usuarios-plataforma__search">
-              <Search size={16} className="usuarios-plataforma__search-icon" />
-              <input
-                type="text"
-                placeholder="Buscar por nome, email ou documento"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
-            </div>
-          </div>
-        </div>
-
-        <div className="usuarios-plataforma__table-wrap">
-          <table className="users-table">
-            <thead>
-              <tr>
-                <th>Nome</th>
-                <th>Tipo</th>
-                <th>Documento</th>
-                <th>Email</th>
-                <th>Status</th>
-                <th>Cadastro</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map((u) => (
-                <tr key={u.id}>
-                  <td className="users-table__name">{u.nome}</td>
-                  <td>
-                    <span className="users-table__badge users-table__badge--type">{u.tipo}</span>
-                  </td>
-                  <td className="users-table__muted">{u.documento}</td>
-                  <td>
-                    <a href={`mailto:${u.email}`} className="users-table__link">
-                      {u.email}
-                    </a>
-                  </td>
-                  <td>
-                    <span className="users-table__badge users-table__badge--status">
-                      {u.status}
-                    </span>
-                  </td>
-                  <td className="users-table__muted">{u.cadastro}</td>
-                </tr>
-              ))}
-
-              {filtered.length === 0 && (
-                <tr>
-                  <td colSpan={6} className="users-table__empty">
-                    Nenhum usuário encontrado.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </section>
+    <div className="fluxo-filtros">
+      <div className="abas-filtro" role="group" aria-label="Filtrar por tipo">
+        {ABAS.map(a => <button key={a.id} type="button" className={`abas-filtro__aba${aba === a.id ? ' abas-filtro__aba--ativa' : ''}`}
+          aria-pressed={aba === a.id} onClick={() => setAba(a.id)}>
+          {a.label}{usuarios && <span className="abas-filtro__total">{usuarios.filter(u => !a.id || u.tipo === a.id).length}</span>}
+        </button>)}
+      </div>
+      <div className="search-input">
+        <Search className="search-input__icon" aria-hidden="true" />
+        <input type="search" placeholder="Buscar por nome, e-mail ou documento" aria-label="Buscar usuário"
+          value={busca} onChange={e => setBusca(e.target.value)} />
+      </div>
     </div>
-  );
+
+    {erro && <Alert variant="error">{erro}</Alert>}
+    {!usuarios && !erro ? <div className="panel" aria-busy="true"><Skeleton variant="title" /><Skeleton /><Skeleton /><Skeleton /></div>
+      : usuarios && !usuarios.length ? <EmptyState icon={IconeUsuarios} title="Nenhum usuário cadastrado ainda">Assim que alguém criar uma conta, ela aparece aqui.</EmptyState>
+      : usuarios && !filtrados.length ? <EmptyState icon={SearchX} title="Nenhum usuário encontrado">Tente outro termo de busca ou mude o filtro.</EmptyState>
+      : usuarios && <div className="table-wrapper">
+        <table className="data-table data-table--responsiva">
+          <thead><tr><th>Nome</th><th>Tipo</th><th>Documento</th><th>Situação</th><th>Cadastro</th></tr></thead>
+          <tbody>{filtrados.map(u => {
+            const [variante, icone, texto] = STATUS[u.status] ?? ['neutral', null, u.status];
+            return <tr key={u.id}>
+              <td data-label="Nome"><span className="data-table__strong">{u.nome}</span><span className="data-table__muted">{u.email}</span></td>
+              <td data-label="Tipo">{u.tipo}</td>
+              <td data-label="Documento">{/^\d{14}$/.test(u.documento) ? mascaraCnpj(u.documento) : u.documento || '–'}</td>
+              <td data-label="Situação"><Badge variant={variante} icon={icone}>{texto}</Badge></td>
+              <td data-label="Cadastro">{dataCurta(u.dataCriacao)}</td>
+            </tr>;
+          })}</tbody>
+        </table>
+      </div>}
+  </div>;
 }

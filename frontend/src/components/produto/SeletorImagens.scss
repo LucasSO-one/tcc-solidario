@@ -1,0 +1,109 @@
+@use '../../styles/design' as *;
+
+.seletor-imagens {
+  display: flex;
+  flex-direction: column;
+  gap: $space-3;
+
+  &__zona {
+    @include button-reset;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: $space-2;
+    min-height: 132px;
+    padding: $space-6;
+    border: 1.5px dashed $color-border-strong;
+    border-radius: $radius-lg;
+    background: $color-section-alt;
+    color: $color-text-secondary;
+    font-size: $font-size-sm;
+    text-align: center;
+    transition: border-color $duration-fast $ease-out, background-color $duration-fast $ease-out;
+
+    svg { width: 28px; height: 28px; color: $color-primary; }
+    strong { color: $color-primary; }
+
+    &:hover,
+    &--ativa { border-color: $color-primary; background: $color-primary-soft; }
+    &:focus-visible { @include focus-ring; }
+  }
+
+  &__lista {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: $space-3;
+    list-style: none;
+
+    @include media-up(tablet) { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  }
+
+  &__item {
+    position: relative;
+    overflow: hidden;
+    aspect-ratio: 4 / 3;
+    border: 1px solid $color-border;
+    border-radius: $radius-md;
+    background: $color-surface-muted;
+
+    img { width: 100%; height: 100%; object-fit: cover; }
+
+    &--capa { border: 2px solid $color-primary; }
+  }
+
+  &__selo,
+  &__capa {
+    position: absolute;
+    left: $space-2;
+    bottom: $space-2;
+    display: inline-flex;
+    align-items: center;
+    gap: $space-1;
+    padding: $space-1 $space-2;
+    border-radius: $radius-full;
+    font-size: $font-size-xs;
+    font-weight: $font-weight-semibold;
+
+    svg { width: 13px; height: 13px; }
+  }
+
+  &__selo {
+    background: $color-primary;
+    color: $color-on-primary;
+
+    svg { fill: currentColor; }
+  }
+
+  &__capa {
+    @include button-reset;
+    min-height: 32px;
+    font-size: $font-size-xs;
+    font-weight: $font-weight-semibold;
+    background: rgba($color-white, 0.94);
+    color: $color-primary;
+    box-shadow: $shadow-sm;
+
+    &:hover { background: $color-white; }
+    &:focus-visible { @include focus-ring; }
+  }
+
+  &__remover {
+    @include button-reset;
+    position: absolute;
+    top: $space-2;
+    right: $space-2;
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    border-radius: $radius-full;
+    background: rgba($color-white, 0.94);
+    color: $color-danger-text;
+    box-shadow: $shadow-sm;
+
+    svg { width: 16px; height: 16px; }
+    &:hover { background: $color-danger-bg; }
+    &:focus-visible { @include focus-ring; }
+  }
+}

@@ -1,0 +1,90 @@
+@use '../design' as *;
+
+.card {
+  @include card-surface;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: $space-5;
+
+  &--interactive { @include card-hover; }
+  &--flush { padding: 0; overflow: hidden; }
+
+  &__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: $space-3;
+    margin-bottom: $space-4;
+  }
+
+  &__body {
+    display: flex;
+    flex-direction: column;
+    gap: $space-2;
+    padding: $space-5;
+  }
+
+  &__title {
+    font-family: $font-body;
+    font-size: $font-size-md;
+    font-weight: $font-weight-semibold;
+    line-height: 1.4;
+    letter-spacing: 0;
+    color: $color-text;
+  }
+
+  &__subtitle {
+    font-size: $font-size-sm;
+    color: $color-text-muted;
+  }
+
+  &__footer {
+    display: flex;
+    align-items: center;
+    gap: $space-3;
+    margin-top: auto;
+    padding-top: $space-4;
+  }
+}
+
+// Painel: card de página inteira (formulários, tabelas)
+.panel {
+  @include card-surface;
+  padding: $space-6;
+}
+
+// Avatar: foto ou iniciais
+.avatar {
+  display: inline-grid;
+  flex-shrink: 0;
+  place-items: center;
+  overflow: hidden;
+  border-radius: $radius-full;
+  background: $color-primary-soft;
+  color: $color-primary;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-bold;
+
+  img { width: 100%; height: 100%; object-fit: cover; }
+}
+
+// Número de destaque (dashboards)
+.stat {
+  @include card-surface;
+  display: flex;
+  flex-direction: column;
+  gap: $space-1;
+  padding: $space-5;
+
+  &__value {
+    @include heading;
+    font-size: $font-size-2xl;
+    font-variant-numeric: tabular-nums;
+  }
+
+  &__label {
+    font-size: $font-size-sm;
+    color: $color-text-secondary;
+  }
+}

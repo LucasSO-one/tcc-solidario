@@ -1,0 +1,129 @@
+@use '../../styles/design' as *;
+
+.carrossel {
+  position: relative;
+  overflow: hidden;
+  background: $color-section-alt;
+
+  &:focus-visible { @include focus-ring; }
+
+  &--card {
+    aspect-ratio: 4 / 3;
+    border-radius: $radius-lg $radius-lg 0 0;
+  }
+
+  &--lightbox {
+    aspect-ratio: 4 / 3;
+    max-height: 70vh;
+    margin-inline: auto;
+    border-radius: $radius-md;
+    background: $color-surface-muted;
+  }
+
+  &--vazio {
+    display: grid;
+    place-items: center;
+    color: $color-green-400;
+
+    svg { width: 48px; height: 48px; stroke-width: 1.5; }
+  }
+
+  &__track {
+    display: flex;
+    height: 100%;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar { display: none; }
+    &--animando { scroll-snap-type: none; }
+  }
+
+  &__slide {
+    flex: 0 0 100%;
+    height: 100%;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      user-select: none;
+    }
+  }
+
+  &--lightbox &__slide img { object-fit: contain; }
+
+  &__ampliar {
+    @include button-reset;
+    display: block;
+    width: 100%;
+    height: 100%;
+    cursor: zoom-in;
+
+    &:focus-visible { outline: 3px solid $color-focus-ring; outline-offset: -3px; }
+  }
+
+  &__seta {
+    @include button-reset;
+    position: absolute;
+    top: 50%;
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    border-radius: $radius-full;
+    background: rgba($color-white, 0.92);
+    box-shadow: $shadow-sm;
+    color: $color-text;
+    transform: translateY(-50%);
+    opacity: 0;
+    transition: opacity $duration-base $ease-out, background-color $duration-fast $ease-out;
+
+    &--anterior { left: $space-2; }
+    &--proxima { right: $space-2; }
+
+    svg { width: 20px; height: 20px; }
+    &:hover:not(:disabled) { background: $color-white; }
+    &:focus-visible { @include focus-ring; opacity: 1; }
+    &:disabled { opacity: 0 !important; pointer-events: none; }
+  }
+
+  // Setas aparecem no hover em dispositivos com mouse; no toque, o swipe é a navegação.
+  @media (hover: hover) {
+    &:hover .carrossel__seta,
+    &:focus-within .carrossel__seta { opacity: 1; }
+  }
+
+  &--lightbox &__seta {
+    opacity: 1;
+    width: $touch-target;
+    height: $touch-target;
+  }
+
+  &__pontos {
+    position: absolute;
+    left: 50%;
+    bottom: $space-2;
+    display: flex;
+    gap: $space-1;
+    padding: $space-1 $space-2;
+    border-radius: $radius-full;
+    background: rgba($color-green-900, 0.35);
+    transform: translateX(-50%);
+  }
+
+  &__ponto {
+    @include button-reset;
+    width: 7px;
+    height: 7px;
+    border-radius: $radius-full;
+    background: rgba($color-white, 0.6);
+    transition: width $duration-base $ease-out, background-color $duration-base $ease-out;
+
+    &[aria-current='true'] { width: 18px; background: $color-white; }
+    &:focus-visible { @include focus-ring; }
+  }
+}

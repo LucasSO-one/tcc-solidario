@@ -1,118 +1,59 @@
-import { ShieldCheck, Package, Heart, Users, Store, Leaf, ArrowUpDown } from 'lucide-react';
-import './DashboardAdm.scss';
-
-// --- Dados mockados — substituir por chamadas à API quando disponíveis ---
-const metrics = [
-  { id: 'alimentos', label: 'Alimentos Cadastrados', value: '1.482', delta: '+124 esta semana', icon: Package },
-  { id: 'doacoes', label: 'Doações Realizadas', value: '326', delta: '+42 este mês', icon: Heart },
-  { id: 'usuarios', label: 'Usuários Totais', value: '2.847', delta: '+188 este mês', icon: Users },
-  { id: 'varejistas', label: 'Varejistas Ativos', value: '134', delta: '+12 este mês', icon: Store },
-];
-
-const impact = [
-  { id: 'kg', label: 'Alimentos salvos', value: '8.640 kg', icon: Leaf },
-  { id: 'pessoas', label: 'Pessoas beneficiadas', value: '2.150', icon: Users },
-  { id: 'estabelecimentos', label: 'Estabelecimentos', value: '47', icon: Store },
-];
-
-const activity = [
-  { id: 1, tipo: 'Cadastro', descricao: 'Novo varejista solicitou cadastro: Mercado Verde', quando: 'há 12 min' },
-];
+import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { HandHeart, Leaf, ShieldCheck, Store, Users } from 'lucide-react';
+import { obterImpacto } from '../../../service/impacto';
+import { mensagemErro } from '../../../utils/mensagemErro';
+import GraficoEvolucao from '../../../components/impacto/GraficoEvolucao';
+import IndicadoresImpacto from '../../../components/impacto/IndicadoresImpacto';
+import Alert from '../../../components/ui/Alert';
+import '../../../components/Fluxos/Fluxos.scss';
 
 export default function DashboardAdministrativo() {
-  return (
-    <div className="dashboard-admin">
-      <header className="dashboard-admin__header">
-        <div>
-          <h1 className="dashboard-admin__title">Dashboard Administrativo</h1>
-          <p className="dashboard-admin__subtitle">Visão geral da plataforma</p>
-        </div>
-        <button type="button" className="dashboard-admin__btn dashboard-admin__btn--ghost">
-          <ShieldCheck size={16} />
-          Ver Aprovações Pendentes
-        </button>
-      </header>
+  const [impacto, setImpacto] = useState(null);
+  const [erro, setErro] = useState('');
 
-      <section className="dashboard-admin__banner" role="status">
-        <div className="dashboard-admin__banner-text">
-          <ShieldCheck size={16} className="dashboard-admin__banner-icon" />
-          <div>
-            <p className="dashboard-admin__banner-title">7 cadastros aguardando análise</p>
-            <p className="dashboard-admin__banner-desc">
-              Revise as solicitações de varejistas e ONGs para liberar o acesso à plataforma.
-            </p>
-          </div>
-        </div>
-        <button type="button" className="dashboard-admin__btn dashboard-admin__btn--primary">
-          Analisar Agora
-        </button>
-      </section>
+  useEffect(() => {
+    obterImpacto().then(setImpacto).catch(e => setErro(mensagemErro(e, 'Não foi possível carregar os indicadores.')));
+  }, []);
 
-      <section className="dashboard-admin__metrics" aria-label="Métricas gerais">
-        {metrics.map(({ id, label, value, delta, icon: Icon }) => (
-          <article key={id} className="metric-card">
-            <div className="metric-card__top">
-              <span className="metric-card__label">{label}</span>
-              <Icon size={18} className="metric-card__icon" />
-            </div>
-            <p className="metric-card__value">{value}</p>
-            <p className="metric-card__delta">{delta}</p>
-          </article>
-        ))}
-      </section>
+  const i = impacto?.indicadores ?? {};
+  const carregando = !impacto && !erro;
+  return <div className="fluxo">
+    <header><span className="eyebrow">Visão geral</span><h1>Painel administrativo</h1>
+      <p>Indicadores da plataforma calculados em tempo real a partir das retiradas confirmadas.</p></header>
+    {erro && <Alert variant="error">{erro}</Alert>}
 
-      <section className="dashboard-admin__section">
-        <h2 className="dashboard-admin__section-title">
-          <Leaf size={16} />
-          Impacto da Plataforma
-        </h2>
-        <div className="dashboard-admin__impact">
-          {impact.map(({ id, label, value, icon: Icon }) => (
-            <article key={id} className="impact-card">
-              <Icon size={20} className="impact-card__icon" />
-              <div>
-                <p className="impact-card__value">{value}</p>
-                <p className="impact-card__label">{label}</p>
-              </div>
-            </article>
-          ))}
-        </div>
-      </section>
+    {i.cadastrosPendentes > 0 && <div className="banner-pendencias">
+      <ShieldCheck aria-hidden="true" />
+      <div>
+        <p className="banner-pendencias__titulo">{i.cadastrosPendentes} {i.cadastrosPendentes === 1 ? 'cadastro aguardando' : 'cadastros aguardando'} análise</p>
+        <p>Revise os dados de varejistas e ONGs para liberar o acesso à plataforma.</p>
+      </div>
+      <Link className="btn btn--primary" to="/dashboard/admin/approvals">Analisar cadastros</Link>
+    </div>}
 
-      <section className="dashboard-admin__activity">
-        <h2 className="dashboard-admin__section-title">
-          <ArrowUpDown size={16} />
-          Atividade Recente da Plataforma
-        </h2>
+    <section><h2>Impacto da plataforma</h2>
+      <IndicadoresImpacto carregando={carregando} itens={[
+        { valor: i.alimentosSalvos, rotulo: 'Unidades salvas do desperdício', icone: Leaf },
+        { valor: i.doacoesRealizadas, rotulo: 'Doações realizadas', icone: HandHeart },
+        { valor: i.ongsAtendidas, rotulo: 'ONGs atendidas', icone: Users },
+        { valor: i.varejistasAtivos, rotulo: 'Varejistas ativos', icone: Store },
+      ]} />
+      {impacto && <GraficoEvolucao titulo="Alimentos retirados por mês" descricao="Unidades doadas e vendidas nos últimos 6 meses."
+        dados={impacto.evolucao} series={[
+          { chave: 'doadas', rotulo: 'Doadas', classe: 'doadas' },
+          { chave: 'vendidas', rotulo: 'Vendidas', classe: 'vendidas' },
+        ]} />}
+    </section>
 
-        <table className="activity-table">
-          <thead>
-            <tr>
-              <th>Tipo</th>
-              <th>Descrição</th>
-              <th className="activity-table__when-col">Quando</th>
-            </tr>
-          </thead>
-          <tbody>
-            {activity.map((item) => (
-              <tr key={item.id}>
-                <td>
-                  <span className="activity-table__badge">{item.tipo}</span>
-                </td>
-                <td>{item.descricao}</td>
-                <td className="activity-table__when">{item.quando}</td>
-              </tr>
-            ))}
-            {activity.length === 0 && (
-              <tr>
-                <td colSpan={3} className="activity-table__empty">
-                  Nenhuma atividade recente.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </section>
-    </div>
-  );
+    <section><h2>Uso da plataforma</h2>
+      <div className="fluxo-grade">
+        <article className="stat"><span className="stat__value">{carregando ? '–' : (i.usuarios ?? 0).toLocaleString('pt-BR')}</span>
+          <span className="stat__label">Usuários cadastrados</span></article>
+        <article className="stat"><span className="stat__value">{carregando ? '–' : (i.alimentosCadastrados ?? 0).toLocaleString('pt-BR')}</span>
+          <span className="stat__label">Lotes de alimentos cadastrados</span></article>
+      </div>
+      <Link to="/dashboard/admin/users">Ver todos os usuários</Link>
+    </section>
+  </div>;
 }

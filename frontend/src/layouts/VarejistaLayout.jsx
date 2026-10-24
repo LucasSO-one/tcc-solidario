@@ -1,19 +1,5 @@
-import { Outlet } from "react-router-dom";
-import VarejistaSidebar from "../components/sidebars/VarejistaSidebar";
+import AppShell from "../components/AppShell/AppShell";
 
-
-function VarejistaLayout() {
-  return (
-    <div className="layout">
-
-      <VarejistaSidebar />
-
-      <main className="content">
-        <Outlet />
-      </main>
-
-    </div>
-  );
+export default function VarejistaLayout() {
+  return <AppShell perfil="Varejista" />;
 }
-
-export default VarejistaLayout;

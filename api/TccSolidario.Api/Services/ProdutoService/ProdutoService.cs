@@ -7,10 +7,8 @@ using VittaFlow.Api.DTOs;
 
 namespace TccSolidario.Api.Services;
 
-public class ProdutoService(AppDbContext context, IWebHostEnvironment env, CicloVidaService ciclo, TimeProvider clock) : IProdutoService
+public class ProdutoService(AppDbContext context, ImagemUploadService uploads, CicloVidaService ciclo, TimeProvider clock) : IProdutoService
 {
-    private readonly IWebHostEnvironment _env = env;
-
     public async Task<Produto> CadastrarLoteAsync(Guid varejistaId, CadastrarLoteRequest request)
     {
         var varejista = await context.Varejistas.SingleOrDefaultAsync(v => v.Id == varejistaId);
@@ -23,6 +21,18 @@ public class ProdutoService(AppDbContext context, IWebHostEnvironment env, Ciclo
         if (string.IsNullOrWhiteSpace(request.Nome) || request.Quantidade <= 0 || request.PrecoOriginal < 0 ||
             request.PrecoDesconto < 0 || request.PrecoDesconto > request.PrecoOriginal)
             throw new InvalidOperationException("Confira o nome, a quantidade e os preços do alimento.");
+        var imagens = request.Imagens.ToList();
+        if (request.Imagem is { Length: > 0 }) imagens.Insert(0, request.Imagem);
+        await ImagemUploadService.ValidarAsync(imagens);
+        if (imagens.Count > 0 && (request.IndiceCapa < 0 || request.IndiceCapa >= imagens.Count))
+            throw new InvalidOperationException("A foto de capa escolhida não foi enviada.");
+        if (imagens.Count > 0)
+        {
+            // A capa vai para a primeira posição; as demais mantêm a ordem escolhida.
+            var capa = imagens[request.IndiceCapa];
+            imagens.RemoveAt(request.IndiceCapa);
+            imagens.Insert(0, capa);
+        }
         var produto = new Produto
         {
             Titulo = request.Nome.Trim(), Categoria = request.Categoria,
@@ -30,32 +40,25 @@ public class ProdutoService(AppDbContext context, IWebHostEnvironment env, Ciclo
             DataValidade = validade, PrecoOriginal = request.PrecoOriginal,
             PrecoVenda = request.PrecoDesconto, IsOferta = request.IsOferta,
             FrutaFeia = request.FrutaFeia, VarejistaId = varejistaId,
-            ImagemUrl = request.Imagem is { Length: > 0 } ? await SalvarImagemAsync(request.Imagem) : null,
             Status = request.PrecoDesconto.HasValue ? StatusProduto.EmDesconto : StatusProduto.Disponivel
         };
-        RegrasCicloVida.AtualizarProduto(produto, agora);
-        context.Produtos.Add(produto);
-        await context.SaveChangesAsync();
+        var urls = new List<string>();
+        try
+        {
+            foreach (var imagem in imagens) urls.Add(await uploads.SalvarAsync(imagem, "produtos"));
+            produto.Imagens = urls.Select((url, ordem) => new ProdutoImagem { Url = url, Ordem = ordem }).ToList();
+            produto.ImagemUrl = urls.FirstOrDefault();
+            RegrasCicloVida.AtualizarProduto(produto, agora);
+            context.Produtos.Add(produto);
+            await context.SaveChangesAsync();
+        }
+        catch
+        {
+            uploads.Remover(urls); // não deixa arquivos órfãos se o cadastro falhar
+            throw;
+        }
         return produto;
     }
-
-    private async Task<string> SalvarImagemAsync(IFormFile imagem)
-    {
-        var webRootPath = _env.WebRootPath
-            ?? Path.Combine(_env.ContentRootPath, "wwwroot");
-
-        var pasta = Path.Combine(webRootPath, "uploads", "produtos");
-        Directory.CreateDirectory(pasta); // cria toda a cadeia de pastas se não existir, incluindo wwwroot
-
-        var nomeArquivo = $"{Guid.NewGuid()}{Path.GetExtension(imagem.FileName)}";
-        var caminho = Path.Combine(pasta, nomeArquivo);
-
-        await using var stream = new FileStream(caminho, FileMode.Create);
-        await imagem.CopyToAsync(stream);
-
-        return $"/uploads/produtos/{nomeArquivo}";
-    }
-
 
     public async Task<List<ProdutoResumoResponse>> ListarPorVarejistaAsync(Guid varejistaId)
     {
@@ -65,6 +68,8 @@ public class ProdutoService(AppDbContext context, IWebHostEnvironment env, Ciclo
             {
                 Id = p.Id, Titulo = p.Titulo, Categoria = p.Categoria, Quantidade = p.Quantidade,
                 DataValidade = p.DataValidade, Status = p.Status.ToString(), ImagemUrl = p.ImagemUrl,
+                Imagens = p.Imagens.OrderBy(i => i.Ordem).Select(i => i.Url).ToList(),
+                Descricao = p.Descricao, PrecoOriginal = p.PrecoOriginal, PrecoVenda = p.PrecoVenda, FrutaFeia = p.FrutaFeia,
                 IsOferta = p.IsOferta, AlertaPreDoacao = p.AlertaPreDoacaoEnviado,
                 AlertaVencimento = p.Status == StatusProduto.Vencido
             }).ToListAsync();
@@ -73,6 +78,7 @@ public class ProdutoService(AppDbContext context, IWebHostEnvironment env, Ciclo
     private IQueryable<Produto> Consulta(string? busca)
     {
         var query = context.Produtos.AsNoTracking().Include(p => p.Varejista)
+            .Include(p => p.Imagens.OrderBy(i => i.Ordem))
             .Where(p => p.Varejista!.StatusAprovacao == StatusAprovacao.Aprovado);
         if (!string.IsNullOrWhiteSpace(busca))
         {
@@ -87,7 +93,7 @@ public class ProdutoService(AppDbContext context, IWebHostEnvironment env, Ciclo
     {
         await ciclo.AtualizarAsync();
         var agora = clock.GetUtcNow().UtcDateTime;
-        var limite = agora.AddHours(24);
+        var limite = RegrasCicloVida.LimiteDoacao(agora);
         var query = Consulta(busca).Where(p =>
             (p.Status == StatusProduto.Disponivel || p.Status == StatusProduto.EmDesconto) && p.DataValidade > limite);
         if (apenasFrutasFeias) query = query.Where(p => p.FrutaFeia);
@@ -105,7 +111,7 @@ public class ProdutoService(AppDbContext context, IWebHostEnvironment env, Ciclo
     {
         await ciclo.AtualizarAsync();
         var agora = clock.GetUtcNow().UtcDateTime;
-        var limite = agora.AddHours(36);
+        var limite = RegrasCicloVida.LimitePrevia(agora);
         var query = Consulta(busca).Where(p => p.DataValidade > agora &&
             (p.Status == StatusProduto.DisponivelParaDoacao ||
              ((p.Status == StatusProduto.Disponivel || p.Status == StatusProduto.EmDesconto) && p.DataValidade <= limite)));
@@ -133,6 +139,7 @@ public class ProdutoService(AppDbContext context, IWebHostEnvironment env, Ciclo
         return new ProdutoVitrineResponse
         {
             Id = p.Id, Nome = p.Titulo, Categoria = p.Categoria, ImagemUrl = p.ImagemUrl,
+            Imagens = p.Imagens.Select(i => i.Url).ToList(), Descricao = p.Descricao, Quantidade = p.Quantidade,
             NomeVarejista = p.Varejista?.NomeEstabelecimento ?? "Estabelecimento",
             PrecoOriginal = p.PrecoOriginal, PrecoDesconto = doacao ? 0m : p.PrecoVenda,
             DescontoPercentual = doacao ? 100 : p.PrecoVenda.HasValue && p.PrecoOriginal > 0
@@ -141,7 +148,7 @@ public class ProdutoService(AppDbContext context, IWebHostEnvironment env, Ciclo
             HorasRestantes = horas, DataValidade = p.DataValidade, FrutaFeia = p.FrutaFeia,
             Status = p.Status.ToString(), PreviaDoacao = previa,
             PodeReservar = p.DataValidade > agora && (painelOng ? doacao : RegrasCicloVida.Comercial(p)),
-            DisponivelParaReservaEm = previa ? p.DataValidade.AddHours(-24) : null
+            DisponivelParaReservaEm = previa ? RegrasCicloVida.LiberacaoParaDoacao(p) : null
         };
     }
 

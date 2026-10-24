@@ -55,6 +55,9 @@ builder.Services.AddHostedService<VerificacaoValidadeProdutosWorker>();
 builder.Services.AddScoped<INotificacaoService, NotificacaoService>();
 builder.Services.AddScoped<IReservaService, ReservaService>();
 builder.Services.AddScoped<CicloVidaService>();
+builder.Services.AddScoped<ImagemUploadService>();
+builder.Services.AddScoped<ContaService>();
+builder.Services.AddScoped<ImpactoService>();
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddHostedService<ExpiracaoReservasWorker>();
 
@@ -165,6 +168,10 @@ using (var scope = app.Services.CreateScope())
 
         // Chama o nosso semeador
         DbInitializer.Initialize(context, config);
+
+        // Usuários e alimentos de teste (somente local). Recriar: dotnet run -- --reset-dados-teste
+        if (app.Environment.IsDevelopment() && config.GetValue("DadosTeste:Ativo", true))
+            DadosTesteSeeder.Executar(context, args.Contains("--reset-dados-teste"));
     }
     catch (Exception ex)
     {

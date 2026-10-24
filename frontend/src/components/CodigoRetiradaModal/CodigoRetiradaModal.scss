@@ -1,54 +1,32 @@
-.modal-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.5);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-}
+@use '../../styles/design' as *;
 
-.modal-conteudo {
-    background: #fff;
-    border-radius: 16px;
-    padding: 32px;
-    width: min(90%, 360px);
-    text-align: center;
-    position: relative;
+.codigo-retirada {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $space-4;
+  text-align: center;
 
-    .modal-fechar {
-        position: absolute;
-        top: 12px;
-        right: 12px;
-        background: none;
-        border: none;
-        cursor: pointer;
-        color: #6b7280;
-        font-size: 16px;
-    }
+  p { font-size: $font-size-sm; }
 
-    h2 {
-        margin: 0 0 8px;
-    }
+  &__qr {
+    padding: $space-4;
+    border: 1px solid $color-border;
+    border-radius: $radius-lg;
+    background: $color-surface;
+  }
 
-    p {
-        color: #6b7280;
-        font-size: 14px;
-        margin-bottom: 20px;
-    }
+  &__codigo {
+    width: 100%;
+    padding: $space-3;
+    border-radius: $radius-md;
+    background: $color-section-alt;
+    font-size: $font-size-xl !important;
+    font-weight: $font-weight-bold;
+    letter-spacing: 0.15em;
+    font-variant-numeric: tabular-nums;
+    color: $color-heading !important;
+  }
 
-    .qrcode-wrapper {
-        display: flex;
-        justify-content: center;
-        margin-bottom: 16px;
-    }
-
-    .codigo-texto {
-        font-size: 20px;
-        font-weight: 700;
-        letter-spacing: 2px;
-        background: #f3f4f6;
-        border-radius: 8px;
-        padding: 10px;
-    }
+  &__prazo strong { color: $color-text; }
 }

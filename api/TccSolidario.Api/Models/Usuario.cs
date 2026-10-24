@@ -27,6 +27,14 @@ public abstract class Usuario
 
     [Required]
     public StatusAprovacao StatusAprovacao { get; set; } = StatusAprovacao.Pendente;
+
+    [StringLength(300)]
+    public string? FotoUrl { get; set; }
+
+    // Preferências de notificação (o envio por e-mail ainda não está implementado)
+    public bool NotificarNovasSolicitacoes { get; set; } = true;
+    public bool NotificarVencimentos { get; set; } = true;
+    public bool NotificarDoacoesConcluidas { get; set; } = true;
 }
 
 public class Varejista : Usuario
@@ -37,7 +45,10 @@ public class Varejista : Usuario
     [Required, StringLength(150)]
     public string NomeEstabelecimento { get; set; } = string.Empty;
     public string RazaoSocial { get; set; } = string.Empty;
+    [StringLength(120)]
     public string? HorarioFuncionamento { get; set; }
+    [StringLength(60)]
+    public string? TipoEstabelecimento { get; set; }
 }
 
 public class Ong : Usuario
@@ -47,6 +58,10 @@ public class Ong : Usuario
     public string AreaAtuacao { get; set; } = string.Empty;
     [Required, StringLength(100)]
     public string NomeFantasia { get; set; } = string.Empty;
+    [StringLength(100)]
+    public string? CapacidadeRecebimento { get; set; }
+    [StringLength(120)]
+    public string? HorarioFuncionamento { get; set; }
 }
 
 

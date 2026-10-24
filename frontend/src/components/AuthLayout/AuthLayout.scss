@@ -1,0 +1,178 @@
+@use '../../styles/design' as *;
+
+.auth {
+  display: grid;
+  min-height: 100vh;
+  background: $color-bg;
+
+  @include media-up(desktop) {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+    align-items: start;
+  }
+
+  // ─── Painel de marca (só desktop) ────────────
+  // Fica parado ocupando a altura da tela; só a coluna do formulário rola.
+  &__marca {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    display: none;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: $space-12;
+    background-size: cover;
+    background-position: center;
+    isolation: isolate;
+
+    @include media-up(desktop) { display: flex; }
+
+    // Véu verde para o texto branco ter contraste sobre a ilustração
+    &::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      background: linear-gradient(160deg, rgba($color-green-900, 0.92) 0%, rgba($color-green-800, 0.78) 55%, rgba($color-green-900, 0.9) 100%);
+    }
+  }
+
+  &__logo { width: fit-content; text-decoration: none; }
+  &__logo:hover { text-decoration: none; }
+
+  &__texto { max-width: 30rem; }
+
+  &__titulo {
+    font-size: clamp(2rem, 3vw, $font-size-3xl);
+    color: $color-white;
+  }
+
+  &__divisor {
+    display: block;
+    width: 48px;
+    height: 3px;
+    margin: $space-6 0;
+    border-radius: $radius-full;
+    background: $color-amber-500;
+  }
+
+  &__frase {
+    font-size: $font-size-lg;
+    color: rgba($color-white, 0.85);
+  }
+
+  // ─── Formulário ──────────────────────────────
+  &__conteudo {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: $space-6 $space-4;
+
+    @include media-up(tablet) { padding: $space-12 $space-8; }
+
+    .rodape {
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      max-width: 30rem;
+      margin-top: auto;
+      padding-top: $space-6;
+      text-align: center;
+    }
+  }
+
+  &__logo-mobile {
+    align-self: center;
+    margin-bottom: $space-8;
+
+    @include media-up(desktop) { display: none; }
+  }
+
+  &__cartao {
+    width: 100%;
+    max-width: 30rem;
+    margin: auto 0 $space-10;
+  }
+}
+
+// Formulário de acesso (login e cadastro)
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: $space-5;
+
+  &__cabecalho {
+    display: flex;
+    flex-direction: column;
+    gap: $space-2;
+
+    h2 { font-size: $font-size-2xl; }
+  }
+
+  &__rodape {
+    font-size: $font-size-sm;
+    text-align: center;
+  }
+}
+
+// Campo de senha com botão de mostrar/ocultar
+.campo-senha {
+  position: relative;
+
+  input { padding-right: $space-12 !important; }
+
+  &__botao {
+    position: absolute;
+    top: 0;
+    right: 0;
+    height: $touch-target;
+  }
+}
+
+// Seletor de tipo de conta
+.seletor-tipo {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: $space-2;
+  border: 0;
+
+  legend {
+    margin-bottom: $space-2;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-semibold;
+    color: $color-text;
+  }
+
+  label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: $space-1;
+    padding: $space-3 $space-2;
+    border: 1px solid $color-border-strong;
+    border-radius: $radius-md;
+    background: $color-surface;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-semibold;
+    color: $color-text-secondary;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color $duration-fast $ease-out, background-color $duration-fast $ease-out;
+
+    svg { width: 22px; height: 22px; }
+    &:hover { border-color: $color-primary; }
+  }
+
+  input { position: absolute; opacity: 0; pointer-events: none; }
+  input:focus-visible + label { @include focus-ring; }
+  input:checked + label { border-color: $color-primary; background: $color-primary-soft; color: $color-primary; }
+}
+
+// Logo sobre fundo escuro
+.logo--claro {
+  .logo__simbolo { background: rgba($color-white, 0.14); }
+  .logo__simbolo svg { stroke: $color-white; }
+  .logo__vitta { color: $color-white; }
+  .logo__flow { color: $color-green-200; }
+}

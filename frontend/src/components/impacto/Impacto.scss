@@ -1,0 +1,157 @@
+@use '../../styles/design' as *;
+
+// ─── Indicadores (números de impacto) ──────────
+.indicadores {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: $space-4;
+
+  @include media-up(tablet) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  @include media-up(desktop) { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+}
+
+.indicador {
+  @include card-surface;
+  display: flex;
+  flex-direction: column;
+  gap: $space-1;
+  padding: $space-6;
+
+  &__icone {
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    margin-bottom: $space-3;
+    border-radius: $radius-md;
+    background: $color-primary-soft;
+    color: $color-primary;
+
+    svg { width: 20px; height: 20px; }
+  }
+
+  // Número em Fraunces (pedido da identidade visual)
+  &__valor {
+    @include heading;
+    font-size: $font-size-3xl;
+    line-height: 1.05;
+    font-variant-numeric: tabular-nums;
+  }
+
+  &__rotulo {
+    font-size: $font-size-sm;
+    font-weight: $font-weight-semibold;
+    color: $color-text;
+  }
+
+  &__descricao {
+    font-size: $font-size-xs;
+    color: $color-text-muted;
+  }
+}
+
+// ─── Gráfico de evolução ───────────────────────
+// Cores validadas (dataviz): âmbar = doação concluída, verde 600 = venda. Ambas passam CVD e croma.
+$cor-doadas: $color-amber-500;
+$cor-vendidas: $color-green-600;
+
+.grafico {
+  @include card-surface;
+  display: flex;
+  flex-direction: column;
+  gap: $space-4;
+  padding: $space-6;
+
+  &__cabecalho {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: $space-3;
+  }
+
+  &__titulo { font-size: $font-size-lg; }
+  &__descricao { font-size: $font-size-sm; }
+
+  &__legenda {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $space-5;
+    list-style: none;
+    font-size: $font-size-sm;
+    color: $color-text-secondary;
+
+    li { display: flex; align-items: center; gap: $space-2; }
+  }
+
+  &__chave {
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+  }
+
+  &__area {
+    position: relative;
+    min-width: 0;
+
+    svg { display: block; overflow: visible; }
+  }
+
+  &__vazio {
+    position: absolute;
+    inset: 30% 10% auto;
+    padding: $space-3 $space-4;
+    border-radius: $radius-md;
+    background: rgba($color-white, 0.92);
+    font-size: $font-size-sm;
+    text-align: center;
+  }
+
+  &__grade {
+    line { stroke: $color-gray-100; stroke-width: 1; shape-rendering: crispEdges; }
+    text { font-size: 11px; fill: $color-text-muted; font-variant-numeric: tabular-nums; }
+  }
+
+  &__base { stroke: $color-border-strong; stroke-width: 1; shape-rendering: crispEdges; }
+
+  &__mes { font-size: 11px; fill: $color-text-muted; }
+
+  &__alvo { fill: transparent; }
+
+  &__faixa {
+    outline: none;
+
+    &--ativa .grafico__alvo { fill: rgba($color-green-900, 0.04); }
+    &:focus-visible .grafico__alvo { stroke: $color-primary; stroke-width: 2; }
+    &--ativa .grafico__mes { fill: $color-text; font-weight: $font-weight-semibold; }
+  }
+
+  &__barra { transition: opacity $duration-fast $ease-out; }
+  &__faixa--ativa &__barra { opacity: 0.85; }
+
+  &__cor--doadas { fill: $cor-doadas; background: $cor-doadas; }
+  &__cor--vendidas { fill: $cor-vendidas; background: $cor-vendidas; }
+
+  &__tooltip {
+    position: absolute;
+    top: $space-2;
+    z-index: 1;
+    min-width: 160px;
+    padding: $space-3;
+    border: 1px solid $color-border;
+    border-radius: $radius-md;
+    background: $color-surface;
+    box-shadow: $shadow-md;
+    font-size: $font-size-xs;
+    color: $color-text-secondary;
+    pointer-events: none;
+
+    p { display: flex; align-items: center; gap: $space-2; color: inherit; }
+    strong { color: $color-text; font-size: $font-size-sm; font-variant-numeric: tabular-nums; }
+  }
+
+  &__tooltip-mes { margin-bottom: $space-1; font-weight: $font-weight-semibold; color: $color-text !important; }
+  &__tooltip-total { margin-top: $space-1; padding-top: $space-1; border-top: 1px solid $color-border; }
+
+  &__traco { width: 12px; height: 3px; border-radius: 2px; }
+}

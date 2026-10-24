@@ -1,0 +1,74 @@
+@use '../design' as *;
+
+// Alertas inline (erro de formulário, sucesso de ação)
+.alert {
+  display: flex;
+  align-items: flex-start;
+  gap: $space-3;
+  padding: $space-3 $space-4;
+  border: 1px solid transparent;
+  border-radius: $radius-md;
+  font-size: $font-size-sm;
+  line-height: 1.5;
+
+  svg { width: 18px; height: 18px; flex-shrink: 0; margin-top: 1px; }
+
+  &--error   { background: $color-danger-bg;  border-color: rgba($color-danger, 0.25);  color: $color-danger-text; }
+  &--success { background: $color-success-bg; border-color: rgba($color-success, 0.25); color: $color-success-text; }
+  &--warning { background: $color-warning-bg; border-color: rgba($color-warning, 0.3);  color: $color-warning-text; }
+  &--info    { background: $color-info-bg;    border-color: rgba($color-info, 0.25);    color: $color-info-text; }
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $space-3;
+  padding: $space-12 $space-6;
+  border: 1px dashed $color-border-strong;
+  border-radius: $radius-lg;
+  background: $color-surface;
+  text-align: center;
+
+  &__icon {
+    display: grid;
+    place-items: center;
+    width: 64px;
+    height: 64px;
+    border-radius: $radius-full;
+    background: $color-primary-soft;
+    color: $color-primary;
+
+    svg { width: 28px; height: 28px; }
+  }
+
+  &__title {
+    font-size: $font-size-lg;
+  }
+
+  &__text {
+    max-width: 44ch;
+    font-size: $font-size-sm;
+  }
+
+  &__action { margin-top: $space-2; }
+}
+
+// Skeleton: blocos cinza com brilho suave
+.skeleton {
+  display: block;
+  border-radius: $radius-sm;
+  background: linear-gradient(90deg, $color-gray-100 0%, $color-gray-50 50%, $color-gray-100 100%);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.4s $ease-in-out infinite;
+
+  &--text { height: 0.9em; margin: 0.35em 0; }
+  &--title { height: 1.4em; width: 60%; }
+  &--image { aspect-ratio: 4 / 3; border-radius: 0; }
+  &--button { height: $touch-target; border-radius: $radius-md; }
+}
+
+@keyframes skeleton-shimmer {
+  from { background-position: 100% 0; }
+  to { background-position: -100% 0; }
+}

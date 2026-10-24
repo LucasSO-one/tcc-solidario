@@ -1,0 +1,24 @@
+// Fraunces: só títulos e números de destaque. Plus Jakarta Sans: toda a interface.
+$font-heading: 'Fraunces Variable', 'Fraunces', Georgia, 'Times New Roman', serif;
+$font-body:    'Plus Jakarta Sans Variable', 'Plus Jakarta Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+$font-size-xs:  0.75rem;   // 12
+$font-size-sm:  0.875rem;  // 14
+$font-size-md:  1rem;      // 16
+$font-size-lg:  1.125rem;  // 18
+$font-size-xl:  1.5rem;    // 24
+$font-size-2xl: 2rem;      // 32
+$font-size-3xl: 2.75rem;   // 44
+
+$font-weight-regular:  400;
+$font-weight-medium:   500;
+$font-weight-semibold: 600;
+$font-weight-bold:     700;
+
+$line-height-heading: 1.2;
+$line-height-body:    1.6;
+$letter-spacing-heading: -0.01em;
+$letter-spacing-label:   0.08em;
+
+// Eixo de suavidade da Fraunces (SOFT 100 = traço arredondado, WONK 0 = sem floreios)
+$font-heading-variation: 'SOFT' 100, 'WONK' 0;

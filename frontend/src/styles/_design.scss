@@ -1,0 +1,6 @@
+// Ponto único de importação do design system nos componentes:
+//   @use '<caminho>/styles/design' as *;
+@forward 'colors';
+@forward 'typography';
+@forward 'tokens';
+@forward 'mixins';

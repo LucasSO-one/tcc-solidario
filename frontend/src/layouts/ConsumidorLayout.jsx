@@ -1,18 +1,5 @@
-import { Outlet } from "react-router-dom";
-import ConsumidorSidebar from "../components/sidebars/ConsumidorSidebar";
-    
-function ConsumidorLayout() {
-  return (
-    <div className="layout">
+import AppShell from "../components/AppShell/AppShell";
 
-      <ConsumidorSidebar />
-
-      <main className="content">
-        <Outlet />
-      </main>
-
-    </div>
-  );
+export default function ConsumidorLayout() {
+  return <AppShell perfil="Consumidor" />;
 }
-
-export default ConsumidorLayout;

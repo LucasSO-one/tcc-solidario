@@ -1,0 +1,26 @@
+@use '../../styles/design' as *;
+
+.rodape {
+  display: flex;
+  flex-direction: column;
+  gap: $space-2;
+  margin-top: $space-12;
+  padding-top: $space-6;
+  border-top: 1px solid $color-border;
+  font-size: $font-size-xs;
+  color: $color-text-muted;
+
+  @include media-up(tablet) {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  &__links {
+    display: flex;
+    gap: $space-5;
+
+    a { color: $color-text-secondary; }
+    a:hover { color: $color-primary; }
+  }
+}

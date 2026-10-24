@@ -1,23 +1,185 @@
-.fluxo { display:grid; gap:1.25rem; max-width:1200px; margin:auto; }
-.fluxo header h1 { margin-bottom:.4rem; }
-.fluxo p { line-height:1.5; }
-.fluxo-filtros,.fluxo-acoes { display:flex; gap:.75rem; flex-wrap:wrap; align-items:center; }
-.fluxo input:not([type="checkbox"]),.fluxo select { padding:.8rem; border:1px solid #cbd5d1; border-radius:8px; min-width:180px; }
-.fluxo-grade { display:grid; grid-template-columns:repeat(auto-fill,minmax(245px,1fr)); gap:1rem; }
-.fluxo-card { background:#fff; border:1px solid #dce5df; border-radius:12px; padding:1rem; display:grid; gap:.65rem; }
-.fluxo-card h2,.fluxo-card h3 { margin:0; }
-.fluxo-card img { width:100%; height:150px; object-fit:cover; border-radius:8px; }
-.fluxo-card--urgente { border:2px solid #bd3030; }
-.fluxo-card--previa { border-style:dashed; }
-.fluxo-aviso { background:#fff4d5; padding:1rem; border-radius:8px; }
-.fluxo-erro { background:#ffe7e7; color:#942525; padding:.8rem; border-radius:8px; }
-.fluxo-sucesso { background:#e2f4e9; padding:.8rem; border-radius:8px; }
-.fluxo small { color:#53665c; }
-.fluxo button:disabled { cursor:not-allowed; opacity:.65; }
-.fluxo-status { display:inline-block; padding:.25rem .65rem; background:#edf3ef; border-radius:20px; width:fit-content; }
-.fluxo-lista { display:grid; gap:.75rem; }
-.fluxo table { width:100%; border-collapse:collapse; }
-.fluxo td,.fluxo th { padding:.75rem; text-align:left; border-bottom:1px solid #e5ece7; }
-.fluxo-tabela { overflow-x:auto; }
+@use '../../styles/design' as *;
 
-.fluxo-filtros label { display:flex; gap:.5rem; align-items:center; }
+// Telas de fluxo (vitrine, reservas, validação, doações).
+.fluxo {
+  display: flex;
+  flex-direction: column;
+  gap: $space-8;
+
+  > header {
+    display: flex;
+    flex-direction: column;
+    gap: $space-2;
+    max-width: 72ch;
+
+    h1 { font-size: $font-size-2xl; }
+    p { font-size: $font-size-md; }
+  }
+
+  section {
+    display: flex;
+    flex-direction: column;
+    gap: $space-4;
+
+    > h2 { font-size: $font-size-xl; }
+    > p { font-size: $font-size-sm; }
+  }
+}
+
+.fluxo-filtros,
+.fluxo-acoes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: $space-3;
+
+  .search-input { min-width: min(100%, 280px); }
+}
+
+.fluxo-acoes .field { flex: 1 1 240px; }
+.fluxo-filtros .field { flex: 1 1 200px; }
+.fluxo-filtros .search-input { flex: 2 1 280px; }
+
+.fluxo-grade {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: $space-5;
+
+  @include media-up(tablet) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  @include media-up(desktop) { grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+}
+
+.fluxo-lista {
+  display: grid;
+  gap: $space-3;
+
+  @include media-up(tablet) { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
+}
+
+.fluxo-card {
+  @include card-surface;
+  @include card-hover;
+  display: flex;
+  flex-direction: column;
+  gap: $space-2;
+  min-width: 0;
+  padding: $space-5;
+
+  h2, h3 {
+    font-family: $font-body;
+    font-size: $font-size-md;
+    font-weight: $font-weight-semibold;
+    letter-spacing: 0;
+    line-height: 1.4;
+    color: $color-text;
+  }
+
+  p { font-size: $font-size-sm; }
+  small { font-size: $font-size-xs; color: $color-text-muted; }
+  strong { color: $color-text; font-variant-numeric: tabular-nums; }
+  .fluxo-preco { color: $color-primary; }
+
+  img {
+    width: calc(100% + #{$space-5 * 2});
+    margin: (-$space-5) (-$space-5) $space-2;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    border-radius: $radius-lg $radius-lg 0 0;
+  }
+
+  .btn { margin-top: auto; }
+
+  &--urgente { border-color: $color-warning; box-shadow: inset 3px 0 0 $color-warning, $shadow-xs; }
+  &--previa { border-style: dashed; border-color: $color-border-strong; box-shadow: none; }
+
+  &__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $space-2;
+  }
+
+  &__acoes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $space-2;
+    margin-top: auto;
+    padding-top: $space-2;
+
+    .btn { margin-top: 0; flex: 1 1 auto; }
+  }
+}
+
+// Número de destaque nos cards do painel
+.fluxo-stat {
+  @include heading;
+  font-size: $font-size-2xl;
+  font-variant-numeric: tabular-nums;
+}
+
+.fluxo-preco {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-bold;
+  color: $color-primary;
+}
+
+.fluxo-tabela { overflow-x: auto; }
+
+// Aviso de pendências no topo de um painel
+.banner-pendencias {
+  display: flex;
+  flex-direction: column;
+  gap: $space-4;
+  padding: $space-5;
+  border: 1px solid $color-green-200;
+  border-radius: $radius-lg;
+  background: $color-section-alt;
+
+  @include media-up(tablet) { flex-direction: row; align-items: center; }
+
+  > svg { width: 24px; height: 24px; flex-shrink: 0; color: $color-primary; }
+  > div { flex: 1; }
+  p { font-size: $font-size-sm; }
+
+  &__titulo { font-weight: $font-weight-semibold; color: $color-text !important; font-size: $font-size-md !important; }
+}
+
+// Filtro em abas (botões de alternância)
+.abas-filtro {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $space-1;
+  padding: $space-1;
+  border: 1px solid $color-border;
+  border-radius: $radius-md;
+  background: $color-surface;
+
+  &__aba {
+    @include button-reset;
+    display: inline-flex;
+    align-items: center;
+    gap: $space-2;
+    min-height: 36px;
+    padding: 0 $space-3;
+    border-radius: $radius-sm;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-medium;
+    color: $color-text-secondary;
+
+    &:hover { background: $color-surface-muted; }
+    &:focus-visible { @include focus-ring; }
+    &--ativa, &--ativa:hover { background: $color-primary-soft; color: $color-primary; font-weight: $font-weight-semibold; }
+  }
+
+  &__total {
+    padding: 0 $space-2;
+    border-radius: $radius-full;
+    background: $color-surface-muted;
+    font-size: $font-size-xs;
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+.fluxo-nota {
+  font-size: $font-size-xs;
+  color: $color-text-muted;
+}

@@ -10,6 +10,11 @@ export async function listarReservasPendentes() {
     return data;
 }
 
+export async function cancelarReserva(reservaId) {
+    const { data } = await api.post(`/reservas/${reservaId}/cancelar`);
+    return data;
+}
+
 export async function listarMinhasReservas() {
     const { data } = await api.get("/reservas/minhas");
     return data;

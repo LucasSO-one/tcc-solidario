@@ -25,6 +25,9 @@ public class ProdutoController : ControllerBase
 
     [HttpPost("cadastrar-lote")]
     [Authorize(Roles = "Varejista")]
+    // 6 fotos de até 5 MB + campos do formulário
+    [RequestSizeLimit(32 * 1024 * 1024)]
+    [RequestFormLimits(MultipartBodyLengthLimit = 32 * 1024 * 1024)]
     public async Task<IActionResult> CadastrarLote([FromForm] CadastrarLoteRequest request)
     {
         var varejistaId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);

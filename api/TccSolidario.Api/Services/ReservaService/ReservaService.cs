@@ -18,6 +18,11 @@ public class ReservaService(AppDbContext context, CicloVidaService ciclo, TimePr
             throw new InvalidOperationException("Apenas consumidores e ONGs podem reservar alimentos.");
 
         await ciclo.AtualizarAsync();
+        var ativas = await context.Transacoes.CountAsync(t => t.StatusReserva == StatusReserva.Ativa &&
+            (t.ConsumidorId == usuarioId || t.OngId == usuarioId));
+        if (ativas >= RegrasCicloVida.MaxReservasAtivas)
+            throw new InvalidOperationException(
+                $"Você já possui {RegrasCicloVida.MaxReservasAtivas} reservas ativas. Retire ou cancele uma antes de reservar outra.");
         var produto = await context.Produtos.Include(p => p.Varejista).SingleOrDefaultAsync(p => p.Id == produtoId)
             ?? throw new InvalidOperationException("Produto não encontrado.");
         var agora = clock.GetUtcNow().UtcDateTime;
@@ -41,7 +46,7 @@ public class ReservaService(AppDbContext context, CicloVidaService ciclo, TimePr
             Tipo = doacao ? TipoTransacao.Doacao : TipoTransacao.Venda,
             CodigoRetirada = await GerarCodigoUnicoAsync(),
             DataTransacao = agora,
-            DataExpiracao = agora.AddHours(2),
+            DataExpiracao = agora.AddHours(RegrasCicloVida.HorasReserva),
             StatusReserva = StatusReserva.Ativa,
             ValorFinal = doacao ? 0m : produto.PrecoVenda ?? produto.PrecoOriginal,
             ConsumidorId = usuario.Tipo == TipoUsuario.Consumidor ? usuarioId : null,
@@ -69,7 +74,7 @@ public class ReservaService(AppDbContext context, CicloVidaService ciclo, TimePr
         var agora = clock.GetUtcNow().UtcDateTime;
         if (RegrasCicloVida.ExpirarReserva(reserva, agora)) await context.SaveChangesAsync();
         if (reserva.StatusReserva != StatusReserva.Ativa || reserva.DataRetirada.HasValue)
-            throw new InvalidOperationException("Esta reserva já foi concluída ou expirou.");
+            throw new InvalidOperationException($"Esta reserva não está mais ativa (situação: {reserva.StatusReserva}).");
         if (reserva.DataExpiracao <= agora || reserva.Produto.DataValidade <= agora ||
             reserva.Produto.Status != StatusProduto.Reservado)
             throw new InvalidOperationException("Reserva indisponível ou alimento vencido.");
@@ -78,6 +83,21 @@ public class ReservaService(AppDbContext context, CicloVidaService ciclo, TimePr
         reserva.Produto.Status = reserva.Tipo == TipoTransacao.Doacao ? StatusProduto.Doado : StatusProduto.Vendido;
         await context.SaveChangesAsync();
         return reserva;
+    }
+
+    public async Task CancelarAsync(Guid usuarioId, Guid reservaId)
+    {
+        var reserva = await context.Transacoes.Include(t => t.Produto)
+            .SingleOrDefaultAsync(t => t.Id == reservaId && (t.ConsumidorId == usuarioId || t.OngId == usuarioId))
+            ?? throw new InvalidOperationException("Reserva não encontrada.");
+        var agora = clock.GetUtcNow().UtcDateTime;
+        if (RegrasCicloVida.ExpirarReserva(reserva, agora))
+        {
+            await context.SaveChangesAsync();
+            throw new InvalidOperationException("Esta reserva já expirou.");
+        }
+        RegrasCicloVida.CancelarReserva(reserva, agora);
+        await context.SaveChangesAsync();
     }
 
     private IQueryable<Transacao> Consulta() => context.Transacoes.AsNoTracking()
@@ -124,6 +144,8 @@ public class ReservaService(AppDbContext context, CicloVidaService ciclo, TimePr
     {
         Id = t.Id, ProdutoId = t.ProdutoId, ProdutoNome = t.Produto!.Titulo,
         CodigoRetirada = mostrarCodigo && t.StatusReserva == StatusReserva.Ativa ? t.CodigoRetirada : "",
+        // O varejista vê apenas o final do código para conferir; o código completo fica só com o receptor.
+        FinalCodigo = t.StatusReserva == StatusReserva.Ativa && t.CodigoRetirada.Length >= 4 ? t.CodigoRetirada[^4..] : "",
         Tipo = t.Tipo.ToString(), Status = t.StatusReserva.ToString(),
         ValorFinal = t.ValorFinal, DataReserva = t.DataTransacao,
         DataExpiracao = t.DataExpiracao, DataValidade = t.Produto.DataValidade,

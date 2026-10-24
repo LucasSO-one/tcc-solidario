@@ -1,0 +1,70 @@
+// Paleta oficial VittaFlow (tema claro).
+// Componentes devem usar apenas os tokens SEMÂNTICOS do fim do arquivo.
+
+// ─── Verde institucional (marca) ───────────────
+$color-green-900: #0F3D2B;   // títulos fortes, sidebar (variante escura)
+$color-green-800: #155239;
+$color-green-700: #1B6646;   // cor principal (botões, links, item ativo)
+$color-green-600: #23805A;   // hover
+$color-green-500: #2F9B6D;   // verde fresco (ícones, destaques, gráficos)
+$color-green-400: #5BB88C;
+$color-green-200: #BFE3CF;
+$color-green-100: #E3F3EA;   // fundos de destaque, badges
+$color-green-50:  #F2FAF5;   // fundo de seções alternadas
+
+// ─── Brancos e neutros (leve tom esverdeado) ───
+$color-white:    #FFFFFF;
+$color-bg:       #F7F9F8;    // fundo da aplicação
+$color-gray-50:  #F2F5F3;
+$color-gray-100: #E6EBE8;    // bordas suaves
+$color-gray-200: #D3DBD7;    // bordas padrão
+$color-gray-400: #8E9A94;    // texto desabilitado / placeholders
+$color-gray-500: #6B7872;    // texto terciário
+$color-gray-600: #4F5B55;    // texto secundário
+$color-gray-800: #2A332F;
+$color-gray-900: #17201C;    // texto principal (nunca preto puro)
+
+// ─── Acento quente (uso pontual, nunca em botões) ──
+$color-amber-500: #E8A33D;
+$color-amber-100: #FCF1DC;
+
+// ─── Estados (inclui validade dos alimentos) ───
+$color-success:     #2F9B6D;  // disponível / doado
+$color-warning:     #D98C1F;  // vence em breve
+$color-danger:      #C8453B;  // vencido / cancelado
+$color-info:        #2F6FB3;  // reservado / em trânsito
+$color-success-bg:  #E3F3EA;
+$color-warning-bg:  #FCF1DC;
+$color-danger-bg:   #FBE7E5;
+$color-info-bg:     #E4EEF8;
+
+// Texto sobre os fundos de estado. As cores de estado puras não atingem
+// contraste AA (4.5:1) em texto pequeno; o texto usa um tom mais escuro da mesma cor.
+$color-success-text: #1B6646;
+$color-warning-text: #8A5410;
+$color-danger-text:  #A3352C;
+$color-info-text:    #245A93;
+
+// ─── Semânticos (use ESTES nos componentes) ────
+$color-surface:         $color-white;
+$color-surface-muted:   $color-gray-50;
+$color-border:          $color-gray-100;
+$color-border-strong:   $color-gray-200;
+$color-text:            $color-gray-900;
+$color-text-secondary:  $color-gray-600;
+$color-text-muted:      $color-gray-500;
+$color-text-disabled:   $color-gray-400;
+$color-heading:         $color-green-900;
+$color-primary:         $color-green-700;
+$color-primary-hover:   $color-green-600;
+$color-primary-active:  $color-green-800;
+$color-primary-soft:    $color-green-100;
+$color-on-primary:      $color-white;
+$color-accent:          $color-green-500;
+$color-section-alt:     $color-green-50;
+$color-sidebar-bg:      $color-white;
+$color-sidebar-active:  $color-green-100;
+$color-focus-ring:      rgba(27, 102, 70, 0.35);
+$color-overlay:         rgba(15, 61, 43, 0.45);
+$color-highlight:       $color-amber-500;
+$color-highlight-bg:    $color-amber-100;

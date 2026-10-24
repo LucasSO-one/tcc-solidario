@@ -1,40 +1,42 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import {
-  FaUserFriends,
-  FaHandsHelping,
-  FaStore,
-  FaEye,
-  FaEyeSlash,
-} from "react-icons/fa";
-import Logo from "../../../assets/Logo.png";
-import "./Register.scss";
-
+import { HandHeart, Store, UserRound } from "lucide-react";
 import ilustracao from "../../../assets/harmony-produce2.png";
 import { register } from "../../../service/auth";
+import { mensagemErro } from "../../../utils/mensagemErro";
+import { mascaraCnpj, mascaraCpf, mascaraTelefone, senhaValida } from "../../../utils/mascaras";
+import AuthLayout from "../../../components/AuthLayout/AuthLayout";
+import ForcaSenha from "../../../components/conta/ForcaSenha";
+import Alert from "../../../components/ui/Alert";
+import Button from "../../../components/ui/Button";
+import CampoSenha from "../../../components/ui/CampoSenha";
+import Field from "../../../components/ui/Field";
 
 const USER_TYPES = [
-  { value: "consumidor", label: "Consumidor", icon: FaUserFriends },
-  { value: "ong", label: "ONG", icon: FaHandsHelping },
-  { value: "varejista", label: "Varejista", icon: FaStore },
+  { value: "consumidor", label: "Consumidor", icon: UserRound },
+  { value: "ong", label: "ONG", icon: HandHeart },
+  { value: "varejista", label: "Varejista", icon: Store },
 ];
+
+const MASCARAS = { cpf: mascaraCpf, cnpj: mascaraCnpj, telefone: mascaraTelefone };
 
 // Campos específicos de cada tipo — controla o que é renderizado E o que é
 // obrigatório, então fica fácil adicionar um novo tipo de usuário no futuro
 const CAMPOS_POR_TIPO = {
   consumidor: [
-    { name: "cpf", label: "CPF", placeholder: "000.000.000-00", maxLength: 14 },
-    { name: "telefone", label: "Telefone", placeholder: "(11) 91234-5678" },
+    { name: "nome", label: "Nome completo", placeholder: "Seu nome", autoComplete: "name" },
+    { name: "cpf", label: "CPF", placeholder: "000.000.000-00", inputMode: "numeric" },
+    { name: "telefone", label: "Celular", placeholder: "(11) 91234-5678", inputMode: "tel", autoComplete: "tel" },
   ],
   ong: [
     { name: "nomeFantasia", label: "Nome da ONG", placeholder: "Nome fantasia da instituição" },
-    { name: "cnpj", label: "CNPJ", placeholder: "00.000.000/0000-00", maxLength: 18 },
-    { name: "telefone", label: "Telefone", placeholder: "(11) 91234-5678" },
+    { name: "cnpj", label: "CNPJ", placeholder: "00.000.000/0000-00", inputMode: "numeric" },
+    { name: "telefone", label: "Celular de contato", placeholder: "(11) 91234-5678", inputMode: "tel", autoComplete: "tel" },
   ],
   varejista: [
-    { name: "razaoSocial", label: "Razão Social", placeholder: "Razão social da empresa" },
-    { name: "nomeEstabelecimento", label: "Nome do Estabelecimento", placeholder: "Nome fantasia (ex: Mercadinho do Bairro)" },
-    { name: "cnpj", label: "CNPJ", placeholder: "00.000.000/0000-00", maxLength: 18 },
+    { name: "razaoSocial", label: "Razão social", placeholder: "Razão social da empresa" },
+    { name: "nomeEstabelecimento", label: "Nome do estabelecimento", placeholder: "Ex.: Mercadinho do Bairro" },
+    { name: "cnpj", label: "CNPJ", placeholder: "00.000.000/0000-00", inputMode: "numeric" },
   ],
 };
 
@@ -55,14 +57,12 @@ const Register = () => {
   const navigate = useNavigate();
   const [userType, setUserType] = useState("consumidor");
   const [formData, setFormData] = useState(CAMPOS_INICIAIS);
-  const [showSenha, setShowSenha] = useState(false);
-  const [showConfirmarSenha, setShowConfirmarSenha] = useState(false);
   const [erro, setErro] = useState("");
   const [carregando, setCarregando] = useState(false);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: MASCARAS[name] ? MASCARAS[name](value) : value }));
   };
 
   // Ao trocar de tipo, limpa os campos específicos do tipo anterior
@@ -71,6 +71,7 @@ const Register = () => {
     setUserType(novoTipo);
     setFormData((prev) => ({
       ...prev,
+      nome: "",
       cpf: "",
       telefone: "",
       cnpj: "",
@@ -81,10 +82,16 @@ const Register = () => {
     setErro("");
   };
 
+  const senhasDiferentes = formData.confirmarSenha && formData.senha !== formData.confirmarSenha;
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErro("");
 
+    if (!senhaValida(formData.senha)) {
+      setErro("A senha ainda não atende a todos os requisitos.");
+      return;
+    }
     if (formData.senha !== formData.confirmarSenha) {
       setErro("As senhas não coincidem.");
       return;
@@ -93,201 +100,79 @@ const Register = () => {
     setCarregando(true);
     try {
       const resultado = await register(userType, formData);
+      const precisaAprovacao = userType !== "consumidor";
       navigate("/login", {
         replace: true,
-        state: { mensagem: resultado.Mensagem },
+        state: {
+          mensagem: resultado?.mensagem ?? resultado?.Mensagem ?? (precisaAprovacao
+            ? "Cadastro enviado! Nossa equipe vai analisar os dados e liberar o acesso em breve."
+            : "Conta criada! Agora é só entrar."),
+        },
       });
     } catch (err) {
-      setErro(err.response?.data?.Erro ?? "Não foi possível concluir o cadastro. Tente novamente.");
+      setErro(mensagemErro(err, "Não foi possível concluir o cadastro. Tente novamente."));
     } finally {
       setCarregando(false);
     }
   };
 
-  const campoIdentificacao =
-    userType === "consumidor" ? "nome" : userType === "ong" ? "nomeFantasia" : "razaoSocial";
-  const camposExtras = CAMPOS_POR_TIPO[userType].filter((c) => c.name !== campoIdentificacao);
-
   return (
-    <div className="register-layout">
-      <aside
-        className="register-layout__brand"
-        style={{ backgroundImage: `url(${ilustracao})` }}
-      >
-        <div className="register-layout__overlay" />
-
-        <div className="register-layout__header">
-          <img className="register-layout__logo" src={Logo} alt="VittaFlow" />
+    <AuthLayout ilustracao={ilustracao}
+      titulo={<>Alimento que sobra em um lugar é cuidado que falta em outro.</>}
+      frase="Varejistas, consumidores e ONGs juntos para que nenhum alimento bom vá para o lixo.">
+      <form onSubmit={handleSubmit} className="auth-form">
+        <div className="auth-form__cabecalho">
+          <h2>Criar conta</h2>
+          <p>Escolha como você vai usar a VittaFlow.</p>
         </div>
 
-        <div className="register-layout__copy">
-          <h1 className="register-layout__tagline">
-            Alimento que sobra<br />
-            em um lugar é cuidado<br />
-            que falta em outro.
-          </h1>
+        {erro && <Alert variant="error">{erro}</Alert>}
 
-          <span className="register-layout__divider" />
-
-          <p className="register-layout__quote">
-            Cada refeição resgatada é um gesto de cuidado — com as pessoas e
-            com a terra.
-          </p>
-        </div>
-      </aside>
-
-      <main className="register-layout__content">
-        <form onSubmit={handleSubmit} className="register-card">
-          <h2 className="register-card__title">Criar conta</h2>
-          <p className="register-card__subtitle">
-            Selecione o tipo e preencha os dados
-          </p>
-
-          {erro && <p className="register-card__error">{erro}</p>}
-
-          <div className="register-card__field">
-            <label className="register-card__label">Tipo de usuário</label>
-            <div className="register-card__type-selector">
-              {USER_TYPES.map(({ value, label, icon: Icon }) => (
-                <button
-                  key={value}
-                  type="button"
-                  className={`register-card__type-btn${
-                    userType === value ? " register-card__type-btn--active" : ""
-                  }`}
-                  onClick={() => handleUserTypeChange(value)}
-                >
-                  <Icon />
-                  <span>{label}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Nome / Razão Social / Nome Fantasia — muda o label conforme o tipo,
-              mas é sempre o mesmo campo visual pro usuário */}
-          <div className="register-card__field">
-            <label htmlFor={campoIdentificacao} className="register-card__label">
-              {userType === "consumidor" && "Nome completo"}
-              {userType === "ong" && "Nome da ONG"}
-              {userType === "varejista" && "Razão Social"}
-            </label>
-            <input
-              type="text"
-              id={campoIdentificacao}
-              name={campoIdentificacao}
-              placeholder={userType === "consumidor" ? "Seu nome" : "Nome oficial da instituição"}
-              value={formData[campoIdentificacao]}
-              onChange={handleInputChange}
-              required
-            />
-          </div>
-
-          {/* Campos extras específicos do tipo (CPF/CNPJ/Telefone) */}
-          {camposExtras.map(({ name, label, placeholder, maxLength }) => (
-            <div className="register-card__field" key={name}>
-              <label htmlFor={name} className="register-card__label">
-                {label}
-              </label>
-              <input
-                type="text"
-                id={name}
-                name={name}
-                placeholder={placeholder}
-                maxLength={maxLength}
-                value={formData[name]}
-                onChange={handleInputChange}
-                required
-              />
-            </div>
+        <fieldset className="seletor-tipo">
+          <legend>Tipo de conta</legend>
+          {USER_TYPES.map(({ value, label, icon: Icon }) => (
+            <span key={value}>
+              <input type="radio" id={`tipo-${value}`} name="tipo" value={value}
+                checked={userType === value} onChange={() => handleUserTypeChange(value)} />
+              <label htmlFor={`tipo-${value}`}><Icon aria-hidden="true" />{label}</label>
+            </span>
           ))}
+        </fieldset>
 
-          <div className="register-card__field">
-            <label htmlFor="email" className="register-card__label">
-              Email
-            </label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              placeholder="seu@email.com"
-              value={formData.email}
-              onChange={handleInputChange}
-              required
-            />
-          </div>
+        {userType !== "consumidor" && <Alert variant="info">
+          Cadastros de {userType === "ong" ? "ONGs" : "varejistas"} passam por uma análise rápida da nossa equipe antes de liberar o acesso.
+        </Alert>}
 
-          <div className="register-card__field">
-            <label htmlFor="senha" className="register-card__label">
-              Senha
-            </label>
-            <div className="register-card__input-wrapper">
-              <input
-                type={showSenha ? "text" : "password"}
-                id="senha"
-                name="senha"
-                placeholder="Pelo menos 8 caracteres"
-                value={formData.senha}
-                onChange={handleInputChange}
-                required
-                minLength={8}
-              />
-              <button
-                type="button"
-                className="register-card__toggle-visibility"
-                onClick={() => setShowSenha((prev) => !prev)}
-                aria-label={showSenha ? "Ocultar senha" : "Mostrar senha"}
-                tabIndex={-1}
-              >
-                {showSenha ? <FaEyeSlash /> : <FaEye />}
-              </button>
-            </div>
-            <small className="register-card__hint">
-              Mínimo de 8 caracteres, com maiúscula, número e caractere especial.
-            </small>
-          </div>
+        {CAMPOS_POR_TIPO[userType].map(({ name, label, ...props }) => (
+          <Field key={name} label={label} required>
+            <input type="text" name={name} value={formData[name]} onChange={handleInputChange} {...props} />
+          </Field>
+        ))}
 
-          <div className="register-card__field">
-            <label htmlFor="confirmarSenha" className="register-card__label">
-              Confirmar senha
-            </label>
-            <div className="register-card__input-wrapper">
-              <input
-                type={showConfirmarSenha ? "text" : "password"}
-                id="confirmarSenha"
-                name="confirmarSenha"
-                placeholder="Repita sua senha"
-                value={formData.confirmarSenha}
-                onChange={handleInputChange}
-                required
-              />
-              <button
-                type="button"
-                className="register-card__toggle-visibility"
-                onClick={() => setShowConfirmarSenha((prev) => !prev)}
-                aria-label={
-                  showConfirmarSenha ? "Ocultar senha" : "Mostrar senha"
-                }
-                tabIndex={-1}
-              >
-                {showConfirmarSenha ? <FaEyeSlash /> : <FaEye />}
-              </button>
-            </div>
-          </div>
+        <Field label="E-mail" required help="Você vai usar este e-mail para entrar.">
+          <input type="email" name="email" placeholder="seu@email.com" autoComplete="email" value={formData.email} onChange={handleInputChange} />
+        </Field>
 
-          <button type="submit" className="register-card__submit" disabled={carregando}>
-            {carregando ? "Criando conta..." : "Criar conta"}
-          </button>
+        <Field label="Senha" required>
+          <CampoSenha name="senha" autoComplete="new-password" value={formData.senha} onChange={handleInputChange} />
+        </Field>
+        <ForcaSenha senha={formData.senha} />
 
-          <p className="register-card__footer">
-            Já tem conta?{" "}
-            <Link to="/login" className="register-card__footer-link">
-              Entrar
-            </Link>
-          </p>
-        </form>
-      </main>
-    </div>
+        <Field label="Confirmar senha" required error={senhasDiferentes ? "As senhas não coincidem." : undefined}>
+          <CampoSenha name="confirmarSenha" autoComplete="new-password" value={formData.confirmarSenha} onChange={handleInputChange} />
+        </Field>
+
+        <Button type="submit" variant="primary" block loading={carregando}>Criar conta</Button>
+
+        <p className="auth-form__rodape">
+          Ao criar a conta, você concorda com os <Link to="/termos">Termos de uso</Link> e
+          a <Link to="/privacidade">Política de privacidade</Link>.
+        </p>
+        <p className="auth-form__rodape">
+          Já tem conta? <Link to="/login">Entrar</Link>
+        </p>
+      </form>
+    </AuthLayout>
   );
 };
 

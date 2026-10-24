@@ -1,11 +1,12 @@
-import { BrowserRouter } from "react-router-dom";
-import AppRoutes from "./routes/AppRoutes";
+import { RouterProvider } from "react-router-dom";
+import router from "./routes/AppRoutes";
+import ToastProvider from "./components/ui/ToastProvider";
 
 function App() {
   return (
-    <BrowserRouter>
-      <AppRoutes />
-    </BrowserRouter>
+    <ToastProvider>
+      <RouterProvider router={router} />
+    </ToastProvider>
   );
 }
 

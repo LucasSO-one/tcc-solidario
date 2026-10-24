@@ -12,7 +12,8 @@ public class Produto
     public string Categoria { get; set; } = string.Empty;
     public string Descricao { get; set; } = string.Empty;
     public bool FrutaFeia { get; set; } = false;
-    public string? ImagemUrl { get; set; }
+    public string? ImagemUrl { get; set; } // capa (primeira de Imagens), mantida por compatibilidade
+    public List<ProdutoImagem> Imagens { get; set; } = new();
 
     public DateTime DataValidade { get; set; }
 

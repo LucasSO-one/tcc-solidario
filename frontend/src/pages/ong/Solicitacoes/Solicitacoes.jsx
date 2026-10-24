@@ -1,2 +1,2 @@
 import HistoricoReservas from '../../../components/Fluxos/HistoricoReservas';
-export default function Historico() { return <HistoricoReservas titulo="Solicitações de retirada" />; }
+export default function Historico() { return <HistoricoReservas titulo="Solicitações de retirada" status={['Ativa', 'Expirada', 'Cancelada']} />; }

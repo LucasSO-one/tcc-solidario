@@ -1,0 +1,219 @@
+@use '../design' as *;
+
+// Campo: label acima, controle, ajuda/erro abaixo.
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: $space-2;
+  min-width: 0;
+
+  &--full { grid-column: 1 / -1; }
+
+  &__label,
+  > label {
+    font-size: $font-size-sm;
+    font-weight: $font-weight-semibold;
+    color: $color-text;
+  }
+
+  &__required {
+    margin-left: 2px;
+    color: $color-danger-text;
+  }
+
+  &__help {
+    font-size: $font-size-xs;
+    color: $color-text-muted;
+  }
+
+  &__error {
+    display: flex;
+    align-items: center;
+    gap: $space-1;
+    font-size: $font-size-xs;
+    font-weight: $font-weight-medium;
+    color: $color-danger-text;
+
+    svg { width: 14px; height: 14px; flex-shrink: 0; }
+  }
+}
+
+.input,
+.field input:not([type='checkbox']):not([type='radio']):not([type='file']),
+.field select,
+.field textarea {
+  width: 100%;
+  min-height: $touch-target;
+  padding: $space-2 $space-3;
+  border: 1px solid $color-border-strong;
+  border-radius: $radius-md;
+  background: $color-surface;
+  font-family: $font-body;
+  font-size: $font-size-sm;
+  color: $color-text;
+  transition: border-color $duration-fast $ease-out, box-shadow $duration-fast $ease-out;
+
+  &::placeholder { color: $color-text-disabled; }
+  &:hover:not(:disabled) { border-color: $color-gray-400; }
+
+  &:focus {
+    border-color: $color-primary;
+    @include focus-ring;
+  }
+
+  &:disabled,
+  &[readonly] {
+    background: $color-surface-muted;
+    color: $color-text-muted;
+    cursor: not-allowed;
+  }
+
+  &[aria-invalid='true'] {
+    border-color: $color-danger;
+
+    &:focus { box-shadow: 0 0 0 3px rgba($color-danger, 0.25); }
+  }
+}
+
+.field textarea {
+  min-height: 96px;
+  resize: vertical;
+  line-height: $line-height-body;
+}
+
+.field select {
+  appearance: none;
+  padding-right: $space-10;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%234F5B55' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m4 6 4 4 4-4'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right $space-3 center;
+}
+
+.input-prefix {
+  position: relative;
+
+  &__symbol {
+    position: absolute;
+    left: $space-3;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: $font-size-sm;
+    color: $color-text-muted;
+    pointer-events: none;
+  }
+
+  input { padding-left: $space-10 !important; }
+}
+
+.checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: $space-2;
+  min-height: $touch-target;
+  font-size: $font-size-sm;
+  color: $color-text;
+  cursor: pointer;
+
+  input {
+    width: 18px;
+    height: 18px;
+    accent-color: $color-primary;
+    cursor: pointer;
+  }
+}
+
+.search-input {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+
+  &__icon {
+    position: absolute;
+    left: $space-3;
+    top: 50%;
+    width: 18px;
+    height: 18px;
+    transform: translateY(-50%);
+    color: $color-text-muted;
+    pointer-events: none;
+  }
+
+  input {
+    width: 100%;
+    min-height: $touch-target;
+    padding: $space-2 $space-3 $space-2 $space-10;
+    border: 1px solid $color-border-strong;
+    border-radius: $radius-md;
+    background: $color-surface;
+    font-size: $font-size-sm;
+    color: $color-text;
+
+    &::placeholder { color: $color-text-disabled; }
+    &:focus { border-color: $color-primary; @include focus-ring; }
+  }
+}
+
+// Interruptor (liga/desliga) com título e descrição
+.toggle-row {
+  display: flex;
+  align-items: flex-start;
+  gap: $space-3;
+  padding: $space-4;
+  border: 1px solid $color-border;
+  border-radius: $radius-md;
+  background: $color-section-alt;
+  cursor: pointer;
+
+  &__switch {
+    position: relative;
+    flex-shrink: 0;
+    width: 40px;
+    height: 22px;
+    margin-top: 2px;
+
+    input {
+      position: absolute;
+      opacity: 0;
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      cursor: pointer;
+
+      &:checked + .toggle-row__slider { background: $color-primary; }
+      &:checked + .toggle-row__slider::before { transform: translateX(18px); }
+      &:focus-visible + .toggle-row__slider { @include focus-ring; }
+    }
+  }
+
+  &__slider {
+    position: absolute;
+    inset: 0;
+    border-radius: $radius-full;
+    background: $color-border-strong;
+    pointer-events: none;
+    transition: background-color $duration-fast $ease-out;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 18px;
+      height: 18px;
+      border-radius: $radius-full;
+      background: $color-surface;
+      box-shadow: $shadow-xs;
+      transition: transform $duration-base $ease-out;
+    }
+  }
+
+  &__text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    font-size: $font-size-sm;
+    color: $color-text-secondary;
+
+    strong { color: $color-text; }
+  }
+}

@@ -81,6 +81,25 @@ public class ReservaController : ControllerBase
         }
     }
 
+    [HttpPost("{reservaId:guid}/cancelar")]
+    [Authorize(Roles = "Consumidor,ONG")]
+    public async Task<IActionResult> Cancelar(Guid reservaId)
+    {
+        var usuarioId = Guid.Parse(
+            User.FindFirstValue(ClaimTypes.NameIdentifier)!
+        );
+
+        try
+        {
+            await _reservaService.CancelarAsync(usuarioId, reservaId);
+            return Ok(new { message = "Reserva cancelada. O alimento voltou a ficar disponível." });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
     [HttpGet("minhas")]
     public async Task<IActionResult> ListarMinhasReservas()
     {

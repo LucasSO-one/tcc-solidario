@@ -4,5 +4,6 @@ public enum StatusReserva
 {
     Ativa,
     Concluida,
-    Expirada
+    Expirada,
+    Cancelada
 }

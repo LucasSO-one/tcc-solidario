@@ -1,0 +1,45 @@
+@use 'design' as *;
+
+.content {
+  flex: 1;
+  min-width: 0;
+  padding: $space-6 $space-4;
+
+  @include media-up(tablet) { padding: $space-8 $space-6; }
+  @include media-up(desktop) { padding: $space-10 $space-8; }
+
+  > * {
+    max-width: $content-max-width;
+    margin-inline: auto;
+  }
+}
+
+// Cabeçalho padrão de página
+.page-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: $space-4;
+  margin-bottom: $space-8;
+
+  &__text {
+    display: flex;
+    flex-direction: column;
+    gap: $space-2;
+    max-width: 64ch;
+  }
+
+  &__title { font-size: $font-size-2xl; }
+  &__subtitle { font-size: $font-size-md; }
+}
+
+// Grade de cards de alimentos: 1 coluna no celular, 2 no tablet, 3–4 no desktop
+.grade-produtos {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: $space-5;
+
+  @include media-up(tablet) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  @include media-up(desktop) { grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); }
+}

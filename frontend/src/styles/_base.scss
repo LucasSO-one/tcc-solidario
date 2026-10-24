@@ -1,0 +1,100 @@
+@use 'design' as *;
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  min-height: 100vh;
+  font-family: $font-body;
+  font-size: $font-size-md;
+  line-height: $line-height-body;
+  color: $color-text;
+  background: $color-bg;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+h1, h2, h3 { @include heading; }
+h1 { font-size: $font-size-2xl; }
+h2 { font-size: $font-size-xl; }
+h3 { font-size: $font-size-lg; }
+
+h4, h5, h6 {
+  font-family: $font-body;
+  font-weight: $font-weight-semibold;
+  line-height: 1.4;
+  color: $color-text;
+}
+
+p { color: $color-text-secondary; }
+
+a {
+  color: $color-primary;
+  text-decoration: none;
+  text-underline-offset: 3px;
+
+  &:hover { color: $color-primary-hover; text-decoration: underline; }
+}
+
+img, svg, video {
+  display: block;
+  max-width: 100%;
+}
+
+button, input, select, textarea {
+  font: inherit;
+  color: inherit;
+}
+
+table, time, data, .tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+:focus-visible {
+  @include focus-ring;
+  border-radius: $radius-sm;
+}
+
+::selection {
+  background: $color-green-200;
+  color: $color-green-900;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: $color-border-strong transparent;
+}
+
+.sr-only { @include visually-hidden; }
+
+// Rótulo de seção (uppercase)
+.eyebrow { @include label-caps; display: inline-block; }
+
+// Número de impacto em Fraunces
+.display-number {
+  @include heading;
+  font-size: $font-size-3xl;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

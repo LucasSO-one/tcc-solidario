@@ -37,6 +37,24 @@ public class AdminController(AppDbContext context) : ControllerBase
         }).ToList();
     }
 
+    // Todos os usuários (exceto administradores). CPF é mascarado: o admin não precisa do documento completo.
+    [HttpGet("usuarios")]
+    public async Task<IActionResult> GetUsuarios()
+    {
+        var usuarios = await context.Usuarios.AsNoTracking().Where(u => u.Tipo != TipoUsuario.Admin)
+            .OrderByDescending(u => u.DataCriacao).ToListAsync();
+        return Ok(usuarios.Select(u => new
+        {
+            u.Id, u.Email, Tipo = u.Tipo.ToString(), Status = u.StatusAprovacao.ToString(), u.DataCriacao,
+            Nome = u switch { Varejista v => v.NomeEstabelecimento, Ong o => o.NomeFantasia, _ => u.Nome },
+            Documento = u switch
+            {
+                Varejista v => v.CNPJ, Ong o => o.CNPJ,
+                Consumidor c when c.CPF.Length == 11 => $"***.{c.CPF[3..6]}.{c.CPF[6..9]}-**", _ => ""
+            }
+        }));
+    }
+
     [HttpPut("avaliar-cadastro/{id:guid}")]
     public async Task<IActionResult> AvaliarCadastro(Guid id, [FromBody] AvaliarCadastroRequest request)
     {

@@ -1,0 +1,275 @@
+@use '../../../styles/design' as *;
+
+.configuracoes {
+  &__corpo {
+    display: grid;
+    gap: $space-6;
+    align-items: start;
+
+    @include media-up(tablet) { grid-template-columns: 220px minmax(0, 1fr); }
+    @include media-up(desktop) { grid-template-columns: 240px minmax(0, 880px); }
+
+    &--acordeao { display: block; }
+  }
+
+  // ─── Abas laterais ───────────────────────────
+  &__abas {
+    position: sticky;
+    top: $space-6;
+    display: flex;
+    flex-direction: column;
+    gap: $space-1;
+  }
+
+  &__aba {
+    @include button-reset;
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: $space-3;
+    min-height: $touch-target;
+    padding: 0 $space-3;
+    border-radius: $radius-md;
+    color: $color-text-secondary;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-medium;
+    text-align: left;
+    transition: background-color $duration-fast $ease-out, color $duration-fast $ease-out;
+
+    svg { width: 18px; height: 18px; flex-shrink: 0; }
+    &:hover { background: $color-surface-muted; color: $color-text; }
+    &:focus-visible { @include focus-ring; }
+
+    &--ativa,
+    &--ativa:hover {
+      background: $color-sidebar-active;
+      color: $color-primary;
+      font-weight: $font-weight-semibold;
+    }
+  }
+
+  // Ponto âmbar: seção com alterações não salvas
+  &__pendente {
+    width: 8px;
+    height: 8px;
+    margin-left: auto;
+    border-radius: $radius-full;
+    background: $color-highlight;
+  }
+
+  &__paineis { min-width: 0; }
+
+  // ─── Acordeão (celular) ──────────────────────
+  &__corpo--acordeao &__item + &__item { margin-top: $space-3; }
+
+  &__acordeao-titulo {
+    margin: 0;
+
+    button {
+      @include button-reset;
+      display: flex;
+      align-items: center;
+      gap: $space-3;
+      width: 100%;
+      min-height: 56px;
+      padding: 0 $space-4;
+      border: 1px solid $color-border;
+      border-radius: $radius-lg;
+      background: $color-surface;
+      font-family: $font-body;
+      font-size: $font-size-md;
+      font-weight: $font-weight-semibold;
+      letter-spacing: 0;
+      color: $color-text;
+
+      > svg:first-child { width: 20px; height: 20px; color: $color-primary; }
+      &:focus-visible { @include focus-ring; }
+      &[aria-expanded='true'] { border-radius: $radius-lg $radius-lg 0 0; border-bottom-color: transparent; }
+      &[aria-expanded='true'] .configuracoes__chevron { transform: rotate(180deg); }
+    }
+  }
+
+  &__chevron {
+    width: 18px;
+    height: 18px;
+    margin-left: auto;
+    color: $color-text-muted;
+    transition: transform $duration-base $ease-out;
+  }
+
+  &__pendente + &__chevron { margin-left: $space-2; }
+
+  &__corpo--acordeao &__painel {
+    border-top: 0;
+    border-radius: 0 0 $radius-lg $radius-lg;
+    padding: $space-4;
+  }
+
+  &__corpo--acordeao .config-secao__cabecalho h2 { @include visually-hidden; }
+}
+
+// ─── Conteúdo das seções ───────────────────────
+.config-secao {
+  display: flex;
+  flex-direction: column;
+  gap: $space-6;
+
+  &__cabecalho {
+    display: flex;
+    flex-direction: column;
+    gap: $space-1;
+
+    h2 { font-size: $font-size-xl; }
+    p { font-size: $font-size-sm; }
+  }
+
+  &__acoes {
+    display: flex;
+    flex-direction: column-reverse;
+    gap: $space-3;
+    padding-top: $space-5;
+    border-top: 1px solid $color-border;
+
+    @include media-up(tablet) {
+      flex-direction: row;
+      justify-content: flex-end;
+    }
+  }
+}
+
+.config-grade {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: $space-5;
+
+  @include media-up(desktop) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+  &--estreita { max-width: 480px; grid-template-columns: 1fr !important; }
+}
+
+.config-grupo {
+  border: 0;
+
+  // float tira a legend da borda do fieldset (comportamento padrão do navegador)
+  legend {
+    @include label-caps;
+    float: left;
+    width: 100%;
+    margin-bottom: $space-4;
+  }
+
+  legend + * { clear: both; }
+
+  & + & { padding-top: $space-6; border-top: 1px solid $color-border; }
+}
+
+.config-foto {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: $space-5;
+
+  .avatar { font-size: $font-size-xl; }
+  .field__help { margin-top: $space-2; max-width: 40ch; }
+}
+
+.config-lista-toggles {
+  display: flex;
+  flex-direction: column;
+  gap: $space-3;
+}
+
+// ─── Força da senha ────────────────────────────
+.forca-senha {
+  display: flex;
+  flex-direction: column;
+  gap: $space-2;
+
+  &__barra {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: $space-1;
+
+    span {
+      height: 6px;
+      border-radius: $radius-full;
+      background: $color-gray-100;
+      transition: background-color $duration-base $ease-out;
+    }
+  }
+
+  &__barra[data-nivel='1'] &__passo--ativo { background: $color-danger; }
+  &__barra[data-nivel='2'] &__passo--ativo { background: $color-warning; }
+  &__barra[data-nivel='3'] &__passo--ativo { background: $color-green-400; }
+  &__barra[data-nivel='4'] &__passo--ativo { background: $color-success; }
+
+  &__nivel { font-size: $font-size-xs; }
+
+  &__requisitos {
+    display: grid;
+    gap: $space-1;
+    list-style: none;
+    font-size: $font-size-xs;
+    color: $color-text-muted;
+
+    li { display: flex; align-items: center; gap: $space-2; }
+    svg { width: 14px; height: 14px; flex-shrink: 0; }
+  }
+
+  &__ok { color: $color-success-text; }
+}
+
+// ─── Recorte da foto ───────────────────────────
+.recorte-foto {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $space-4;
+
+  p { font-size: $font-size-sm; text-align: center; }
+
+  &__visor {
+    position: relative;
+    width: min(280px, 70vw);
+    aspect-ratio: 1;
+    overflow: hidden;
+    border-radius: $radius-lg;
+    background: $color-surface-muted;
+    cursor: grab;
+    touch-action: none;
+    box-shadow: inset 0 0 0 1px $color-border;
+
+    &:active { cursor: grabbing; }
+    &:focus-visible { @include focus-ring; }
+
+    img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      max-width: none;
+      user-select: none;
+      pointer-events: none;
+    }
+
+    // Guia circular: como a foto aparece no avatar
+    &::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: $radius-full;
+      box-shadow: 0 0 0 999px rgba($color-green-900, 0.35);
+      pointer-events: none;
+    }
+  }
+
+  &__zoom {
+    display: flex;
+    align-items: center;
+    gap: $space-3;
+    width: min(280px, 70vw);
+    font-size: $font-size-sm;
+    font-weight: $font-weight-semibold;
+
+    input { flex: 1; accent-color: $color-primary; min-height: $touch-target; }
+  }
+}

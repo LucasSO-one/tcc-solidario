@@ -1,0 +1,119 @@
+@use '../design' as *;
+
+// Botões: no máximo um .btn--primary por tela; ações secundárias em .btn--secondary.
+.btn {
+  @include button-reset;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: $space-2;
+  min-height: $touch-target;
+  padding: $space-2 $space-5;
+  border: 1px solid transparent;
+  border-radius: $radius-md;
+  font-family: $font-body;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  line-height: 1.2;
+  white-space: nowrap;
+  text-decoration: none;
+  transition: background-color $duration-fast $ease-out, border-color $duration-fast $ease-out,
+    color $duration-fast $ease-out, box-shadow $duration-fast $ease-out, transform $duration-fast $ease-out;
+
+  &:hover { text-decoration: none; }
+  &:focus-visible { @include focus-ring; }
+  &:active:not(:disabled) { transform: translateY(1px); }
+
+  &:disabled,
+  &[aria-disabled='true'] {
+    cursor: not-allowed;
+    opacity: 0.55;
+  }
+
+  svg { flex-shrink: 0; width: 18px; height: 18px; }
+
+  &--primary {
+    background: $color-primary;
+    color: $color-on-primary;
+    box-shadow: $shadow-xs;
+
+    &:hover:not(:disabled) { background: $color-primary-hover; color: $color-on-primary; }
+    &:active:not(:disabled) { background: $color-primary-active; }
+  }
+
+  &--secondary {
+    background: $color-surface;
+    border-color: $color-primary;
+    color: $color-primary;
+
+    &:hover:not(:disabled) { background: $color-primary-soft; color: $color-primary-active; }
+  }
+
+  &--ghost {
+    background: transparent;
+    color: $color-text-secondary;
+
+    &:hover:not(:disabled) { background: $color-surface-muted; color: $color-text; }
+  }
+
+  &--danger {
+    background: $color-surface;
+    border-color: $color-danger;
+    color: $color-danger-text;
+
+    &:hover:not(:disabled) { background: $color-danger-bg; }
+  }
+
+  &--sm {
+    min-height: 36px;
+    padding: $space-1 $space-3;
+    font-size: $font-size-xs;
+  }
+
+  &--block { width: 100%; }
+
+  // Estado de carregamento: o texto some e um spinner ocupa o centro
+  &--loading {
+    color: transparent !important;
+    pointer-events: none;
+
+    .btn__spinner { position: absolute; inset: 0; margin: auto; }
+  }
+
+  &__spinner {
+    width: 18px;
+    height: 18px;
+    border: 2px solid currentColor;
+    border-right-color: transparent;
+    border-radius: $radius-full;
+    animation: btn-spin 700ms linear infinite;
+  }
+
+  &--primary &__spinner { border-color: $color-on-primary; border-right-color: transparent; }
+  &--secondary &__spinner,
+  &--ghost &__spinner { border-color: $color-primary; border-right-color: transparent; }
+  &--danger &__spinner { border-color: $color-danger; border-right-color: transparent; }
+}
+
+.icon-btn {
+  @include button-reset;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: $touch-target;
+  height: $touch-target;
+  border-radius: $radius-md;
+  color: $color-text-muted;
+  transition: background-color $duration-fast $ease-out, color $duration-fast $ease-out;
+
+  &:hover:not(:disabled) { background: $color-surface-muted; color: $color-text; }
+  &:focus-visible { @include focus-ring; }
+  &:disabled { cursor: not-allowed; opacity: 0.5; }
+
+  svg { width: 20px; height: 20px; }
+}
+
+@keyframes btn-spin {
+  to { transform: rotate(360deg); }
+}

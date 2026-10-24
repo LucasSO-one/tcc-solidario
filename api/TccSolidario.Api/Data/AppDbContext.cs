@@ -43,6 +43,7 @@ public class AppDbContext : DbContext
     // Core do Negócio
     public DbSet<Produto> Produtos { get; set; }
     public DbSet<Transacao> Transacoes { get; set; }
+    public DbSet<ProdutoImagem> ProdutoImagens { get; set; }
 
     // --- Configurações do Banco ---
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -54,6 +55,10 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<Transacao>().HasIndex(t => t.CodigoRetirada)
             .IsUnique().HasFilter("\"CodigoRetirada\" <> ''");
         modelBuilder.Entity<Transacao>().HasIndex(t => new { t.StatusReserva, t.DataExpiracao });
+        modelBuilder.Entity<ProdutoImagem>().Property(i => i.Url).HasMaxLength(300).IsRequired();
+        modelBuilder.Entity<ProdutoImagem>().HasIndex(i => new { i.ProdutoId, i.Ordem }).IsUnique();
+        modelBuilder.Entity<Produto>().HasMany(p => p.Imagens).WithOne(i => i.Produto)
+            .HasForeignKey(i => i.ProdutoId).OnDelete(DeleteBehavior.Cascade);
 
         // O EF vai criar uma coluna "TipoUsuarioString" para saber quem é quem
         modelBuilder.Entity<Usuario>()
@@ -62,6 +67,10 @@ public class AppDbContext : DbContext
             .HasValue<Ong>("Ong")
             .HasValue<Consumidor>("Consumidor")
             .HasValue<Admin>("Admin");
+
+        // Varejista e ONG compartilham a mesma coluna de horário na tabela Usuarios
+        modelBuilder.Entity<Varejista>().Property(v => v.HorarioFuncionamento).HasColumnName("HorarioFuncionamento");
+        modelBuilder.Entity<Ong>().Property(o => o.HorarioFuncionamento).HasColumnName("HorarioFuncionamento");
 
         // 2. Configuração de Relacionamento Usuario -> Endereco
         // Se deletar o Usuario, deleta os endereços dele (Cascade)

@@ -1,0 +1,92 @@
+@use 'sass:map';
+@use 'colors' as *;
+@use 'tokens' as *;
+@use 'typography' as *;
+
+$_breakpoints: (tablet: $bp-tablet, desktop: $bp-desktop);
+
+// Mobile-first: estilos base para celular, media-up para telas maiores.
+@mixin media-up($bp) {
+  @media (min-width: map.get($_breakpoints, $bp)) { @content; }
+}
+
+@mixin media-down($bp) {
+  @media (max-width: map.get($_breakpoints, $bp) - 0.02px) { @content; }
+}
+
+@mixin focus-ring {
+  outline: none;
+  box-shadow: 0 0 0 3px $color-focus-ring;
+}
+
+@mixin truncate($linhas: 1) {
+  @if $linhas == 1 {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  } @else {
+    display: -webkit-box;
+    -webkit-line-clamp: $linhas;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+}
+
+@mixin card-surface {
+  background: $color-surface;
+  border: 1px solid $color-border;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-xs;
+}
+
+@mixin card-hover {
+  transition: transform $duration-base $ease-out, box-shadow $duration-base $ease-out;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: $shadow-md;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    &:hover { transform: none; }
+  }
+}
+
+@mixin heading {
+  font-family: $font-heading;
+  font-variation-settings: $font-heading-variation;
+  font-weight: $font-weight-semibold;
+  line-height: $line-height-heading;
+  letter-spacing: $letter-spacing-heading;
+  color: $color-heading;
+}
+
+@mixin label-caps {
+  font-family: $font-body;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-semibold;
+  text-transform: uppercase;
+  letter-spacing: $letter-spacing-label;
+  color: $color-text-muted;
+}
+
+@mixin button-reset {
+  border: 0;
+  background: none;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+@mixin visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

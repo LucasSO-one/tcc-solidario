@@ -1,0 +1,42 @@
+$radius-sm: 8px;
+$radius-md: 12px;
+$radius-lg: 16px;
+$radius-xl: 24px;
+$radius-full: 999px;
+
+$space-1: 4px;
+$space-2: 8px;
+$space-3: 12px;
+$space-4: 16px;
+$space-5: 20px;
+$space-6: 24px;
+$space-8: 32px;
+$space-10: 40px;
+$space-12: 48px;
+$space-16: 64px;
+
+// Sombras suaves e esverdeadas (nada de sombra preta dura)
+$shadow-xs: 0 1px 2px rgba(15, 61, 43, 0.06);
+$shadow-sm: 0 2px 8px rgba(15, 61, 43, 0.06);
+$shadow-md: 0 8px 24px rgba(15, 61, 43, 0.08);
+$shadow-lg: 0 16px 40px rgba(15, 61, 43, 0.12);
+
+$ease-out:      cubic-bezier(0.22, 1, 0.36, 1);
+$ease-in-out:   cubic-bezier(0.65, 0, 0.35, 1);
+$duration-fast: 150ms;
+$duration-base: 260ms;
+$duration-slow: 420ms;
+
+$bp-tablet:  768px;
+$bp-desktop: 1200px;
+
+$z-header: 80;
+$z-overlay: 90;
+$z-sidebar: 100;
+$z-modal: 200;
+$z-toast: 300;
+
+$sidebar-width:           260px;
+$sidebar-width-collapsed: 76px;
+$content-max-width:       1320px;
+$touch-target:            44px;

@@ -132,6 +132,31 @@ namespace TccSolidario.Api.Migrations
                     b.ToTable("Produtos");
                 });
 
+            modelBuilder.Entity("TccSolidario.Api.Models.ProdutoImagem", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Ordem")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("ProdutoId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Url")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProdutoId", "Ordem")
+                        .IsUnique();
+
+                    b.ToTable("ProdutoImagens");
+                });
+
             modelBuilder.Entity("TccSolidario.Api.Models.Transacao", b =>
                 {
                     b.Property<Guid>("Id")
@@ -212,9 +237,22 @@ namespace TccSolidario.Api.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("FotoUrl")
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)");
+
                     b.Property<string>("Nome")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<bool>("NotificarDoacoesConcluidas")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("NotificarNovasSolicitacoes")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("NotificarVencimentos")
+                        .HasColumnType("boolean");
 
                     b.Property<string>("SenhaHash")
                         .IsRequired()
@@ -281,6 +319,16 @@ namespace TccSolidario.Api.Migrations
                         .HasMaxLength(14)
                         .HasColumnType("character varying(14)");
 
+                    b.Property<string>("CapacidadeRecebimento")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("HorarioFuncionamento")
+                        .ValueGeneratedOnUpdateSometimes()
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)")
+                        .HasColumnName("HorarioFuncionamento");
+
                     b.Property<string>("NomeFantasia")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -299,7 +347,10 @@ namespace TccSolidario.Api.Migrations
                         .HasColumnType("character varying(14)");
 
                     b.Property<string>("HorarioFuncionamento")
-                        .HasColumnType("text");
+                        .ValueGeneratedOnUpdateSometimes()
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)")
+                        .HasColumnName("HorarioFuncionamento");
 
                     b.Property<string>("NomeEstabelecimento")
                         .IsRequired()
@@ -309,6 +360,10 @@ namespace TccSolidario.Api.Migrations
                     b.Property<string>("RazaoSocial")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<string>("TipoEstabelecimento")
+                        .HasMaxLength(60)
+                        .HasColumnType("character varying(60)");
 
                     b.ToTable("Usuarios", t =>
                         {
@@ -341,6 +396,17 @@ namespace TccSolidario.Api.Migrations
                     b.Navigation("Varejista");
                 });
 
+            modelBuilder.Entity("TccSolidario.Api.Models.ProdutoImagem", b =>
+                {
+                    b.HasOne("TccSolidario.Api.Models.Produto", "Produto")
+                        .WithMany("Imagens")
+                        .HasForeignKey("ProdutoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Produto");
+                });
+
             modelBuilder.Entity("TccSolidario.Api.Models.Transacao", b =>
                 {
                     b.HasOne("TccSolidario.Api.Models.Consumidor", "Consumidor")
@@ -362,6 +428,11 @@ namespace TccSolidario.Api.Migrations
                     b.Navigation("Ong");
 
                     b.Navigation("Produto");
+                });
+
+            modelBuilder.Entity("TccSolidario.Api.Models.Produto", b =>
+                {
+                    b.Navigation("Imagens");
                 });
 
             modelBuilder.Entity("TccSolidario.Api.Models.Usuario", b =>

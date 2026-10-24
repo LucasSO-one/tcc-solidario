@@ -1,6 +1,7 @@
 namespace TccSolidario.Api.DTOs.Varejista;
 
 using System.ComponentModel.DataAnnotations;
+using TccSolidario.Api.Models;
 
 public class RegistroVarejistaRequest
 {
@@ -20,7 +21,6 @@ public class RegistroVarejistaRequest
     public string Email { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "A senha e obrigatoria.")]
-    [RegularExpression(@"^(?=.*[A-Z])(?=.*\d)(?=.*[\W_])[A-Za-z\d\W_]{8,}$",
-        ErrorMessage = "A senha deve ter no minimo 8 caracteres, contendo pelo menos uma letra maiuscula, um numero e um caractere especial.")]
+    [RegularExpression(RegrasSenha.Padrao, ErrorMessage = RegrasSenha.Mensagem)]
     public string Senha { get; set; } = string.Empty;
 }

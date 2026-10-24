@@ -1,198 +1,217 @@
-.sidebar {
-  --sidebar-width: 280px;
-  --sidebar-width-collapsed: 84px;
-
-  position: relative; /* âncora pro botão flutuante */
-
-  width: var(--sidebar-width);
-  min-height: 100vh;
-
-  background: var(--fundo-nav);
-  border-right: 1px solid #E2E8F0;
-
-  padding: 28px 20px;
-
-  transition: width 0.25s ease, padding 0.25s ease;
-}
-
-.sidebar--collapsed {
-  width: var(--sidebar-width-collapsed);
-  padding: 28px 14px;
-}
-
-/* ===== CONTEÚDO (logo + nav, com overflow controlado) ===== */
-
-.sidebar__content {
-  height: 100%;
-  overflow: hidden;
-
-  display: flex;
-  flex-direction: column;
-}
-
-/* ===== LOGO ===== */
-
-.sidebar__logo {
-  display: flex;
-  justify-content: center;
-
-  margin-bottom: 56px;
-}
-
-.sidebar__logo img {
-  width: 150px;
-  max-width: 100%;
-  object-fit: contain;
-  transition: opacity 0.15s ease, width 0.15s ease;
-}
-
-.sidebar--collapsed .sidebar__logo img {
-  opacity: 0;
-  width: 0;
-}
-
-/* ===== TOGGLE (botão flutuante na borda) ===== */
-
-.sidebar__toggle {
-  position: absolute;
-  top: 76px;              /* ANTES: top: 50%; */
-  right: -14px;
-  transform: translateY(-50%);
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  width: 30px;
-  height: 30px;
-
-  background: #FFFFFF;
-  border: 1px solid #E2E8F0;
-  border-radius: 50%;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-
-  color: #4A5568;
-  cursor: pointer;
-  z-index: 2;
-
-  transition: right 0.25s ease, background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
-}
-
-.sidebar__toggle:hover {
-  background: #2F855A;
-  border-color: #2F855A;
-  color: #FFFFFF;
-  box-shadow: 0 2px 10px rgba(47, 133, 90, 0.35);
-}
-
-.sidebar__toggle svg {
-  width: 16px;
-  height: 16px;
-}
-
-/* ===== NAV ===== */
-
-.sidebar__nav {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-/* ===== LINKS ===== */
-
-.sidebar__link {
-  position: relative;
-
-  display: flex;
-  align-items: center;
-  gap: 14px;
-
-  padding: 13px 16px;
-
-  border-radius: 12px;
-
-  text-decoration: none;
-  white-space: nowrap;
-
-  color: #4A5568;
-
-  font-size: 16px;
-  font-weight: 500;
-
-  transition: background 0.2s ease, color 0.2s ease;
-}
-
-.sidebar__link:hover {
-  background: #EDF2F7;
-  color: #2F855A;
-}
-
-.sidebar__link--active {
-  background: #E6FFFA;
-  color: #2F855A;
-  font-weight: 600;
-}
-
-.sidebar__link--active::before {
-  content: "";
-  position: absolute;
-  left: -20px;
-  top: 8px;
-  bottom: 8px;
-  width: 4px;
-  border-radius: 0 4px 4px 0;
-  background: #2F855A;
-}
-
-.sidebar--collapsed .sidebar__link--active::before {
-  left: -14px;
-}
-
-.sidebar__link svg {
-  flex-shrink: 0;
-  width: 21px;
-  height: 21px;
-}
-
-.sidebar__label {
-  transition: opacity 0.15s ease;
-}
-
-.sidebar--collapsed .sidebar__label {
-  opacity: 0;
-  width: 0;
-  overflow: hidden;
-}
-
-.sidebar--collapsed .sidebar__link {
-  justify-content: center;
-  padding: 13px 0;
-}
+@use '../../styles/design' as *;
 
 .sidebar {
+  position: fixed;
+  inset: 0 auto 0 0;
+  z-index: $z-sidebar;
   display: flex;
   flex-direction: column;
+  width: $sidebar-width;
+  padding: $space-5 $space-3;
+  background: $color-sidebar-bg;
+  border-right: 1px solid $color-border;
+  transition: width $duration-base $ease-out, transform $duration-base $ease-out,
+    box-shadow $duration-base $ease-out;
+
+  &--recolhida { width: $sidebar-width-collapsed; }
+
+  // Tablet expandido: flutua sobre o conteúdo
+  &--tablet.sidebar--aberta { box-shadow: $shadow-lg; }
+
+  // Celular: drawer fora da tela até ser aberto
+  &--mobile {
+    width: min(300px, 86vw);
+    transform: translateX(-100%);
+    visibility: hidden;
+    transition: transform $duration-base $ease-out, visibility 0s linear $duration-base;
+
+    &.sidebar--aberta {
+      transform: none;
+      visibility: visible;
+      box-shadow: $shadow-lg;
+      transition: transform $duration-base $ease-out, visibility 0s;
+    }
+  }
+
+  // ─── Topo ────────────────────────────────────
+  &__topo {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: $space-2;
+    min-height: 48px;
+    padding: 0 $space-1 0 $space-2;
+    margin-bottom: $space-6;
+  }
+
+  &--recolhida &__topo {
+    flex-direction: column;
+    gap: $space-3;
+    padding: 0;
+  }
+
+  // ─── Navegação ───────────────────────────────
+  &__nav {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: $space-5;
+    min-height: 0;
+    overflow-y: auto;
+    margin: 0 (-$space-3);
+    padding: 0 $space-3;
+
+    ul { display: flex; flex-direction: column; gap: $space-1; list-style: none; }
+  }
+
+  // Com tooltips laterais o conteúdo precisa vazar do trilho
+  &--recolhida &__nav { overflow: visible; }
+
+  &__titulo-secao {
+    @include label-caps;
+    padding: 0 $space-3;
+    margin-bottom: $space-2;
+  }
+
+  &--recolhida &__titulo-secao {
+    @include visually-hidden;
+  }
+
+  &--recolhida &__secao + &__secao {
+    padding-top: $space-4;
+    border-top: 1px solid $color-border;
+  }
+
+  &__link {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: $space-3;
+    min-height: $touch-target;
+    padding: 0 $space-3;
+    border-radius: $radius-md;
+    color: $color-text-secondary;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-medium;
+    white-space: nowrap;
+    text-decoration: none;
+    transition: background-color $duration-fast $ease-out, color $duration-fast $ease-out;
+
+    svg { flex-shrink: 0; width: 20px; height: 20px; }
+
+    &:hover { background: $color-surface-muted; color: $color-text; text-decoration: none; }
+    &:focus-visible { @include focus-ring; }
+
+    &--ativo,
+    &--ativo:hover {
+      background: $color-sidebar-active;
+      color: $color-primary;
+      font-weight: $font-weight-semibold;
+    }
+
+    // Barra vertical de 3px colada à borda do menu
+    &--ativo::before {
+      content: '';
+      position: absolute;
+      top: $space-2;
+      bottom: $space-2;
+      left: -$space-3;
+      width: 3px;
+      border-radius: 0 3px 3px 0;
+      background: $color-primary;
+    }
+  }
+
+  &__label { @include truncate; }
+
+  &--recolhida &__link {
+    justify-content: center;
+    padding: 0;
+  }
+
+  &--recolhida &__label { @include visually-hidden; }
+
+  // ─── Rodapé ──────────────────────────────────
+  &__rodape {
+    display: flex;
+    flex-direction: column;
+    gap: $space-1;
+    padding-top: $space-4;
+    margin-top: $space-4;
+    border-top: 1px solid $color-border;
+  }
+
+  &__conta {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: $space-3;
+    padding: $space-2;
+    min-width: 0;
+  }
+
+  &--recolhida &__conta { justify-content: center; padding: $space-2 0; }
+
+  &__conta-texto {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  &--recolhida &__conta-texto { @include visually-hidden; }
+
+  &__conta-nome {
+    @include truncate;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-semibold;
+    color: $color-text;
+  }
+
+  &__conta-tipo {
+    font-size: $font-size-xs;
+    color: $color-text-muted;
+  }
+
+  // ─── Tooltips do trilho recolhido ────────────
+  &--recolhida [data-tooltip] {
+    &::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      top: 50%;
+      left: calc(100% + #{$space-3});
+      z-index: 1;
+      padding: $space-1 $space-3;
+      border-radius: $radius-sm;
+      background: $color-gray-900;
+      color: $color-white;
+      font-size: $font-size-xs;
+      font-weight: $font-weight-medium;
+      white-space: nowrap;
+      box-shadow: $shadow-md;
+      opacity: 0;
+      pointer-events: none;
+      transform: translate(-4px, -50%);
+      transition: opacity $duration-fast $ease-out, transform $duration-fast $ease-out;
+    }
+
+    &:hover::after,
+    &:focus-visible::after {
+      opacity: 1;
+      transform: translate(0, -50%);
+    }
+  }
+
+  &__alternar { position: relative; }
 }
 
-.sidebar__content {
-  height: auto;
-  flex: 1;
-}
-
-.sidebar-footer {
-  margin-top: 24px;
-}
-
+// Só remove o visual nativo do botão: espaçamento e fonte vêm de .sidebar__link
 .btn-logout {
   width: 100%;
   border: 0;
-  background: transparent;
+  background: none;
   font-family: inherit;
   text-align: left;
   cursor: pointer;
-}
 
-.btn-logout:disabled {
-  opacity: 0.6;
-  cursor: wait;
+  &:disabled { cursor: wait; opacity: 0.6; }
 }
