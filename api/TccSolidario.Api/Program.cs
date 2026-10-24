@@ -55,6 +55,17 @@ builder.Services.AddHostedService<VerificacaoValidadeProdutosWorker>();
 builder.Services.AddScoped<INotificacaoService, NotificacaoService>();
 builder.Services.AddScoped<IReservaService, ReservaService>();
 builder.Services.AddScoped<CicloVidaService>();
+// Sem credenciais do Cloudinary, o ImagemUploadService grava as fotos em wwwroot/uploads.
+var cloudinarySection = builder.Configuration.GetSection("Cloudinary");
+if (!string.IsNullOrWhiteSpace(cloudinarySection["CloudName"])
+    && !string.IsNullOrWhiteSpace(cloudinarySection["ApiKey"])
+    && !string.IsNullOrWhiteSpace(cloudinarySection["ApiSecret"]))
+{
+    var cloudinary = new CloudinaryDotNet.Cloudinary(new CloudinaryDotNet.Account(
+        cloudinarySection["CloudName"], cloudinarySection["ApiKey"], cloudinarySection["ApiSecret"]));
+    cloudinary.Api.Secure = true;
+    builder.Services.AddSingleton(cloudinary);
+}
 builder.Services.AddScoped<ImagemUploadService>();
 builder.Services.AddScoped<ContaService>();
 builder.Services.AddScoped<ImpactoService>();

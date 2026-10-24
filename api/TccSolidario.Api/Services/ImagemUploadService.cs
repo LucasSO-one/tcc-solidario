@@ -1,3 +1,7 @@
+using System.Text.RegularExpressions;
+using CloudinaryDotNet;
+using CloudinaryDotNet.Actions;
+
 namespace TccSolidario.Api.Services;
 
 /// <summary>
@@ -5,11 +9,14 @@ namespace TccSolidario.Api.Services;
 /// <see cref="TamanhoMaximoBytes"/> cada. O tipo é identificado pelo conteúdo do arquivo
 /// (assinatura binária), nunca pela extensão ou Content-Type enviados pelo navegador,
 /// e o arquivo é gravado com nome aleatório e a extensão do tipo detectado.
+/// Com o Cloudinary configurado (seção "Cloudinary"), as fotos vão para lá; sem ele,
+/// ficam em wwwroot/uploads.
 /// </summary>
-public class ImagemUploadService(IWebHostEnvironment env)
+public partial class ImagemUploadService(IWebHostEnvironment env, Cloudinary? cloudinary = null)
 {
     public const int MaxImagens = 6;
     public const long TamanhoMaximoBytes = 5 * 1024 * 1024;
+    private const string PastaCloudinary = "tcc-solidario";
 
     public static async Task ValidarAsync(IReadOnlyList<IFormFile> imagens, long tamanhoMaximo = TamanhoMaximoBytes)
     {
@@ -30,24 +37,63 @@ public class ImagemUploadService(IWebHostEnvironment env)
     {
         var extensao = await DetectarExtensaoAsync(imagem)
             ?? throw new InvalidOperationException("Formato de imagem não suportado.");
+        var nome = Guid.NewGuid().ToString();
+
+        if (cloudinary is not null)
+        {
+            await using var stream = imagem.OpenReadStream();
+            var resultado = await cloudinary.UploadAsync(new ImageUploadParams
+            {
+                File = new FileDescription($"{nome}{extensao}", stream),
+                Folder = $"{PastaCloudinary}/{pasta}",
+                PublicId = nome,
+                Overwrite = false,
+            });
+            if (resultado.Error is not null || resultado.SecureUrl is null)
+                throw new InvalidOperationException("Não foi possível enviar a foto. Tente novamente.");
+            return resultado.SecureUrl.ToString();
+        }
+
         var webRoot = env.WebRootPath ?? Path.Combine(env.ContentRootPath, "wwwroot");
         var diretorio = Path.Combine(webRoot, "uploads", pasta);
         Directory.CreateDirectory(diretorio);
-        var nome = $"{Guid.NewGuid()}{extensao}";
-        await using var destino = new FileStream(Path.Combine(diretorio, nome), FileMode.CreateNew);
+        await using var destino = new FileStream(Path.Combine(diretorio, nome + extensao), FileMode.CreateNew);
         await imagem.CopyToAsync(destino);
-        return $"/uploads/{pasta}/{nome}";
+        return $"/uploads/{pasta}/{nome}{extensao}";
     }
 
-    public void Remover(IEnumerable<string> urls)
+    public async Task RemoverAsync(IEnumerable<string> urls)
     {
         var webRoot = env.WebRootPath ?? Path.Combine(env.ContentRootPath, "wwwroot");
         foreach (var url in urls)
         {
+            if (Uri.TryCreate(url, UriKind.Absolute, out _))
+            {
+                // Só apaga o que este app enviou ao Cloudinary; falhas aqui não devem derrubar a requisição.
+                var publicId = PublicIdCloudinary(url);
+                if (cloudinary is not null && publicId is not null)
+                {
+                    try { await cloudinary.DestroyAsync(new DeletionParams(publicId)); }
+                    catch (Exception) { }
+                }
+                continue;
+            }
+            // Só apaga uploads; imagens fixas do projeto (ex.: /seed) ficam.
+            var pastaUploads = Path.GetFullPath(Path.Combine(webRoot, "uploads")) + Path.DirectorySeparatorChar;
             var caminho = Path.GetFullPath(Path.Combine(webRoot, url.TrimStart('/')));
-            if (caminho.StartsWith(Path.GetFullPath(webRoot)) && File.Exists(caminho)) File.Delete(caminho);
+            if (caminho.StartsWith(pastaUploads) && File.Exists(caminho)) File.Delete(caminho);
         }
     }
+
+    // https://res.cloudinary.com/<nuvem>/image/upload/v123/tcc-solidario/produtos/<guid>.jpg -> tcc-solidario/produtos/<guid>
+    private static string? PublicIdCloudinary(string url)
+    {
+        var match = RegexPublicId().Match(url);
+        return match.Success ? match.Groups["id"].Value : null;
+    }
+
+    [GeneratedRegex($@"/image/upload/(?:v\d+/)?(?<id>{PastaCloudinary}/[\w-]+/[\w-]+)\.\w+$")]
+    private static partial Regex RegexPublicId();
 
     private static async Task<string?> DetectarExtensaoAsync(IFormFile imagem)
     {

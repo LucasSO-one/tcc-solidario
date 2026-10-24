@@ -31,6 +31,10 @@ public static class RegrasCicloVida
     public static bool Comercial(Produto produto) =>
         produto.Status is StatusProduto.Disponivel or StatusProduto.EmDesconto;
 
+    // O varejista só edita o que ainda está em alguma vitrine (sem reserva, entrega ou vencimento).
+    public static bool Editavel(Produto produto) =>
+        Comercial(produto) || produto.Status == StatusProduto.DisponivelParaDoacao;
+
     public static DateTime LimiteDoacao(DateTime agora) => agora.AddHours(HorasParaDoacao);
     public static DateTime LimitePrevia(DateTime agora) => agora.AddHours(HorasPreviaOng);
     public static DateTime LiberacaoParaDoacao(Produto produto) => produto.DataValidade.AddHours(-HorasParaDoacao);

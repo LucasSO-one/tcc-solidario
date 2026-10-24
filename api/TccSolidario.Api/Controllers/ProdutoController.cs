@@ -58,6 +58,43 @@ public class ProdutoController : ControllerBase
         return Ok(produtos);
     }
 
+    [HttpGet("{produtoId:guid}")]
+    [Authorize(Roles = "Varejista")]
+    public async Task<IActionResult> Obter(Guid produtoId)
+    {
+        try
+        {
+            return Ok(await _produtoService.ObterDoVarejistaAsync(Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!), produtoId));
+        }
+        catch (InvalidOperationException ex) { return NotFound(new { message = ex.Message }); }
+    }
+
+    [HttpPut("{produtoId:guid}")]
+    [Authorize(Roles = "Varejista")]
+    [RequestSizeLimit(32 * 1024 * 1024)]
+    [RequestFormLimits(MultipartBodyLengthLimit = 32 * 1024 * 1024)]
+    public async Task<IActionResult> Atualizar(Guid produtoId, [FromForm] AtualizarProdutoRequest request)
+    {
+        try
+        {
+            await _produtoService.AtualizarAsync(Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!), produtoId, request);
+            return Ok(new { message = "Alimento atualizado." });
+        }
+        catch (InvalidOperationException ex) { return BadRequest(new { message = ex.Message }); }
+    }
+
+    [HttpDelete("{produtoId:guid}")]
+    [Authorize(Roles = "Varejista")]
+    public async Task<IActionResult> Excluir(Guid produtoId)
+    {
+        try
+        {
+            await _produtoService.ExcluirAsync(Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!), produtoId);
+            return NoContent();
+        }
+        catch (InvalidOperationException ex) { return BadRequest(new { message = ex.Message }); }
+    }
+
     [HttpGet("vitrine")]
     [AllowAnonymous]
     public async Task<ActionResult<List<ProdutoVitrineResponse>>> ListarVitrine(

@@ -118,8 +118,8 @@ public partial class ContaService(AppDbContext context, ImagemUploadService uplo
         var anterior = usuario.FotoUrl;
         usuario.FotoUrl = await uploads.SalvarAsync(foto, "contas");
         try { await context.SaveChangesAsync(); }
-        catch { uploads.Remover([usuario.FotoUrl]); throw; }
-        if (anterior is not null) uploads.Remover([anterior]);
+        catch { await uploads.RemoverAsync([usuario.FotoUrl]); throw; }
+        if (anterior is not null) await uploads.RemoverAsync([anterior]);
         return usuario.FotoUrl;
     }
 
