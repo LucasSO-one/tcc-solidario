@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Camera } from 'lucide-react';
 import { atualizarConta, enviarFoto } from '../../../service/conta';
 import { mensagemErro } from '../../../utils/mensagemErro';
@@ -25,6 +26,7 @@ function validar(v) {
 
 export default function SecaoPerfil({ conta, setConta, onSujo }) {
   const toast = useToast();
+  const navigate = useNavigate();
   const inputFoto = useRef(null);
   const form = useFormulario({ nome: conta.nome, email: conta.email, telefone: mascaraTelefone(conta.telefone), senhaAtual: '' });
   const { valores, alterar, erros, setErros, sujo } = form;
@@ -68,7 +70,8 @@ export default function SecaoPerfil({ conta, setConta, onSujo }) {
       }));
       setConta(atualizada);
       form.redefinir({ nome: atualizada.nome, email: atualizada.email, telefone: mascaraTelefone(atualizada.telefone), senhaAtual: '' });
-      toast.success('Perfil atualizado.');
+      if (trocandoEmail) navigate('/login', { replace: true, state: { mensagem: 'Confirme o novo e-mail pelo link enviado para entrar novamente.' } });
+      else toast.success('Perfil atualizado.');
     } catch (err) {
       const porCampo = errosDoServidor(err);
       if (porCampo) setErros(porCampo); else toast.error(mensagemErro(err));

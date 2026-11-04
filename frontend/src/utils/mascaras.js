@@ -20,14 +20,19 @@ export function mascaraCpf(valor) {
 }
 
 export function mascaraCnpj(valor) {
-  const d = digitos(valor).slice(0, 14);
-  return d.replace(/^(\d{2})(\d)/, '$1.$2').replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3')
-    .replace(/\.(\d{3})(\d)/, '.$1/$2').replace(/(\d{4})(\d)/, '$1-$2');
+  const d = (valor || '').replace(/[^a-z0-9]/gi, '').toUpperCase().slice(0, 14);
+  let texto = d.slice(0, 2);
+  if (d.length > 2) texto += '.' + d.slice(2, 5);
+  if (d.length > 5) texto += '.' + d.slice(5, 8);
+  if (d.length > 8) texto += '/' + d.slice(8, 12);
+  if (d.length > 12) texto += '-' + d.slice(12);
+  return texto;
 }
 
 // Mesma regra do backend (RegrasSenha.cs)
 export const REQUISITOS_SENHA = [
   ['Pelo menos 8 caracteres', s => s.length >= 8],
+  ['Até 72 bytes (caracteres acentuados ocupam mais espaço)', s => new TextEncoder().encode(s).length <= 72],
   ['Uma letra maiúscula', s => /[A-Z]/.test(s)],
   ['Um número', s => /\d/.test(s)],
   ['Um caractere especial (ex.: @ # !)', s => /[\W_]/.test(s)],

@@ -1,33 +1,33 @@
-// service/api.js
 import axios from 'axios';
 
-const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || '/api',
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
+const baseURL = import.meta.env.VITE_API_URL || '/api';
+const api = axios.create({ baseURL, withCredentials: true });
+const csrfClient = axios.create({ baseURL, withCredentials: true });
+let csrfToken;
+let csrfPromise;
 
-// Anexa o token JWT em toda requisição, se existir
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
+export async function renovarCsrf() {
+  csrfToken = undefined;
+  if (!csrfPromise) csrfPromise = csrfClient.get('/auth/csrf')
+    .then(({ data }) => { csrfToken = data.token; return csrfToken; })
+    .finally(() => { csrfPromise = undefined; });
+  return csrfPromise;
+}
+api.interceptors.request.use(async config => {
+  if (!['get', 'head', 'options'].includes((config.method || 'get').toLowerCase()))
+    config.headers['X-CSRF-TOKEN'] = csrfToken || await renovarCsrf();
   return config;
 });
-
-// Se o backend responder 401 (token expirado/inválido), desloga e manda pro login
-api.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response?.status === 401 && localStorage.getItem('token') && !error.config?.url?.toLowerCase().includes('/auth/login')) {
-      localStorage.removeItem('token');
-      localStorage.removeItem('usuario');
-      window.location.href = '/login';
-    }
-    return Promise.reject(error);
+api.interceptors.response.use(response => response, async error => {
+  const config = error.config;
+  if (error.response?.status === 400 && error.response.data?.code === 'csrf_invalid' && config && !config._csrfReenviado) {
+    // O servidor recusou antes da ação. Uma atualização de chave/identidade permite obter novo CSRF.
+    config._csrfReenviado = true;
+    await renovarCsrf();
+    return api.request(config);
   }
-);
-
+  if (error.response?.status === 401 && !config?.url?.toLowerCase().includes('/auth/') && window.location.pathname.startsWith('/dashboard/'))
+    window.location.replace('/login');
+  return Promise.reject(error);
+});
 export default api;

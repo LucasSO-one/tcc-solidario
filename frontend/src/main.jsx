@@ -1,3 +1,5 @@
+// Remove credenciais persistidas pela versão anterior; a autenticação usa cookie HttpOnly.
+try { localStorage.removeItem('token'); localStorage.removeItem('usuario'); } catch { /* armazenamento indisponível */ }
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import App from './App.jsx'

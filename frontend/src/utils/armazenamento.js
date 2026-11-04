@@ -15,12 +15,3 @@ export function gravarLocal(chave, valor) {
     // preferência apenas visual: ignorar falha
   }
 }
-
-// Usuário salvo no login: { id, email, tipo }
-export function lerUsuario() {
-  try {
-    return JSON.parse(lerLocal('usuario', 'null'));
-  } catch {
-    return null;
-  }
-}

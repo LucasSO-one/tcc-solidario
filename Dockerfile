@@ -19,6 +19,8 @@ RUN dotnet publish api/TccSolidario.Api/TccSolidario.Api.csproj -c Release -o /o
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
 WORKDIR /app
 ENV ASPNETCORE_ENVIRONMENT=Production
+# Railway fornece HTTPS público e encaminha HTTP interno.
+ENV Proxy__HttpsTermination=true
 ENV ASPNETCORE_HTTP_PORTS=8080
 ENV Database__AutoMigrate=false
 ENV Database__SeedAdmin=false

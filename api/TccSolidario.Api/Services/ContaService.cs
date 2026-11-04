@@ -13,7 +13,7 @@ namespace TccSolidario.Api.Services;
 /// - trocar o e-mail (que é o login) exige a senha atual e um e-mail ainda não usado;
 /// - a nova senha segue a mesma política do cadastro (<see cref="RegrasSenha"/>).
 /// </summary>
-public partial class ContaService(AppDbContext context, ImagemUploadService uploads)
+public partial class ContaService(AppDbContext context, ImagemUploadService uploads, Seguranca.AutenticacaoService? autenticacao = null)
 {
     public const long TamanhoMaximoFoto = 2 * 1024 * 1024;
     public static readonly string[] TiposEstabelecimento =
@@ -27,11 +27,11 @@ public partial class ContaService(AppDbContext context, ImagemUploadService uplo
         var usuario = await Carregar(usuarioId);
         var erros = new Dictionary<string, string>();
         var nome = request.Nome?.Trim() ?? "";
-        var email = request.Email?.Trim() ?? "";
+        var email = Seguranca.EmailNormalizado.Normalizar(request.Email);
         var telefone = SomenteDigitos(request.Telefone);
 
         if (nome.Length is < 3 or > 100) erros["nome"] = "Informe um nome entre 3 e 100 caracteres.";
-        if (!EmailValido().IsMatch(email)) erros["email"] = "Informe um e-mail válido.";
+        if (!Seguranca.EmailNormalizado.Valido(email)) erros["email"] = "Informe um e-mail válido.";
         else if (!string.Equals(email, usuario.Email, StringComparison.OrdinalIgnoreCase))
         {
             if (string.IsNullOrEmpty(request.SenhaAtual) || !BCrypt.Net.BCrypt.Verify(request.SenhaAtual, usuario.SenhaHash))
@@ -60,7 +60,13 @@ public partial class ContaService(AppDbContext context, ImagemUploadService uplo
 
         if (erros.Count > 0) throw new ValidacaoException(erros);
 
+        var emailAlterado = !string.Equals(usuario.EmailNormalizado, email, StringComparison.Ordinal);
         usuario.Nome = nome;
+        if (!string.Equals(usuario.EmailNormalizado, email, StringComparison.Ordinal))
+        {
+            usuario.EmailConfirmado = false;
+            usuario.VersaoSeguranca = Guid.NewGuid();
+        }
         usuario.Email = email;
         usuario.Telefone = telefone;
         usuario.NotificarNovasSolicitacoes = request.Notificacoes.NovasSolicitacoes;
@@ -83,7 +89,12 @@ public partial class ContaService(AppDbContext context, ImagemUploadService uplo
         if (usuario is Varejista or Ong && request.Endereco is { } e)
         {
             var endereco = usuario.Enderecos.FirstOrDefault();
-            if (endereco is null) { endereco = new Endereco { UsuarioId = usuario.Id }; usuario.Enderecos.Add(endereco); }
+            if (endereco is null)
+            {
+                endereco = new Endereco { UsuarioId = usuario.Id };
+                context.Enderecos.Add(endereco); // INSERT explícito: o Guid já preenchido não significa linha existente.
+                // A inclusão no DbSet executa o fixup da navegação.
+            }
             endereco.CEP = SomenteDigitos(e.Cep);
             endereco.Rua = e.Rua.Trim();
             endereco.Numero = e.Numero.Trim();
@@ -93,6 +104,7 @@ public partial class ContaService(AppDbContext context, ImagemUploadService uplo
             endereco.Estado = e.Estado.Trim().ToUpperInvariant();
         }
         await context.SaveChangesAsync();
+        if (emailAlterado && autenticacao is not null) await autenticacao.EnfileirarConfirmacaoAsync(usuario.Id);
         await operacao.CommitAsync();
         return Mapear(usuario);
     }
@@ -104,12 +116,13 @@ public partial class ContaService(AppDbContext context, ImagemUploadService uplo
         var erros = new Dictionary<string, string>();
         if (string.IsNullOrEmpty(request.SenhaAtual) || !BCrypt.Net.BCrypt.Verify(request.SenhaAtual, usuario.SenhaHash))
             erros["senhaAtual"] = "A senha atual está incorreta.";
-        if (!Regex.IsMatch(request.NovaSenha ?? "", RegrasSenha.Padrao))
+        if (!Seguranca.EmailNormalizado.SenhaValida(request.NovaSenha))
             erros["novaSenha"] = RegrasSenha.Mensagem;
         else if (request.NovaSenha == request.SenhaAtual)
             erros["novaSenha"] = "A nova senha precisa ser diferente da atual.";
         if (erros.Count > 0) throw new ValidacaoException(erros);
-        usuario.SenhaHash = BCrypt.Net.BCrypt.HashPassword(request.NovaSenha);
+        usuario.SenhaHash = BCrypt.Net.BCrypt.HashPassword(request.NovaSenha, 12);
+        usuario.VersaoSeguranca = Guid.NewGuid();
         await context.SaveChangesAsync();
         await operacao.CommitAsync();
     }
@@ -148,7 +161,7 @@ public partial class ContaService(AppDbContext context, ImagemUploadService uplo
         var endereco = u.Enderecos.FirstOrDefault();
         return new ContaResponse
         {
-            Id = u.Id, Tipo = u.Tipo.ToString(), Nome = u.Nome, Email = u.Email, Telefone = u.Telefone,
+            Id = u.Id, Tipo = u.Tipo.ToString(), Nome = u.Nome, Email = u.Email, Telefone = u.Telefone, EmailConfirmado = u.EmailConfirmado, MfaAtivo = u.MfaAtivo,
             FotoUrl = u.FotoUrl, StatusAprovacao = u.StatusAprovacao.ToString(), DataCriacao = u.DataCriacao,
             NomeExibicao = u switch { Varejista v => v.NomeEstabelecimento, Ong o => o.NomeFantasia, _ => u.Nome },
             Organizacao = u switch

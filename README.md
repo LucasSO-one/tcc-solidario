@@ -118,3 +118,7 @@ As verificações de conta usam SQLite em memória e não leem configurações o
 ## Deploy no Railway + Supabase
 
 Consulte [o passo a passo de publicação](deploy/RAILWAY.md). O Dockerfile da raiz publica frontend e API em um serviço, com banco Supabase existente e configurações pelas Variables do Railway. Migrações e seed ficam desligados em produção.
+
+## Segurança e publicação
+
+Esta versão altera autenticação, banco e variáveis de produção. Antes do deploy, siga [o roteiro de segurança](deploy/SEGURANCA.md). Há migration, confirmação de e-mail por SMTP e MFA obrigatório para administradores.

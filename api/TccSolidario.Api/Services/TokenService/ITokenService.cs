@@ -5,5 +5,5 @@ using TccSolidario.Api.Models;
 
 public interface ITokenService
 {
-    string GerarTokenJwt(Usuario usuario);
+    string GerarTokenJwt(Usuario usuario, Guid sessaoId);
 }

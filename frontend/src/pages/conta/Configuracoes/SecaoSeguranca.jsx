@@ -1,5 +1,6 @@
 import ExcluirConta from './ExcluirConta';
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { alterarSenha } from '../../../service/conta';
 import { mensagemErro } from '../../../utils/mensagemErro';
 import { senhaValida } from '../../../utils/mascaras';
@@ -14,6 +15,7 @@ const VAZIO = { senhaAtual: '', novaSenha: '', confirmacao: '' };
 
 export default function SecaoSeguranca({ onSujo }) {
   const toast = useToast();
+  const navigate = useNavigate();
   const form = useFormulario(VAZIO);
   const { valores, alterar, erros, setErros, sujo } = form;
   const [salvando, setSalvando] = useState(false);
@@ -29,7 +31,7 @@ export default function SecaoSeguranca({ onSujo }) {
     try {
       await alterarSenha(valores.senhaAtual, valores.novaSenha);
       form.redefinir(VAZIO);
-      toast.success('Senha alterada. Use a nova senha no próximo acesso.');
+      navigate('/login', { replace: true, state: { mensagem: 'Senha alterada. Entre novamente com a nova senha.' } });
     } catch (err) {
       const porCampo = errosDoServidor(err);
       if (porCampo) setErros(porCampo); else toast.error(mensagemErro(err));

@@ -18,6 +18,13 @@ public abstract class Usuario
     public string Telefone { get; set; } = string.Empty;
     
     public string SenhaHash { get; set; } = string.Empty;
+    public string EmailNormalizado { get; set; } = string.Empty;
+    public bool EmailConfirmado { get; set; } = true; // Legado e seed; cadastros novos começam sem confirmação.
+    public Guid VersaoSeguranca { get; set; } = Guid.NewGuid();
+    public bool MfaAtivo { get; set; }
+    public string? SegredoMfaProtegido { get; set; }
+    public long UltimoPassoMfa { get; set; } = -1;
+    public string CodigosRecuperacaoMfa { get; set; } = "[]";
     
     public DateTime DataCriacao { get; set; } = DateTime.UtcNow;
     

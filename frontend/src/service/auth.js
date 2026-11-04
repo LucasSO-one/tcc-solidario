@@ -1,5 +1,5 @@
 // service/auth.js
-import api from '../config/api';
+import api, { renovarCsrf } from '../config/api';
 
 const ENDPOINTS_REGISTRO = {
   consumidor: '/registro/consumidor',
@@ -25,14 +25,14 @@ function montarPayloadRegistro(userType, formData) {
       return {
         ...base,
         nomeFantasia: formData.nomeFantasia,
-        cnpj: apenasDigitos(formData.cnpj),
+        cnpj: formData.cnpj.replace(/[^a-z0-9]/gi, '').toUpperCase(),
         telefone: formData.telefone,
       };
     case 'varejista':
       return {
         ...base,
         razaoSocial: formData.razaoSocial,
-        cnpj: apenasDigitos(formData.cnpj),
+        cnpj: formData.cnpj.replace(/[^a-z0-9]/gi, '').toUpperCase(),
         nomeEstabelecimento: formData.nomeEstabelecimento,
       };
     default:
@@ -51,18 +51,15 @@ export async function register(userType, formData) {
 
 export async function login({ email, senha }) {
   const { data } = await api.post('/auth/login', { email, senha });
+  if (data.usuario) await renovarCsrf();
   return data;
 }
-
+export async function confirmarMfa(payload) {
+  const { data } = await api.post('/auth/mfa/confirmar', payload);
+  if (data.usuario) await renovarCsrf();
+  return data;
+}
 export async function logout() {
-  try {
-    // 1. Envia o comando para o C# invalidar o token
-    await api.post('/auth/logout');
-  } catch (error) {
-    console.warn("Aviso no back-end durante o logout:", error);
-  } finally {
-    // As chaves são as mesmas usadas pela tela de login.
-    localStorage.removeItem('token'); 
-    localStorage.removeItem('usuario'); 
-  }
+  await api.post('/auth/logout');
+  await renovarCsrf();
 }

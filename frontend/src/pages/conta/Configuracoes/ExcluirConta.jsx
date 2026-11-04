@@ -21,7 +21,7 @@ export default function ExcluirConta() {
     setEnviando(true); setErro('');
     try {
       await excluirConta(senha, confirmacao);
-      localStorage.removeItem('token'); localStorage.removeItem('usuario');
+      // A API encerrou a conta e invalidou as sessões no banco.
       navigate('/login', { replace: true });
     } catch (e) { setErro(mensagemErro(e)); setEnviando(false); }
   }

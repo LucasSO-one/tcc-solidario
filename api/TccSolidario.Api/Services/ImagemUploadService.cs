@@ -12,7 +12,7 @@ namespace TccSolidario.Api.Services;
 /// Com o Cloudinary configurado (seção "Cloudinary"), as fotos vão para lá; sem ele,
 /// ficam em wwwroot/uploads.
 /// </summary>
-public partial class ImagemUploadService(IWebHostEnvironment env, Cloudinary? cloudinary = null)
+public partial class ImagemUploadService(IWebHostEnvironment env, Cloudinary? cloudinary = null, IConfiguration? config = null)
 {
     public const int MaxImagens = 6;
     public const long TamanhoMaximoBytes = 5 * 1024 * 1024;
@@ -54,8 +54,7 @@ public partial class ImagemUploadService(IWebHostEnvironment env, Cloudinary? cl
             return resultado.SecureUrl.ToString();
         }
 
-        var webRoot = env.WebRootPath ?? Path.Combine(env.ContentRootPath, "wwwroot");
-        var diretorio = Path.Combine(webRoot, "uploads", pasta);
+        var diretorio = Path.Combine(Seguranca.ArmazenamentoImagens.Raiz(env, config), pasta);
         Directory.CreateDirectory(diretorio);
         await using var destino = new FileStream(Path.Combine(diretorio, nome + extensao), FileMode.CreateNew);
         await imagem.CopyToAsync(destino);
@@ -64,7 +63,7 @@ public partial class ImagemUploadService(IWebHostEnvironment env, Cloudinary? cl
 
     public async Task RemoverAsync(IEnumerable<string> urls)
     {
-        var webRoot = env.WebRootPath ?? Path.Combine(env.ContentRootPath, "wwwroot");
+        var webRoot = Seguranca.ArmazenamentoImagens.Raiz(env, config);
         foreach (var url in urls)
         {
             if (Uri.TryCreate(url, UriKind.Absolute, out _))
@@ -79,8 +78,9 @@ public partial class ImagemUploadService(IWebHostEnvironment env, Cloudinary? cl
                 continue;
             }
             // Só apaga uploads; imagens fixas do projeto (ex.: /seed) ficam.
-            var pastaUploads = Path.GetFullPath(Path.Combine(webRoot, "uploads")) + Path.DirectorySeparatorChar;
-            var caminho = Path.GetFullPath(Path.Combine(webRoot, url.TrimStart('/')));
+            if (!url.StartsWith("/uploads/", StringComparison.Ordinal)) continue;
+            var pastaUploads = Path.GetFullPath(webRoot) + Path.DirectorySeparatorChar;
+            var caminho = Path.GetFullPath(Path.Combine(webRoot, url["/uploads/".Length..]));
             if (caminho.StartsWith(pastaUploads) && File.Exists(caminho)) File.Delete(caminho);
         }
     }

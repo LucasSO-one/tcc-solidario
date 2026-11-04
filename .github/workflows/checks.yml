@@ -1,0 +1,79 @@
+name: Build e segurança
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: qa
+          POSTGRES_PASSWORD: local-fixture-only
+          POSTGRES_DB: vittaflow_seguranca
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U qa -d vittaflow_seguranca"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      VITTAFLOW_TEST_CONNECTION: Host=127.0.0.1;Port=5432;Database=vittaflow_seguranca;Username=qa;Password=local-fixture-only
+      ConnectionStrings__DefaultConnection: Host=127.0.0.1;Port=5432;Database=vittaflow_seguranca;Username=qa;Password=local-fixture-only
+      VITE_API_URL: /api
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: dotnet tool restore
+      - run: dotnet build api/TccSolidario.Api
+      - run: dotnet ef migrations has-pending-model-changes --project api/TccSolidario.Api
+      - run: dotnet ef database update --project api/TccSolidario.Api
+      - name: Regras, contas e compatibilidade legada
+        run: |
+          dotnet run --project tests/TccSolidario.RegrasChecks
+          dotnet run --project tests/TccSolidario.ContaChecks
+          dotnet run --project tests/TccSolidario.LegadoChecks
+      - name: Segurança no PostgreSQL isolado
+        run: dotnet run --project tests/TccSolidario.SegurancaChecks
+      - name: Preparar papel restrito para a API de teste
+        env:
+          PGHOST: 127.0.0.1
+          PGPORT: '5432'
+          PGUSER: qa
+          PGDATABASE: vittaflow_seguranca
+          PGPASSWORD: local-fixture-only
+        run: |
+          psql -X -v ON_ERROR_STOP=1 -f deploy/security/permissoes-supabase.sql
+          psql -X -v ON_ERROR_STOP=1 -c "ALTER ROLE vittaflow_app LOGIN PASSWORD 'local-fixture-only';"
+      - name: Build e análise do frontend
+        working-directory: frontend
+        run: |
+          npm ci
+          npm run lint
+          npm run build
+          npm audit --audit-level=high
+          npx playwright install --with-deps chromium
+      - name: Fluxos pelo navegador, SMTP local e reinícios
+        working-directory: frontend
+        run: npm run test:e2e
+        env:
+          VITTAFLOW_TEST_USE_LIMITED_ROLE: 'true'
+      - name: Bloquear dependências .NET vulneráveis
+        shell: pwsh
+        run: |
+          $audit = dotnet list api/TccSolidario.Api package --vulnerable --include-transitive --format json | ConvertFrom-Json
+          if ($LASTEXITCODE -ne 0) { throw 'Falha na auditoria NuGet.' }
+          foreach ($project in $audit.projects) {
+            foreach ($framework in $project.frameworks) {
+              if ($framework.topLevelPackages.Count -gt 0 -or $framework.transitivePackages.Count -gt 0) { throw 'Dependências vulneráveis encontradas.' }
+            }
+          }

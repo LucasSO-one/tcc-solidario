@@ -9,7 +9,7 @@ public class RegistroVarejistaRequest
     [StringLength(150, ErrorMessage = "O nome do estabelecimento deve ter no máximo 150 caracteres.")]
     public string NomeEstabelecimento { get; set; } = string.Empty;
     [Required(ErrorMessage = "O CNPJ e obrigatorio.")]
-    [RegularExpression(@"^\d{14}$", ErrorMessage = "O CNPJ deve conter exatamente 14 digitos numericos puros.")]
+    [RegularExpression(@"^[A-Za-z0-9]{12}[0-9]{2}$", ErrorMessage = "O CNPJ deve conter exatamente 14 caracteres, com dois dígitos verificadores.")]
     public string Cnpj { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "A Razao Social e obrigatoria.")]

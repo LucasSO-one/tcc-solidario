@@ -25,6 +25,10 @@ public partial class ContaService
         if (reservas.Any(t => t.StatusReserva == StatusReserva.Ativa))
             throw new ConflictException("Há reservas ativas vinculadas à conta. Conclua as retiradas ou aguarde o encerramento das reservas antes de excluir. Consumidores e ONGs também podem cancelar suas reservas.");
 
+        await context.TokensSeguranca.Where(t => t.UsuarioId == usuarioId && t.ConsumidoEmUtc == null)
+            .ExecuteUpdateAsync(s => s.SetProperty(t => t.ConsumidoEmUtc, agora).SetProperty(t => t.SegredoProtegido, (string?)null));
+        await context.EmailsPendentes.Where(e => e.UsuarioId == usuarioId && e.EnviadoEmUtc == null)
+            .ExecuteUpdateAsync(s => s.SetProperty(e => e.Cancelado, true).SetProperty(e => e.MensagemProtegida, ""));
         var foto = usuario.FotoUrl;
         context.Enderecos.RemoveRange(usuario.Enderecos);
         usuario.Nome = "Conta excluída";
@@ -33,6 +37,10 @@ public partial class ContaService
         usuario.SenhaHash = BCrypt.Net.BCrypt.HashPassword(Guid.NewGuid().ToString("N"));
         usuario.FotoUrl = null;
         usuario.StatusAprovacao = StatusAprovacao.Excluido;
+        usuario.VersaoSeguranca = Guid.NewGuid();
+        usuario.SegredoMfaProtegido = null;
+        usuario.CodigosRecuperacaoMfa = "[]";
+        usuario.MfaAtivo = false;
         usuario.NotificarNovasSolicitacoes = usuario.NotificarVencimentos = usuario.NotificarDoacoesConcluidas = false;
         switch (usuario)
         {

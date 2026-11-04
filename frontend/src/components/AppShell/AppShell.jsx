@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Outlet } from "react-router-dom";
+import { Outlet, Navigate, Link } from "react-router-dom";
 import { Menu } from "lucide-react";
 import Sidebar from "../Sidebar/Sidebar";
 import Logo from "../Logo/Logo";
 import { NAVEGACAO } from "../../config/navegacao";
 import useBreakpoint from "../../hooks/useBreakpoint";
 import useFocusTrap from "../../hooks/useFocusTrap";
-import { gravarLocal, lerLocal, lerUsuario } from "../../utils/armazenamento";
+import { gravarLocal, lerLocal } from "../../utils/armazenamento";
 import { ContaContext } from "../../contexts/contaContext";
 import { obterConta } from "../../service/conta";
 import Avatar from "../ui/Avatar";
@@ -20,10 +20,11 @@ const BASE_PERFIL = { Admin: "/dashboard/admin", Varejista: "/dashboard/varejist
 // Estrutura comum às áreas logadas: menu lateral + cabeçalho no celular + conteúdo.
 export default function AppShell({ perfil }) {
   const modo = useBreakpoint();
-  const [usuario] = useState(lerUsuario);
+
   const [recolhidaDesktop, setRecolhidaDesktop] = useState(() => lerLocal(CHAVE_RECOLHIDA) === "true");
   const [aberta, setAberta] = useState(false); // tablet: expandida sobre o conteúdo | celular: drawer aberto
   const [conta, setConta] = useState(null);
+  const usuario = conta ? { id: conta.id, email: conta.email, tipo: conta.tipo } : null;
   const [erroConta, setErroConta] = useState(false);
   const [tentativa, setTentativa] = useState(0);
   const sidebarRef = useRef(null);
@@ -58,6 +59,11 @@ export default function AppShell({ perfil }) {
       return !atual;
     });
   }
+
+  if (!conta) return <main className="content" aria-busy={!erroConta}>{erroConta
+    ? <p>Não foi possível carregar sua conta. <button className="btn btn--secondary" onClick={recarregarConta}>Tentar novamente</button> <Link to="/login">Entrar</Link></p>
+    : <p>Carregando sua conta...</p>}</main>;
+  if (conta.tipo !== perfil) return <Navigate to={BASE_PERFIL[conta.tipo] ?? '/login'} replace />;
 
   const classes = ["app-shell", `app-shell--${modo}`, recolhida && "app-shell--recolhida"].filter(Boolean).join(" ");
 

@@ -15,13 +15,17 @@ public class RegistroController : ControllerBase
 {
     private readonly ICnpjValidatorService _cnpjValidator;
     private readonly IUsuarioRegistrationService _registrationService;
+    private readonly Services.Seguranca.AutenticacaoService _auth;
+    private readonly TccSolidario.Api.Data.AppDbContext _db;
 
     public RegistroController(
         ICnpjValidatorService cnpjValidator,
-        IUsuarioRegistrationService registrationService)
+        IUsuarioRegistrationService registrationService, Services.Seguranca.AutenticacaoService auth, TccSolidario.Api.Data.AppDbContext db)
     {
         _cnpjValidator = cnpjValidator;
         _registrationService = registrationService;
+        _auth = auth;
+        _db = db;
     }
 
     [HttpPost("varejista")]
@@ -34,14 +38,17 @@ public class RegistroController : ControllerBase
         {
             Nome = request.RazaoSocial,
             NomeEstabelecimento = request.NomeEstabelecimento,
-            CNPJ = SomenteDigitos(request.Cnpj),
+            CNPJ = Services.Seguranca.Documentos.NormalizarCnpj(request.Cnpj),
             RazaoSocial = request.RazaoSocial,
             Email = request.Email,
             Tipo = TipoUsuario.Varejista
         };
 
+        await using var operacao = await Services.OperacaoConta.IniciarAsync(_db);
         await _registrationService.RegistrarAsync(varejista, request.Senha);
-        return Ok(new { Sucesso = true, Mensagem = "Cadastro realizado. Aguardando aprovação." });
+        await _auth.EnfileirarConfirmacaoAsync(varejista.Id);
+        await operacao.CommitAsync();
+        return Ok(new { Sucesso = true, Mensagem = "Cadastro recebido. Confirme seu e-mail e aguarde a aprovação." });
     }
 
     [HttpPost("ong")]
@@ -53,15 +60,18 @@ public class RegistroController : ControllerBase
         var ong = new Ong
         {
             Nome = request.NomeFantasia,
-            CNPJ = SomenteDigitos(request.Cnpj),
+            CNPJ = Services.Seguranca.Documentos.NormalizarCnpj(request.Cnpj),
             NomeFantasia = request.NomeFantasia,
             Telefone = request.Telefone,
             Email = request.Email,
             Tipo = TipoUsuario.ONG
         };
 
+        await using var operacao = await Services.OperacaoConta.IniciarAsync(_db);
         await _registrationService.RegistrarAsync(ong, request.Senha);
-        return Ok(new { Sucesso = true, Mensagem = "Cadastro realizado. Aguardando aprovação." });
+        await _auth.EnfileirarConfirmacaoAsync(ong.Id);
+        await operacao.CommitAsync();
+        return Ok(new { Sucesso = true, Mensagem = "Cadastro recebido. Confirme seu e-mail e aguarde a aprovação." });
     }
 
     [HttpPost("consumidor")]
@@ -76,8 +86,11 @@ public class RegistroController : ControllerBase
             Tipo = TipoUsuario.Consumidor
         };
 
+        await using var operacao = await Services.OperacaoConta.IniciarAsync(_db);
         await _registrationService.RegistrarAsync(consumidor, request.Senha);
-        return Ok(new { Sucesso = true, Mensagem = "Cadastro realizado com sucesso." });
+        await _auth.EnfileirarConfirmacaoAsync(consumidor.Id);
+        await operacao.CommitAsync();
+        return Ok(new { Sucesso = true, Mensagem = "Cadastro recebido. Confirme seu e-mail para entrar." });
     }
 
     private static string SomenteDigitos(string valor) => new(valor.Where(char.IsDigit).ToArray());

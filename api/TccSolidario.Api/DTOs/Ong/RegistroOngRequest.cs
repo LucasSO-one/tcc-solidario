@@ -7,7 +7,7 @@ using System.Text.RegularExpressions;
 public class RegistroOngRequest
 {
     [Required(ErrorMessage = "O CNPJ da ONG e obrigatorio.")]
-    [RegularExpression(@"^\d{14}$", ErrorMessage = "O CNPJ deve conter exatamente 14 digitos numericos.")]
+    [RegularExpression(@"^[A-Za-z0-9]{12}[0-9]{2}$", ErrorMessage = "O CNPJ deve conter exatamente 14 caracteres, com dois dígitos verificadores.")]
     public string Cnpj { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "O Nome da ONG e obrigatorio.")]

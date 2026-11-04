@@ -22,6 +22,64 @@ namespace TccSolidario.Api.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("TccSolidario.Api.Models.ChaveProtecao", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("XmlProtegido")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ChavesProtecao");
+                });
+
+            modelBuilder.Entity("TccSolidario.Api.Models.EmailPendente", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("Cancelado")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime>("CriadoEmUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("EmProcessamentoAteUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("EnviadoEmUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("ExpiraEmUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("MensagemProtegida")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("ProximaTentativaUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Tentativas")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("UsuarioId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UsuarioId");
+
+                    b.HasIndex("EnviadoEmUtc", "ProximaTentativaUtc");
+
+                    b.ToTable("EmailsPendentes");
+                });
+
             modelBuilder.Entity("TccSolidario.Api.Models.Endereco", b =>
                 {
                     b.Property<Guid>("Id")
@@ -70,6 +128,53 @@ namespace TccSolidario.Api.Migrations
                     b.HasIndex("UsuarioId");
 
                     b.ToTable("Enderecos");
+                });
+
+            modelBuilder.Entity("TccSolidario.Api.Models.EventoAuditoria", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Acao")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)");
+
+                    b.Property<DateTime>("EmUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("EntidadeId")
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("Sucesso")
+                        .HasColumnType("boolean");
+
+                    b.Property<Guid?>("UsuarioId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EmUtc");
+
+                    b.ToTable("EventosAuditoria");
+                });
+
+            modelBuilder.Entity("TccSolidario.Api.Models.LimiteAutenticacao", b =>
+                {
+                    b.Property<string>("Chave")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<DateTime>("InicioUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Tentativas")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Chave");
+
+                    b.ToTable("LimitesAutenticacao");
                 });
 
             modelBuilder.Entity("TccSolidario.Api.Models.Produto", b =>
@@ -157,6 +262,70 @@ namespace TccSolidario.Api.Migrations
                     b.ToTable("ProdutoImagens");
                 });
 
+            modelBuilder.Entity("TccSolidario.Api.Models.SessaoAutenticacao", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CriadaEmUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("ExpiraEmUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("RevogadaEmUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("UsuarioId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("VersaoUsuario")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UsuarioId", "ExpiraEmUtc");
+
+                    b.ToTable("SessoesAutenticacao");
+                });
+
+            modelBuilder.Entity("TccSolidario.Api.Models.TokenSeguranca", b =>
+                {
+                    b.Property<string>("Hash")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<DateTime?>("ConsumidoEmUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("ExpiraEmUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Falhas")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Finalidade")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
+                    b.Property<string>("SegredoProtegido")
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("UsuarioId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("VersaoUsuario")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Hash");
+
+                    b.HasIndex("UsuarioId", "Finalidade");
+
+                    b.ToTable("TokensSeguranca");
+                });
+
             modelBuilder.Entity("TccSolidario.Api.Models.Transacao", b =>
                 {
                     b.Property<Guid>("Id")
@@ -230,6 +399,11 @@ namespace TccSolidario.Api.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<string>("CodigosRecuperacaoMfa")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasDefaultValue("[]");
+
                     b.Property<DateTime>("DataCriacao")
                         .HasColumnType("timestamp with time zone");
 
@@ -237,9 +411,21 @@ namespace TccSolidario.Api.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<bool>("EmailConfirmado")
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true);
+
+                    b.Property<string>("EmailNormalizado")
+                        .IsRequired()
+                        .HasMaxLength(254)
+                        .HasColumnType("character varying(254)");
+
                     b.Property<string>("FotoUrl")
                         .HasMaxLength(300)
                         .HasColumnType("character varying(300)");
+
+                    b.Property<bool>("MfaAtivo")
+                        .HasColumnType("boolean");
 
                     b.Property<string>("Nome")
                         .IsRequired()
@@ -253,6 +439,9 @@ namespace TccSolidario.Api.Migrations
 
                     b.Property<bool>("NotificarVencimentos")
                         .HasColumnType("boolean");
+
+                    b.Property<string>("SegredoMfaProtegido")
+                        .HasColumnType("text");
 
                     b.Property<string>("SenhaHash")
                         .IsRequired()
@@ -275,7 +464,19 @@ namespace TccSolidario.Api.Migrations
                         .HasMaxLength(13)
                         .HasColumnType("character varying(13)");
 
+                    b.Property<long>("UltimoPassoMfa")
+                        .HasColumnType("bigint")
+                        .HasDefaultValue(-1L);
+
+                    b.Property<Guid>("VersaoSeguranca")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("EmailNormalizado")
+                        .IsUnique();
 
                     b.ToTable("Usuarios");
 
@@ -374,6 +575,15 @@ namespace TccSolidario.Api.Migrations
                     b.HasDiscriminator().HasValue("Varejista");
                 });
 
+            modelBuilder.Entity("TccSolidario.Api.Models.EmailPendente", b =>
+                {
+                    b.HasOne("TccSolidario.Api.Models.Usuario", null)
+                        .WithMany()
+                        .HasForeignKey("UsuarioId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("TccSolidario.Api.Models.Endereco", b =>
                 {
                     b.HasOne("TccSolidario.Api.Models.Usuario", "Usuario")
@@ -405,6 +615,24 @@ namespace TccSolidario.Api.Migrations
                         .IsRequired();
 
                     b.Navigation("Produto");
+                });
+
+            modelBuilder.Entity("TccSolidario.Api.Models.SessaoAutenticacao", b =>
+                {
+                    b.HasOne("TccSolidario.Api.Models.Usuario", null)
+                        .WithMany()
+                        .HasForeignKey("UsuarioId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("TccSolidario.Api.Models.TokenSeguranca", b =>
+                {
+                    b.HasOne("TccSolidario.Api.Models.Usuario", null)
+                        .WithMany()
+                        .HasForeignKey("UsuarioId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("TccSolidario.Api.Models.Transacao", b =>

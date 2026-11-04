@@ -1,33 +1,21 @@
-name: Run EF Core Migrations
-
+name: Migrations de produção (manual)
 on:
-  push:
-    branches:
-      - main
-
+  workflow_dispatch:
 jobs:
   migrate:
     runs-on: ubuntu-latest
-
+    environment: production
+    permissions:
+      contents: read
     steps:
-      - name: Checkout do codigo
-        uses: actions/checkout@v4
-
-      - name: Configurar .NET
-        uses: actions/setup-dotnet@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '8.0.x'
-
-      - name: Restaurar dependencias
-        run: dotnet restore
-
-      - name: Instalar EF Core CLI
-        run: dotnet tool install --global dotnet-ef
-
-      # O passo de forcar o IPv4 foi removido.
-
-      - name: Rodar migrations
+      - run: dotnet tool restore
+      - run: dotnet restore api/TccSolidario.Api
+      # Configure aprovação no environment production e execute preflight/backup antes.
+      - name: Aplicar migrations com credencial exclusiva de manutenção
         run: dotnet ef database update --project api/TccSolidario.Api
         env:
-          ConnectionStrings__DefaultConnection: "Host=aws-1-us-east-1.pooler.supabase.com;Database=postgres;Username=postgres.wqgrxpnjelgixasitbzo;Password=${{ secrets.DB_PASSWORD }};SSL Mode=Require;Trust Server Certificate=true"
-          Jwt__Key: ${{ secrets.JWT_KEY }}
+          ConnectionStrings__DefaultConnection: ${{ secrets.DB_MIGRATION_CONNECTION }}

@@ -13,10 +13,10 @@ public class TokenService : ITokenService
 
     public TokenService(IConfiguration configuration) => _configuration = configuration;
 
-    public string GerarTokenJwt(Usuario usuario)
+    public string GerarTokenJwt(Usuario usuario, Guid sessaoId)
     {
         var jwtKey = _configuration["Jwt:Key"];
-        var key = Encoding.ASCII.GetBytes(jwtKey!);
+        var key = Encoding.UTF8.GetBytes(jwtKey!);
 
         var claims = new List<Claim>
         {
@@ -24,6 +24,8 @@ public class TokenService : ITokenService
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             new Claim(JwtRegisteredClaimNames.Email, usuario.Email),
             new Claim("TipoUsuario", usuario.Tipo.ToString()),
+            new Claim("vfsid", sessaoId.ToString()),
+            new Claim("vfsv", usuario.VersaoSeguranca.ToString()),
             new Claim(ClaimTypes.Role, usuario.Tipo.ToString())
         };
 

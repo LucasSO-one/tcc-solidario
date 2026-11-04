@@ -1,0 +1,7 @@
+@use '../../../styles/design' as *;
+.mfa-setup { display: grid; justify-items: center; gap: 12px; padding: 20px 0; text-align: center; }
+.mfa-setup code { overflow-wrap: anywhere; word-break: break-all; max-width: 100%; padding: 12px; background: $color-primary-soft; border-radius: 8px; }
+.mfa-setup svg { background: white; padding: 8px; }
+.mfa-codigos { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; list-style: none; margin: 20px 0; }
+.mfa-codigos li { padding: 10px; background: $color-primary-soft; border-radius: 8px; font-size: 12px; overflow-wrap: anywhere; }
+@media (max-width: 380px) { .mfa-codigos { grid-template-columns: 1fr; } }

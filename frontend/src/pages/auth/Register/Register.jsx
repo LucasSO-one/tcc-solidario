@@ -30,13 +30,13 @@ const CAMPOS_POR_TIPO = {
   ],
   ong: [
     { name: "nomeFantasia", label: "Nome da ONG", placeholder: "Nome fantasia da instituição" },
-    { name: "cnpj", label: "CNPJ", placeholder: "00.000.000/0000-00", inputMode: "numeric" },
+    { name: "cnpj", label: "CNPJ", placeholder: "00.000.000/0000-00", inputMode: "text" },
     { name: "telefone", label: "Celular de contato", placeholder: "(11) 91234-5678", inputMode: "tel", autoComplete: "tel" },
   ],
   varejista: [
     { name: "razaoSocial", label: "Razão social", placeholder: "Razão social da empresa" },
     { name: "nomeEstabelecimento", label: "Nome do estabelecimento", placeholder: "Ex.: Mercadinho do Bairro" },
-    { name: "cnpj", label: "CNPJ", placeholder: "00.000.000/0000-00", inputMode: "numeric" },
+    { name: "cnpj", label: "CNPJ", placeholder: "00.000.000/0000-00", inputMode: "text" },
   ],
 };
 
