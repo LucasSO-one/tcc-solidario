@@ -13,6 +13,15 @@ using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Railway termina o HTTPS no proxy e encaminha HTTP para a porta do container.
+var port = Environment.GetEnvironmentVariable("PORT");
+if (!string.IsNullOrWhiteSpace(port))
+{
+    if (!int.TryParse(port, out var numeroPorta) || numeroPorta is < 1 or > 65535)
+        throw new InvalidOperationException("PORT deve ser uma porta TCP válida.");
+    builder.WebHost.UseUrls($"http://0.0.0.0:{numeroPorta}");
+}
+
 builder.Services.AddControllers(); 
 builder.Services.AddEndpointsApiExplorer();
 
@@ -78,8 +87,10 @@ builder.Services.AddMemoryCache();
 // Registra o serviço como Singleton (única instância para compartilhar a lista negra)
 builder.Services.AddSingleton<ILogoutService, LogoutService>();
 
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+if (string.IsNullOrWhiteSpace(connectionString))
+    throw new InvalidOperationException("Configure ConnectionStrings__DefaultConnection.");
+builder.Services.AddDbContext<AppDbContext>(options => options.UseNpgsql(connectionString));
 
 
 builder.Services.AddHttpClient<ICnpjValidatorService, CnpjValidatorService>(client =>
@@ -92,10 +103,16 @@ builder.Services.AddHttpClient<ICnpjValidatorService, CnpjValidatorService>(clie
 var jwtKey = builder.Configuration["Jwt:Key"];
 if (string.IsNullOrEmpty(jwtKey))
 {
-    throw new InvalidOperationException("A chave JWT não foi configurada no appsettings.json.");
+    throw new InvalidOperationException("Configure Jwt__Key no ambiente da aplicação.");
 }
 
-var key = Encoding.ASCII.GetBytes(jwtKey);
+if (builder.Environment.IsProduction()
+    && (Encoding.UTF8.GetByteCount(jwtKey) < 32
+        || string.IsNullOrWhiteSpace(builder.Configuration["Jwt:Issuer"])
+        || string.IsNullOrWhiteSpace(builder.Configuration["Jwt:Audience"])))
+    throw new InvalidOperationException("Configure Jwt__Key com pelo menos 32 bytes, Jwt__Issuer e Jwt__Audience.");
+
+var key = Encoding.UTF8.GetBytes(jwtKey);
 
 builder.Services.AddAuthentication(options =>
 {
@@ -116,7 +133,7 @@ builder.Services.AddAuthentication(options =>
                 validation.Fail("Cadastro sem autorização para operar.");
         }
     };
-    options.RequireHttpsMetadata = false; // Em producao, mude para true
+    options.RequireHttpsMetadata = !builder.Environment.IsDevelopment();
     options.SaveToken = true;
     options.TokenValidationParameters = new TokenValidationParameters
     {
@@ -135,10 +152,11 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("Frontend", policy =>
     {
-        policy
-            .WithOrigins("http://localhost:5173")
-            .AllowAnyHeader()
-            .AllowAnyMethod();
+        var origins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
+            ?? (builder.Environment.IsDevelopment() ? ["http://localhost:5173"] : []);
+        // O deploy integrado usa o mesmo domínio; CORS só é necessário para outro frontend.
+        if (origins.Length > 0)
+            policy.WithOrigins(origins).AllowAnyHeader().AllowAnyMethod();
     });
 });
 
@@ -151,11 +169,14 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-app.UseHttpsRedirection();
+// Em produção, o domínio Railway fornece HTTPS; o container recebe HTTP interno.
+if (app.Environment.IsDevelopment())
+    app.UseHttpsRedirection();
 
 app.UseMiddleware<ExceptionMiddleware>();
 
 app.UseCors("Frontend");
+app.UseDefaultFiles();
 app.UseStaticFiles(); 
 
 app.UseAuthentication();
@@ -165,6 +186,22 @@ app.UseMiddleware<TccSolidario.Api.Middlewares.TokenBlacklistMiddleware>();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapGet("/health", async (AppDbContext db, CancellationToken ct) =>
+{
+    try
+    {
+        return await db.Database.CanConnectAsync(ct)
+            ? Results.Ok(new { status = "ok" })
+            : Results.StatusCode(StatusCodes.Status503ServiceUnavailable);
+    }
+    catch
+    {
+        return Results.StatusCode(StatusCodes.Status503ServiceUnavailable);
+    }
+}).AllowAnonymous();
+// Uma rota de API inexistente continua retornando 404, sem receber o HTML do React.
+app.Map("/api/{**path}", () => Results.NotFound());
+app.MapFallbackToFile("index.html");
 
 using (var scope = app.Services.CreateScope())
 {
@@ -174,11 +211,12 @@ using (var scope = app.Services.CreateScope())
         var context = services.GetRequiredService<AppDbContext>();
         var config = services.GetRequiredService<IConfiguration>();
         
-        if (builder.Configuration.GetValue("Database:AutoMigrate", true))
+        if (builder.Configuration.GetValue("Database:AutoMigrate", app.Environment.IsDevelopment()))
             context.Database.Migrate();
 
-        // Chama o nosso semeador
-        DbInitializer.Initialize(context, config);
+        // O banco existente não deve ser alterado durante um deploy comum.
+        if (config.GetValue("Database:SeedAdmin", app.Environment.IsDevelopment()))
+            DbInitializer.Initialize(context, config);
 
         // Usuários e alimentos de teste (somente local). Recriar: dotnet run -- --reset-dados-teste
         if (app.Environment.IsDevelopment() && config.GetValue("DadosTeste:Ativo", true))
@@ -187,7 +225,8 @@ using (var scope = app.Services.CreateScope())
     catch (Exception ex)
     {
         var logger = services.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "Ocorreu um erro ao semear o banco de dados.");
+        logger.LogError(ex, "Ocorreu um erro ao preparar o banco de dados.");
+        if (app.Environment.IsProduction()) throw;
     }
 }
 

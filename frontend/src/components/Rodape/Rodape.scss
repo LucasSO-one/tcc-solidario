@@ -18,7 +18,8 @@
 
   &__links {
     display: flex;
-    gap: $space-5;
+    flex-wrap: wrap;
+    gap: $space-3 $space-5;
 
     a { color: $color-text-secondary; }
     a:hover { color: $color-primary; }

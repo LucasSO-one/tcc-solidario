@@ -1,0 +1,15 @@
+.git
+**/.git
+**/node_modules
+**/bin
+**/obj
+**/dist
+**/appsettings*.json
+**/.env
+**/.env.*
+**/*.pfx
+**/*.p12
+**/*.key
+**/wwwroot/uploads
+.vs
+tests

@@ -32,6 +32,7 @@ import Solicitacoes from "../pages/ong/Solicitacoes/Solicitacoes";
 
 // Comum
 import Configuracoes from "../pages/conta/Configuracoes/Configuracoes";
+import Home from "../pages/publicas/Home";
 import Termos from "../pages/publicas/Termos";
 import Privacidade from "../pages/publicas/Privacidade";
 
@@ -42,8 +43,8 @@ import Login from "../pages/auth/Login/Login";
 // Roteador de dados (createBrowserRouter): necessário para avisar sobre alterações não salvas (useBlocker).
 const router = createBrowserRouter(createRoutesFromElements(
   <>
-    {/* Rota raiz -> redireciona para login */}
-    <Route path="/" element={<Navigate to="/login" replace />} />
+    {/* Apresentação pública da plataforma */}
+    <Route path="/" element={<Home />} />
 
     {/* Rotas públicas */}
     <Route path="/login" element={<Login />} />

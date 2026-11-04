@@ -8,7 +8,7 @@ export default function PaginaDocumento({ titulo, atualizadoEm, children }) {
   return (
     <div className="documento">
       <header className="documento__topo">
-        <Link to="/login" aria-label="VittaFlow: voltar ao início"><Logo /></Link>
+        <Link to="/" aria-label="VittaFlow: voltar ao início"><Logo /></Link>
         <Link to="/login" className="btn btn--secondary btn--sm">Entrar</Link>
       </header>
       <main className="documento__conteudo">

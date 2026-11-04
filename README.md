@@ -114,3 +114,7 @@ npm --prefix frontend run lint
 ```
 
 As verificações de conta usam SQLite em memória e não leem configurações ou credenciais do banco da aplicação. Falhas na limpeza da foto após o encerramento da conta não desfazem a exclusão e podem exigir remoção pelo responsável pelo armazenamento.
+
+## Deploy no Railway + Supabase
+
+Consulte [o passo a passo de publicação](deploy/RAILWAY.md). O Dockerfile da raiz publica frontend e API em um serviço, com banco Supabase existente e configurações pelas Variables do Railway. Migrações e seed ficam desligados em produção.
