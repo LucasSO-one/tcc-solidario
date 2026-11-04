@@ -23,8 +23,11 @@ ENV ASPNETCORE_HTTP_PORTS=8080
 ENV Database__AutoMigrate=false
 ENV Database__SeedAdmin=false
 ENV DadosTeste__Ativo=false
+# CA do Supabase para validar certificado e hostname com SSL Mode=VerifyFull.
+ENV PGSSLROOTCERT=/app/certs/supabase-root.crt
 COPY --from=api --chown=app:app /out ./
 COPY --from=frontend --chown=app:app /src/frontend/dist/ ./wwwroot/
+COPY --chown=app:app deploy/certs/supabase-root.crt ./certs/supabase-root.crt
 USER app
 EXPOSE 8080
 ENTRYPOINT ["dotnet", "TccSolidario.Api.dll"]

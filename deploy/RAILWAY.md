@@ -22,7 +22,7 @@ Host=HOST_DO_PAINEL;Port=5432;Database=postgres;Username=USUARIO_DO_PAINEL;Passw
 
 Se a senha contiver ponto e vírgula ou aspas, use a sintaxe de escape de connection strings Npgsql (valor entre aspas e aspas internas duplicadas). Não aplique URL encoding a esta string `Host=...`.
 
-Session pooler é compatível com IPv4 e adequado para este serviço persistente. Não troque por transaction pooler/porta 6543 neste primeiro deploy. TLS usa VerifyFull; não desative a validação do certificado se ocorrer erro.
+Session pooler é compatível com IPv4 e adequado para este serviço persistente. Não troque por transaction pooler/porta 6543 neste primeiro deploy. TLS usa VerifyFull. O Docker inclui a CA pública do Supabase e define `PGSSLROOTCERT=/app/certs/supabase-root.crt` para o Npgsql validar a cadeia. Não é necessário criar essa variável manualmente no Railway; se já existir um valor manual para `PGSSLROOTCERT`, ele precisa apontar para esse caminho. Não desative a validação do certificado se ocorrer erro.
 
 ## 3. Criar o serviço Railway
 
@@ -83,3 +83,9 @@ Para este primeiro deploy, mantenha uma réplica e o serviço ativo, pois os wor
 - [Railway: domínio público](https://docs.railway.com/networking/public-networking)
 - [Supabase: conexão PostgreSQL](https://supabase.com/docs/guides/database/connecting-to-postgres)
 - [Npgsql: TLS e certificados](https://www.npgsql.org/doc/security.html)
+
+### Falha no handshake SSL
+
+Se o log mostrar `Exception while performing SSL handshake` e `remote certificate was rejected`, confirme que o deploy usa o Dockerfile atualizado com `deploy/certs/supabase-root.crt`. Imagens anteriores não incluíam essa raiz. Faça commit e push desses arquivos e publique uma nova imagem, mantendo `SSL Mode=VerifyFull`. Reiniciar a imagem antiga não adiciona o certificado.
+
+O arquivo é público e não contém senha. A sua procedência e impressão digital estão em `deploy/certs/README.md`. Para uma execução local fora do Docker, use `Root Certificate=CAMINHO_ABSOLUTO_DO_CERTIFICADO` na conexão ou defina `PGSSLROOTCERT` no ambiente local.
