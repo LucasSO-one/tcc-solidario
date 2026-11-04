@@ -25,7 +25,7 @@ public class AdminController(AppDbContext context) : ControllerBase
 
     private async Task<List<object>> Listar(StatusAprovacao? status)
     {
-        var query = context.Usuarios.AsNoTracking().Where(u => u.Tipo == TipoUsuario.ONG || u.Tipo == TipoUsuario.Varejista);
+        var query = context.Usuarios.AsNoTracking().Where(u => u.StatusAprovacao != StatusAprovacao.Excluido && (u.Tipo == TipoUsuario.ONG || u.Tipo == TipoUsuario.Varejista));
         if (status.HasValue) query = query.Where(u => u.StatusAprovacao == status.Value);
         var usuarios = await query.OrderBy(u => u.DataCriacao).ToListAsync();
         return usuarios.Select(u => (object)new
@@ -41,7 +41,7 @@ public class AdminController(AppDbContext context) : ControllerBase
     [HttpGet("usuarios")]
     public async Task<IActionResult> GetUsuarios()
     {
-        var usuarios = await context.Usuarios.AsNoTracking().Where(u => u.Tipo != TipoUsuario.Admin)
+        var usuarios = await context.Usuarios.AsNoTracking().Where(u => u.Tipo != TipoUsuario.Admin && u.StatusAprovacao != StatusAprovacao.Excluido)
             .OrderByDescending(u => u.DataCriacao).ToListAsync();
         return Ok(usuarios.Select(u => new
         {

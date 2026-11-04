@@ -23,6 +23,7 @@ public partial class ContaService(AppDbContext context, ImagemUploadService uplo
 
     public async Task<ContaResponse> AtualizarAsync(Guid usuarioId, AtualizarContaRequest request)
     {
+        await using var operacao = await OperacaoConta.IniciarAsync(context);
         var usuario = await Carregar(usuarioId);
         var erros = new Dictionary<string, string>();
         var nome = request.Nome?.Trim() ?? "";
@@ -92,11 +93,13 @@ public partial class ContaService(AppDbContext context, ImagemUploadService uplo
             endereco.Estado = e.Estado.Trim().ToUpperInvariant();
         }
         await context.SaveChangesAsync();
+        await operacao.CommitAsync();
         return Mapear(usuario);
     }
 
     public async Task AlterarSenhaAsync(Guid usuarioId, AlterarSenhaRequest request)
     {
+        await using var operacao = await OperacaoConta.IniciarAsync(context);
         var usuario = await Carregar(usuarioId);
         var erros = new Dictionary<string, string>();
         if (string.IsNullOrEmpty(request.SenhaAtual) || !BCrypt.Net.BCrypt.Verify(request.SenhaAtual, usuario.SenhaHash))
@@ -108,10 +111,12 @@ public partial class ContaService(AppDbContext context, ImagemUploadService uplo
         if (erros.Count > 0) throw new ValidacaoException(erros);
         usuario.SenhaHash = BCrypt.Net.BCrypt.HashPassword(request.NovaSenha);
         await context.SaveChangesAsync();
+        await operacao.CommitAsync();
     }
 
     public async Task<string> AtualizarFotoAsync(Guid usuarioId, IFormFile? foto)
     {
+        await using var operacao = await OperacaoConta.IniciarAsync(context);
         if (foto is null) throw new InvalidOperationException("Envie uma imagem.");
         var usuario = await Carregar(usuarioId);
         await ImagemUploadService.ValidarAsync([foto], TamanhoMaximoFoto);
@@ -119,12 +124,13 @@ public partial class ContaService(AppDbContext context, ImagemUploadService uplo
         usuario.FotoUrl = await uploads.SalvarAsync(foto, "contas");
         try { await context.SaveChangesAsync(); }
         catch { await uploads.RemoverAsync([usuario.FotoUrl]); throw; }
+        await operacao.CommitAsync();
         if (anterior is not null) await uploads.RemoverAsync([anterior]);
         return usuario.FotoUrl;
     }
 
     private async Task<Usuario> Carregar(Guid usuarioId) =>
-        await context.Usuarios.Include(u => u.Enderecos).SingleOrDefaultAsync(u => u.Id == usuarioId)
+        await context.Usuarios.Include(u => u.Enderecos).SingleOrDefaultAsync(u => u.Id == usuarioId && u.StatusAprovacao != TccSolidario.Api.Models.Enums.StatusAprovacao.Excluido)
         ?? throw new KeyNotFoundException("Conta não encontrada.");
 
     private static void ValidarEndereco(EnderecoDto e, Dictionary<string, string> erros)

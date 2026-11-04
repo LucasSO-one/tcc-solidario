@@ -93,3 +93,24 @@ Banco de Dados: PostgreSQL
 
 Projeto em desenvolvimento como Trabalho de Conclusão de Curso.
 
+
+
+## Exclusão de conta e páginas públicas
+
+- Termos de uso: `/termos`; política de privacidade: `/privacidade`. As duas rotas são públicas e estão ligadas ao cadastro e ao rodapé.
+- Contato padrão: `lucas.silva2014outbook@gmail.com`. Pode ser substituído com `VITE_CONTATO_PRIVACIDADE` no ambiente do frontend.
+- Em Configurações > Segurança, a exclusão exige a senha atual e a palavra `EXCLUIR`. A API usa `DELETE /api/conta`, com corpo JSON `{ "senhaAtual": "...", "confirmacao": "EXCLUIR" }`; o titular vem do JWT.
+- Reservas ainda ativas impedem a exclusão (HTTP 409). Reservas já expiradas são encerradas. O último administrador aprovado também é protegido.
+- O cadastro é encerrado com `StatusAprovacao.Excluido` (valor 4, na coluna já existente). Dados de perfil e endereços são removidos ou substituídos; as chaves e o histórico operacional permanecem. Isso não apaga automaticamente anúncios, seus arquivos, logs ou backups. A política informa esse limite.
+- A verificação do usuário no banco a cada JWT bloqueia também as sessões já emitidas. Não há migração de esquema nova nem aplicação de migração em banco real nesta alteração.
+- No PostgreSQL, transações com advisory lock serializam a exclusão, as alterações de perfil, a publicação de lotes e a criação de reservas para evitar corrida entre exclusão e novas operações. É uma proteção para o protótipo; o teste SQLite abaixo não valida concorrência PostgreSQL.
+
+Verificação isolada, sem acessar o banco configurado da aplicação:
+
+```sh
+dotnet run --project tests/TccSolidario.ContaChecks
+npm --prefix frontend run build
+npm --prefix frontend run lint
+```
+
+As verificações de conta usam SQLite em memória e não leem configurações ou credenciais do banco da aplicação. Falhas na limpeza da foto após o encerramento da conta não desfazem a exclusão e podem exigir remoção pelo responsável pelo armazenamento.

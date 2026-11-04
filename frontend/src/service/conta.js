@@ -14,6 +14,10 @@ export async function alterarSenha(senhaAtual, novaSenha) {
   await api.put('/conta/senha', { senhaAtual, novaSenha });
 }
 
+export async function excluirConta(senhaAtual, confirmacao) {
+  await api.delete('/conta', { data: { senhaAtual, confirmacao } });
+}
+
 export async function enviarFoto(arquivo) {
   const formData = new FormData();
   formData.append('foto', arquivo);

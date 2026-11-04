@@ -12,6 +12,7 @@ public class ProdutoService(AppDbContext context, ImagemUploadService uploads, C
 {
     public async Task<Produto> CadastrarLoteAsync(Guid varejistaId, CadastrarLoteRequest request)
     {
+        await using var operacao = await OperacaoConta.IniciarAsync(context);
         var varejista = await context.Varejistas.SingleOrDefaultAsync(v => v.Id == varejistaId);
         if (varejista is null || !RegrasAcesso.PodeAcessar(varejista))
             throw new InvalidOperationException("Varejista não aprovado.");
@@ -54,6 +55,7 @@ public class ProdutoService(AppDbContext context, ImagemUploadService uploads, C
             await uploads.RemoverAsync(urls); // não deixa arquivos órfãos se o cadastro falhar
             throw;
         }
+        await operacao.CommitAsync();
         return produto;
     }
 

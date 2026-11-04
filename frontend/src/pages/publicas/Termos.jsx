@@ -1,37 +1,32 @@
+import { Link } from 'react-router-dom';
 import PaginaDocumento from './PaginaDocumento';
+import ContatoPrivacidade from './ContatoPrivacidade';
 
-// Modelo de termos para o projeto acadêmico. Revisar com orientação jurídica antes de uso comercial.
 export default function Termos() {
-  return (
-    <PaginaDocumento titulo="Termos de uso" atualizadoEm="outubro de 2026">
-      <p>A VittaFlow conecta estabelecimentos que têm alimentos próximos do vencimento a consumidores e organizações sociais, para reduzir o desperdício. Ao criar uma conta, você concorda com as regras abaixo.</p>
-
-      <h2>1. Quem pode usar</h2>
-      <ul>
-        <li><strong>Consumidores</strong> podem reservar alimentos à venda com desconto.</li>
-        <li><strong>Varejistas</strong> e <strong>ONGs</strong> só operam após a aprovação do cadastro pela nossa equipe, que confere o CNPJ informado.</li>
-      </ul>
-
-      <h2>2. Como funcionam as reservas e doações</h2>
-      <ul>
-        <li>Alimentos com mais de 24 horas de validade ficam à venda na vitrine dos consumidores.</li>
-        <li>Com 24 horas ou menos para vencer, o alimento passa a ser exclusivo para doação a ONGs aprovadas, sem custo.</li>
-        <li>Cada reserva bloqueia o lote inteiro por até 2 horas e gera um código de retirada único. Ela é encerrada antes se o alimento vencer.</li>
-        <li>Cada conta pode manter no máximo 5 reservas ativas ao mesmo tempo. Reservas podem ser canceladas a qualquer momento antes da retirada.</li>
-        <li>A retirada só é confirmada pelo estabelecimento, com o código apresentado por quem reservou.</li>
-      </ul>
-
-      <h2>3. Responsabilidades do varejista</h2>
-      <p>O varejista é responsável pelas informações publicadas (descrição, fotos, validade e preço) e por entregar apenas alimentos próprios para consumo, armazenados de acordo com as normas sanitárias. Alimentos vencidos são bloqueados automaticamente pela plataforma e não devem ser entregues.</p>
-
-      <h2>4. Responsabilidades de quem retira</h2>
-      <p>Consumidores e ONGs devem retirar os alimentos dentro do prazo da reserva e conferir as condições do produto no momento da retirada. O pagamento das compras é feito diretamente no estabelecimento.</p>
-
-      <h2>5. Conduta</h2>
-      <p>É proibido usar a plataforma para revenda de doações, cadastrar informações falsas ou reservar alimentos sem a intenção de retirá-los. Contas que descumprirem estas regras podem ser suspensas.</p>
-
-      <h2>6. Alterações</h2>
-      <p>Estes termos podem ser atualizados. Mudanças relevantes serão comunicadas na própria plataforma.</p>
-    </PaginaDocumento>
-  );
+  return <PaginaDocumento titulo="Termos de uso" atualizadoEm="3 de novembro de 2026">
+    <p>A VittaFlow é uma plataforma desenvolvida em um projeto acadêmico para aproximar estabelecimentos, consumidores e organizações sociais na destinação de excedentes alimentares. A plataforma organiza anúncios, reservas e registros de retirada. Ela não realiza transporte, processamento de pagamentos ou avaliação sanitária dos alimentos.</p>
+    <h2>1. Cadastro e acesso</h2>
+    <p>Informe dados verdadeiros, mantenha seu cadastro atualizado e proteja sua senha e seus códigos de retirada. Varejistas e ONGs dependem de aprovação administrativa para operar. A aprovação permite o acesso às funcionalidades institucionais e não constitui certificação sanitária ou garantia sobre os alimentos.</p>
+    <h2>2. Ofertas e vitrine</h2>
+    <p>Ofertas reúne os lotes destacados pelos varejistas. O botão “Ver na vitrine” abre o alimento correspondente. Na Vitrine, o consumidor consulta o catálogo comercial, com ou sem desconto, e realiza a reserva. A indicação de destaque não significa, por si só, desconto. Preço, quantidade, estabelecimento e validade devem ser conferidos antes da reserva.</p>
+    <h2>3. Validade, doação e reservas</h2>
+    <ul>
+      <li>Lotes comerciais livres e válidos ficam disponíveis para venda enquanto restarem mais de 24 horas para o vencimento. Com 24 horas ou menos, passam à doação para ONGs aprovadas, com preço zero. O varejista pode antecipar a doação.</li>
+      <li>Na janela de mais de 24 e até 36 horas, a ONG pode consultar uma prévia logística. Essa prévia não permite reservar enquanto o lote permanecer comercial.</li>
+      <li>Uma reserva bloqueia o lote inteiro por até duas horas, com encerramento antecipado se o alimento vencer. Reservas ativas mantêm a exclusividade quando o lote entra na janela de doação.</li>
+      <li>Cada consumidor ou ONG pode manter até cinco reservas ativas. A reserva pode ser cancelada antes da retirada. Após expiração ou cancelamento, o lote ainda válido retorna ao fluxo aplicável à sua destinação e validade.</li>
+      <li>A apresentação de um anúncio não garante disponibilidade até a conclusão da reserva. Produtos vencidos não podem ser reservados nem ter sua retirada confirmada.</li>
+    </ul>
+    <h2>4. Retirada e pagamento</h2>
+    <p>A retirada ocorre presencialmente no estabelecimento, dentro do prazo da reserva. O receptor apresenta o código e o varejista responsável o valida para concluir a operação. Nas vendas, o pagamento é combinado e realizado diretamente com o varejista, fora da VittaFlow. A plataforma não cobra, guarda dados de cartão ou emite documento fiscal.</p>
+    <h2>5. Responsabilidades</h2>
+    <p>O varejista responde pela exatidão das informações, pela conservação e pelas condições sanitárias do alimento ofertado. Consumidores e ONGs devem conferir o lote e organizar sua coleta, transporte e conservação. A validade cadastrada e o registro de retirada não substituem a verificação das condições físicas do produto nem as obrigações legais de cada participante.</p>
+    <p>É proibido publicar informações falsas, conteúdo ilícito ou imagens de terceiros sem autorização, usar credenciais de outra pessoa e fazer reservas com finalidade de prejudicar os demais participantes. Doações devem observar sua finalidade social e as normas aplicáveis.</p>
+    <h2>6. Exclusão da conta</h2>
+    <p>Em Configurações da conta, na seção Segurança, é possível solicitar a exclusão com a senha atual e a confirmação “EXCLUIR”. É necessário encerrar as reservas ativas relacionadas à conta. O último administrador aprovado não pode se excluir antes de haver outro administrador aprovado.</p>
+    <p>A exclusão é definitiva para o cadastro: impede novos acessos, invalida o uso das sessões existentes e remove os dados de perfil do banco operacional. Os vínculos técnicos e os registros de reservas e retiradas são preservados com identificação de conta excluída. A <Link to="/privacidade">Política de privacidade</Link> detalha os limites desse tratamento.</p>
+    <h2>7. Disponibilidade e alterações</h2>
+    <p>Por se tratar de uma aplicação acadêmica em desenvolvimento, podem ocorrer falhas, manutenção e indisponibilidade. Consulte a data desta página para identificar a versão dos termos. Eventuais mudanças devem respeitar os direitos dos participantes; estes termos não afastam direitos previstos na legislação aplicável.</p>
+    <h2>8. Contato</h2><ContatoPrivacidade />
+  </PaginaDocumento>;
 }

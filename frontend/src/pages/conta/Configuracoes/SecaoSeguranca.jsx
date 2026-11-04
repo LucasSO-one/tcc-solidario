@@ -1,3 +1,4 @@
+import ExcluirConta from './ExcluirConta';
 import { useEffect, useState } from 'react';
 import { alterarSenha } from '../../../service/conta';
 import { mensagemErro } from '../../../utils/mensagemErro';
@@ -35,7 +36,7 @@ export default function SecaoSeguranca({ onSujo }) {
     } finally { setSalvando(false); }
   }
 
-  return <form className="config-secao" onSubmit={salvar} noValidate>
+  return <><form className="config-secao" onSubmit={salvar} noValidate>
     <div className="config-secao__cabecalho">
       <h2>Segurança</h2>
       <p>Troque sua senha periodicamente e não a compartilhe com outras pessoas.</p>
@@ -56,5 +57,5 @@ export default function SecaoSeguranca({ onSujo }) {
       {sujo && <Button variant="ghost" onClick={form.descartar} disabled={salvando}>Limpar</Button>}
       <Button type="submit" variant="primary" loading={salvando} disabled={!pronto}>Alterar senha</Button>
     </div>
-  </form>;
+  </form><ExcluirConta /></>;
 }

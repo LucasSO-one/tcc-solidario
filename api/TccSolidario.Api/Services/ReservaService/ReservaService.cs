@@ -11,6 +11,7 @@ public class ReservaService(AppDbContext context, CicloVidaService ciclo, TimePr
 {
     public async Task<Transacao> ReservarAsync(Guid usuarioId, Guid produtoId)
     {
+        await using var operacao = await OperacaoConta.IniciarAsync(context);
         var usuario = await context.Usuarios.SingleOrDefaultAsync(u => u.Id == usuarioId);
         if (usuario is null || !RegrasAcesso.PodeAcessar(usuario))
             throw new InvalidOperationException("Cadastro não autorizado para realizar reservas.");
@@ -57,6 +58,7 @@ public class ReservaService(AppDbContext context, CicloVidaService ciclo, TimePr
         context.Transacoes.Add(reserva);
         // A versão do produto e o índice único de reserva ativa protegem a concorrência.
         await context.SaveChangesAsync();
+        await operacao.CommitAsync();
         return reserva;
     }
 

@@ -9,5 +9,7 @@ public enum StatusAprovacao
     Aprovado = 2,
     
     // O valor 3 sera definido quando o Admin clicar em "Rejeitar"
-    Rejeitado = 3
+    Rejeitado = 3,
+
+    Excluido = 4
 }

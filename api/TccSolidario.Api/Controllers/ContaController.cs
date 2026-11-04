@@ -26,6 +26,10 @@ public class ContaController(ContaService contas) : ControllerBase
     public Task<IActionResult> AlterarSenha([FromBody] AlterarSenhaRequest request) =>
         Executar(async () => { await contas.AlterarSenhaAsync(UsuarioId, request); return NoContent(); });
 
+    [HttpDelete]
+    public Task<IActionResult> Excluir([FromBody] ExcluirContaRequest request) =>
+        Executar(async () => { await contas.ExcluirAsync(UsuarioId, request); return NoContent(); });
+
     [HttpPost("foto")]
     [RequestSizeLimit(3 * 1024 * 1024)]
     public Task<IActionResult> AtualizarFoto(IFormFile? foto) =>
@@ -38,6 +42,7 @@ public class ContaController(ContaService contas) : ControllerBase
     {
         try { return await acao(); }
         catch (ValidacaoException ex) { return BadRequest(new { message = ex.Message, erros = ex.Erros }); }
+        catch (KeyNotFoundException) { return NotFound(new { message = "Conta não encontrada." }); }
         catch (InvalidOperationException ex) { return BadRequest(new { message = ex.Message }); }
     }
 }

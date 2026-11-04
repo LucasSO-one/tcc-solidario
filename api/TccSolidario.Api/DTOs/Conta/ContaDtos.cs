@@ -59,6 +59,12 @@ public class AtualizarContaRequest
     public NotificacoesDto Notificacoes { get; set; } = new();
 }
 
+public class ExcluirContaRequest
+{
+    public string SenhaAtual { get; set; } = string.Empty;
+    public string Confirmacao { get; set; } = string.Empty;
+}
+
 public class AlterarSenhaRequest
 {
     public string SenhaAtual { get; set; } = string.Empty;
