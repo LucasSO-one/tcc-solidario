@@ -214,7 +214,14 @@ using (var scope = app.Services.CreateScope())
         if (builder.Configuration.GetValue("Database:AutoMigrate", app.Environment.IsDevelopment()))
             context.Database.Migrate();
 
-        // O banco existente não deve ser alterado durante um deploy comum.
+        // Compatibilidade pontual com administradores antigos: admin/99 -> Admin.
+        // O login consulta a base Usuario e falha antes de verificar a senha se
+        // encontrar um discriminador desconhecido. Não depende de seed/migrations.
+        var adminsNormalizados = await NormalizacaoAdminLegado.ExecutarAsync(context);
+        if (adminsNormalizados > 0)
+            app.Logger.LogInformation("Identificadores de {Quantidade} administrador(es) legado(s) normalizados.", adminsNormalizados);
+
+        // Criação do primeiro administrador somente quando habilitada.
         if (config.GetValue("Database:SeedAdmin", app.Environment.IsDevelopment()))
             DbInitializer.Initialize(context, config);
 

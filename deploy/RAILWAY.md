@@ -89,3 +89,7 @@ Para este primeiro deploy, mantenha uma réplica e o serviço ativo, pois os wor
 Se o log mostrar `Exception while performing SSL handshake` e `remote certificate was rejected`, confirme que o deploy usa o Dockerfile atualizado com `deploy/certs/supabase-root.crt`. Imagens anteriores não incluíam essa raiz. Faça commit e push desses arquivos e publique uma nova imagem, mantendo `SSL Mode=VerifyFull`. Reiniciar a imagem antiga não adiciona o certificado.
 
 O arquivo é público e não contém senha. A sua procedência e impressão digital estão em `deploy/certs/README.md`. Para uma execução local fora do Docker, use `Root Certificate=CAMINHO_ABSOLUTO_DO_CERTIFICADO` na conexão ou defina `PGSSLROOTCERT` no ambiente local.
+
+### Administrador antigo com identificador `admin`
+
+A inicialização normaliza `TipoUsuarioString=admin` para `Admin` apenas quando `Tipo` já indica administrador (`99`, `Admin` ou `admin`). Preserva IDs, senhas e aprovação; não cria nem exclui contas. É uma correção pontual de compatibilidade executada antes do seed, independente de `Database__AutoMigrate` e `Database__SeedAdmin`. Em caso de correção, o log informa a quantidade normalizada. O usuário do banco precisa da permissão UPDATE em Usuarios já utilizada na edição de conta.
