@@ -68,19 +68,19 @@ public partial class ImagemUploadService(IWebHostEnvironment env, Cloudinary? cl
                 var detalhe = resultado.Error?.Message ?? "";
                 bool Tem(string texto) => detalhe.Contains(texto, StringComparison.OrdinalIgnoreCase);
                 if (status == 401 || Tem("invalid signature") || Tem("unknown api key") || Tem("invalid api key"))
-                    throw FalhaCloudinary(status, "credenciais", "O Cloudinary recusou as credenciais de envio. O responsável pelo site deve conferir Cloud name, API Key e API Secret no Railway.");
+                    throw FalhaCloudinary(status, "credenciais", "Não foi possível autorizar o envio da imagem. Avise o responsável pelo site.");
                 if (status is 420 or 429 || Tem("quota exceeded") || Tem("rate limit"))
                     throw FalhaCloudinary(status, "limite", "O serviço de imagens atingiu um limite de uso. Tente mais tarde ou avise o responsável pelo site.");
                 if (status == 404 || Tem("unknown cloud") || Tem("invalid cloud"))
-                    throw FalhaCloudinary(status, "ambiente", "O Cloudinary não encontrou o ambiente configurado. O responsável pelo site deve conferir o Cloud name no Railway.");
+                    throw FalhaCloudinary(status, "ambiente", "O serviço de imagens está com uma configuração inválida. Avise o responsável pelo site.");
                 if (Tem("cloud_name is disabled") || Tem("cloud name is disabled"))
-                    throw FalhaCloudinary(status, "conta-desativada", "O ambiente do Cloudinary está desativado. O responsável pelo site deve conferir a situação da conta.");
+                    throw FalhaCloudinary(status, "conta-desativada", "O armazenamento de imagens está desativado. Avise o responsável pelo site.");
                 if (status == 403)
-                    throw FalhaCloudinary(status, "permissao", "O Cloudinary não permitiu o envio. O responsável pelo site deve conferir as permissões da conta e da chave.");
+                    throw FalhaCloudinary(status, "permissao", "O serviço de imagens não permitiu o envio. Avise o responsável pelo site.");
                 if (status >= 500)
                     throw FalhaCloudinary(status, "indisponivel", "O serviço de imagens está indisponível. Tente novamente em instantes.");
                 if (status == 400)
-                    throw FalhaCloudinary(status, "requisicao", "O Cloudinary recusou a imagem ou os parâmetros de envio. Tente outra imagem JPG, PNG ou WEBP; se persistir, avise o responsável pelo site.");
+                    throw FalhaCloudinary(status, "requisicao", "Não foi possível processar a imagem. Tente outro arquivo JPG, PNG ou WEBP; se persistir, avise o responsável pelo site.");
                 throw FalhaCloudinary(status, "resposta-invalida", "O serviço de imagens não confirmou o envio. Tente novamente em instantes.");
             }
             return resultado.SecureUrl.ToString();

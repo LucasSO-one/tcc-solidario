@@ -70,3 +70,11 @@ Referências oficiais: [Supabase RLS](https://supabase.com/docs/guides/database/
 ## Homologação
 
 Use outro environment/projeto Railway com banco Supabase próprio e credenciais distintas. Não aponte homologação para produção. Configure outro domínio público e outro armazenamento, chaves JWT/cifragem independentes. Aplique as mesmas migrations e permissões. Use somente dados sintéticos ou anonimizados; não clone dados pessoais de produção para demonstração. A criação desses recursos na sua conta permanece uma etapa de infraestrutura descrita neste roteiro.
+
+## Diagnóstico de envio de imagens
+
+A partir desta correção, os logs registram `Cloudinary: upload recusado. HTTP N; categoria C.` sem a mensagem bruta do provedor. Credenciais, assinaturas e conteúdo dos arquivos não são registrados. A interface recebe uma orientação sem detalhes internos da infraestrutura. Categorias: `credenciais` (autenticação recusada), `ambiente` (ambiente não encontrado), `conta-desativada`, `permissao`, `limite`, `requisicao` (imagem/parâmetros recusados), `indisponivel`, `resposta-invalida`, `conexao` e `tempo-esgotado`. O status do log é o status externo do Cloudinary, não o HTTP 400 devolvido pelo controller ao navegador.
+
+Confira que CloudName, ApiKey e ApiSecret pertencem ao mesmo ambiente e ao mesmo par de chaves ativo. Não confunda Key Name com Cloud name ou API Key. A inicialização valida presença, não testa as credenciais contra a rede. O código remove espaços nas extremidades dos três valores antes de construir o cliente.
+
+O projeto `tests/TccSolidario.ImagensChecks` exercita o SDK real contra HTTP exclusivamente local e respostas simuladas, sem credenciais reais ou acesso ao Cloudinary. Foram verificadas recusas, ausência de URL, sucesso e proteção dos logs. Esses testes não comprovam que as credenciais de produção estejam corretas.

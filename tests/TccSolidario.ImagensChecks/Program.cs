@@ -31,14 +31,14 @@ try
     int total = 0;
     void Check(bool ok, string text) { if (!ok) throw new Exception("FALHOU: " + text); total++; Console.WriteLine("PASSOU: " + text); }
     foreach (var (status, raw, category, expected) in new[] {
-        (401, "Invalid Signature NAO-VAZAR-SECRET-FIXTURE", "credenciais", "credenciais"),
-        (400, "Unknown API key 123456-fixture", "credenciais", "credenciais"),
-        (400, "Unknown cloud name qa-fixture", "ambiente", "Cloud name"),
+        (401, "Invalid Signature NAO-VAZAR-SECRET-FIXTURE", "credenciais", "autorizar"),
+        (400, "Unknown API key 123456-fixture", "credenciais", "autorizar"),
+        (400, "Unknown cloud name qa-fixture", "ambiente", "configuração"),
         (400, "cloud_name is disabled", "conta-desativada", "desativado"),
-        (403, "Not allowed", "permissao", "permissões"),
+        (403, "Not allowed", "permissao", "não permitiu"),
         (420, "Rate limited", "limite", "limite"),
         (429, "Rate limited", "limite", "limite"),
-        (400, "Invalid image file", "requisicao", "recusou a imagem"),
+        (400, "Invalid image file", "requisicao", "processar a imagem"),
         (500, "Failure NAO-VAZAR-SECRET-FIXTURE", "indisponivel", "indisponível")
     })
     {
