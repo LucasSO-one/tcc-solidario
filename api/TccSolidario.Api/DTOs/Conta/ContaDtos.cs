@@ -5,7 +5,6 @@ public class ContaResponse
     public Guid Id { get; set; }
     public string Tipo { get; set; } = string.Empty;
     public string Nome { get; set; } = string.Empty;          // nome do responsável
-    public bool EmailConfirmado { get; set; }
     public bool MfaAtivo { get; set; }
     public string NomeExibicao { get; set; } = string.Empty;  // nome mostrado no menu (estabelecimento, ONG ou pessoa)
     public string Email { get; set; } = string.Empty;

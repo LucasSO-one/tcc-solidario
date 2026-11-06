@@ -5,21 +5,12 @@ test.describe.configure({ mode: 'serial' });
 const base = 'http://127.0.0.1:55187';
 const control = 'http://127.0.0.1:55188';
 const fixturePassword = 'Teste!42-SomenteFixture';
-const email = `browser-${Date.now()}@example.invalid`;
+let email = `browser-${Date.now()}@example.invalid`;
 let password = 'Inicial!42-Fixture';
 let userState;
 async function post(client, path, data) {
   const csrf = await (await client.get('/api/auth/csrf')).json();
   return client.post(path, { data, headers: { 'X-CSRF-TOKEN': csrf.token } });
-}
-async function mailLink(request, recipient, route) {
-  let link;
-  await expect.poll(async () => {
-    const messages = await (await request.get(`${control}/messages?to=${encodeURIComponent(recipient)}`)).json();
-    link = messages.map(m => m.body.match(new RegExp(`http://127\\.0\\.0\\.1:55187/${route}#token=([a-f0-9]{64})`))?.[0]).filter(Boolean).at(-1);
-    return !!link;
-  }).toBe(true);
-  return link;
 }
 function totp(secret) {
   const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567'; let bits = 0, buffer = 0; const bytes = [];
@@ -33,19 +24,17 @@ async function loginPage(page, user, pass) {
   await page.getByLabel('Senha', { exact: true }).fill(pass); await page.getByRole('button', { name: 'Entrar', exact: true }).click();
 }
 
-test('cadastro, e-mail, endereço, cookie, CSRF e imagem persistente', async ({ page, request }) => {
+test('cadastro sem confirmação, endereço, cookie, CSRF e imagem persistente', async ({ page, request }) => {
   const invalid = await request.post('/api/registro/consumidor', { data: { email, senha: password, nome: 'Pessoa teste', cpf: '12345678909', telefone: '11900000000' } });
   expect(invalid.status()).toBe(400); expect((await invalid.json()).code).toBe('csrf_invalid');
   const badCpf = await post(request, '/api/registro/consumidor', { email, senha: password, nome: 'Pessoa teste', cpf: '00000000000', telefone: '11900000000' });
   expect(badCpf.status()).toBe(400);
   const registration = await post(request, '/api/registro/consumidor', { email: email.toUpperCase(), senha: password, nome: 'Pessoa teste', cpf: '12345678909', telefone: '11900000000' });
   expect(registration.status()).toBe(200);
-  expect((await post(request, '/api/auth/login', { email, senha: password })).status()).toBe(401);
-  const link = await mailLink(request, email, 'confirmar-email');
-  await page.goto(link); await page.getByRole('button', { name: 'Confirmar e-mail', exact: true }).click();
-  await expect(page.getByRole('status')).toContainText('E-mail confirmado');
-  expect(page.url()).not.toContain('token=');
-  expect((await post(request, '/api/auth/confirmar-email', { token: link.split('=')[1] })).status()).toBe(400);
+  expect((await registration.json()).mensagem).not.toContain('Confirme');
+  await page.goto('/login');
+  await expect(page.getByRole('link', { name: 'Esqueci minha senha' })).toHaveCount(0);
+  await expect(page.getByRole('link', { name: 'Reenviar confirmação de e-mail' })).toHaveCount(0);
   await loginPage(page, email.toUpperCase(), password); await page.waitForURL('**/dashboard/consumidor');
   const cookies = await page.context().cookies(); expect(cookies.find(c => c.name === 'vittaflow-session')?.httpOnly).toBe(true);
   expect(await page.evaluate(() => localStorage.getItem('token'))).toBeNull();
@@ -76,25 +65,31 @@ test('cadastro, e-mail, endereço, cookie, CSRF e imagem persistente', async ({ 
   await store.dispose();
 });
 
-test('troca e recuperação de senha revogam sessões; links são de uso único', async ({ page, request }) => {
+test('troca de senha e e-mail revogam sessões; recuperação por e-mail removida', async ({ request }) => {
   const client = await requestFactory.newContext({ baseURL: base, storageState: userState });
   const csrf = await (await client.get('/api/auth/csrf')).json();
   const changed = await client.put('/api/conta/senha', { data: { senhaAtual: password, novaSenha: 'NovaSenha!43-Fixture' }, headers: { 'X-CSRF-TOKEN': csrf.token } });
   expect(changed.status()).toBe(204); expect((await client.get('/api/conta')).status()).toBe(401);
-  expect((await post(request, '/api/auth/login', { email, senha: password })).status()).toBe(401); password = 'NovaSenha!43-Fixture';
+  expect((await post(request, '/api/auth/login', { email, senha: password })).status()).toBe(401);
+  password = 'NovaSenha!43-Fixture';
+  const login = await post(request, '/api/auth/login', { email, senha: password });
+  expect(login.status()).toBe(200); expect(Object.hasOwn(await login.json(), 'token')).toBe(false);
+  const beforeChange = await request.storageState();
+  const profile = await (await request.get('/api/conta')).json();
+  expect(Object.hasOwn(profile, 'emailConfirmado')).toBe(false);
+  const newEmail = 'alterado-' + email;
+  const update = async senhaAtual => request.put('/api/conta', { data: { ...profile, email: newEmail, senhaAtual },
+    headers: { 'X-CSRF-TOKEN': (await (await request.get('/api/auth/csrf')).json()).token } });
+  expect((await update('Incorreta!42')).status()).toBe(400);
+  expect((await update(password)).status()).toBe(200);
+  expect((await request.get('/api/conta')).status()).toBe(401);
+  expect((await post(request, '/api/auth/login', { email, senha: password })).status()).toBe(401);
+  email = newEmail;
   expect((await post(request, '/api/auth/login', { email, senha: password })).status()).toBe(200);
-  const stateBeforeReset = await request.storageState();
-  const generic = await post(request, '/api/auth/recuperar-senha', { email });
-  const unknown = await post(request, '/api/auth/recuperar-senha', { email: 'inexistente-'+Date.now()+'@example.invalid' });
-  expect(generic.status()).toBe(200); expect(await generic.json()).toEqual(await unknown.json());
-  const link = await mailLink(request, email, 'redefinir-senha');
-  await page.goto(link); await page.getByLabel('Nova senha', { exact: true }).fill('FinalSenha!44-Fixture');
-  await page.getByLabel('Confirme a nova senha', { exact: true }).fill('FinalSenha!44-Fixture');
-  await page.getByRole('button', { name: 'Redefinir senha', exact: true }).click(); await expect(page.getByRole('status')).toContainText('Senha redefinida');
-  expect((await post(request, '/api/auth/redefinir-senha', { token: link.split('=')[1], novaSenha: 'OutraSenha!45-Fixture' })).status()).toBe(400);
-  const revoked = await requestFactory.newContext({ baseURL: base, storageState: stateBeforeReset });
-  expect((await revoked.get('/api/auth/sessao')).status()).toBe(401); password = 'FinalSenha!44-Fixture';
-  const login = await post(request, '/api/auth/login', { email, senha: password }); expect(login.status()).toBe(200); expect(Object.hasOwn(await login.json(), 'token')).toBe(false);
+  const revoked = await requestFactory.newContext({ baseURL: base, storageState: beforeChange });
+  expect((await revoked.get('/api/auth/sessao')).status()).toBe(401);
+  for (const route of ['recuperar-senha', 'reenviar-confirmacao', 'confirmar-email', 'redefinir-senha'])
+    expect((await post(request, '/api/auth/' + route, { email, token: 'a'.repeat(64), novaSenha: 'NaoPode!42' })).status()).toBe(404);
   const beforeLogout = await request.storageState(); expect((await post(request, '/api/auth/logout')).status()).toBe(200);
   const old = await requestFactory.newContext({ baseURL: base, storageState: beforeLogout });
   expect((await old.get('/api/conta')).status()).toBe(401);
@@ -113,7 +108,9 @@ test('MFA administrativo, recuperação e limites persistentes', async ({ page, 
   await expect(page.locator('.mfa-codigos li')).toHaveCount(10);
   const oldCode = completed.codigosRecuperacao[0];
   await page.getByRole('button', { name: 'Guardei os códigos. Continuar' }).click(); await page.waitForURL('**/dashboard/admin');
-  expect((await page.request.get('/api/admin/operacao')).status()).toBe(200);
+  const operation = await page.request.get('/api/admin/operacao');
+  expect(operation.status()).toBe(200);
+  expect(Object.hasOwn(await operation.json(), 'emailsPendentes')).toBe(false);
   expect((await post(page.request, '/api/auth/logout')).status()).toBe(200);
   await loginPage(page, 'admin-web@example.invalid', fixturePassword);
   await expect(page.getByRole('heading', { name: 'Verifique sua identidade' })).toBeVisible();

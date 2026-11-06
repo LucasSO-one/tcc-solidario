@@ -62,7 +62,7 @@ jobs:
           npm run build
           npm audit --audit-level=high
           npx playwright install --with-deps chromium
-      - name: Fluxos pelo navegador, SMTP local e reinícios
+      - name: Fluxos pelo navegador e reinícios
         working-directory: frontend
         run: npm run test:e2e
         env:

@@ -13,7 +13,7 @@ namespace TccSolidario.Api.Services;
 /// - trocar o e-mail (que é o login) exige a senha atual e um e-mail ainda não usado;
 /// - a nova senha segue a mesma política do cadastro (<see cref="RegrasSenha"/>).
 /// </summary>
-public partial class ContaService(AppDbContext context, ImagemUploadService uploads, Seguranca.AutenticacaoService? autenticacao = null)
+public partial class ContaService(AppDbContext context, ImagemUploadService uploads)
 {
     public const long TamanhoMaximoFoto = 2 * 1024 * 1024;
     public static readonly string[] TiposEstabelecimento =
@@ -60,7 +60,6 @@ public partial class ContaService(AppDbContext context, ImagemUploadService uplo
 
         if (erros.Count > 0) throw new ValidacaoException(erros);
 
-        var emailAlterado = !string.Equals(usuario.EmailNormalizado, email, StringComparison.Ordinal);
         usuario.Nome = nome;
         if (!string.Equals(usuario.EmailNormalizado, email, StringComparison.Ordinal))
         {
@@ -104,7 +103,6 @@ public partial class ContaService(AppDbContext context, ImagemUploadService uplo
             endereco.Estado = e.Estado.Trim().ToUpperInvariant();
         }
         await context.SaveChangesAsync();
-        if (emailAlterado && autenticacao is not null) await autenticacao.EnfileirarConfirmacaoAsync(usuario.Id);
         await operacao.CommitAsync();
         return Mapear(usuario);
     }
@@ -161,7 +159,7 @@ public partial class ContaService(AppDbContext context, ImagemUploadService uplo
         var endereco = u.Enderecos.FirstOrDefault();
         return new ContaResponse
         {
-            Id = u.Id, Tipo = u.Tipo.ToString(), Nome = u.Nome, Email = u.Email, Telefone = u.Telefone, EmailConfirmado = u.EmailConfirmado, MfaAtivo = u.MfaAtivo,
+            Id = u.Id, Tipo = u.Tipo.ToString(), Nome = u.Nome, Email = u.Email, Telefone = u.Telefone, MfaAtivo = u.MfaAtivo,
             FotoUrl = u.FotoUrl, StatusAprovacao = u.StatusAprovacao.ToString(), DataCriacao = u.DataCriacao,
             NomeExibicao = u switch { Varejista v => v.NomeEstabelecimento, Ong o => o.NomeFantasia, _ => u.Nome },
             Organizacao = u switch

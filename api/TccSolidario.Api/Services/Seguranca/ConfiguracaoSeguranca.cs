@@ -16,11 +16,10 @@ public static class ConfiguracaoSeguranca
         services.AddSingleton<ProtecaoSegredos>(); services.AddSingleton<EstadoOperacao>();
         services.AddSingleton<RepositorioChaves>(); services.AddSingleton<IConfigureOptions<KeyManagementOptions>, ConfigurarChaves>();
         services.AddDataProtection().SetApplicationName("VittaFlow");
-        services.AddScoped<AutenticacaoService>(); services.AddScoped<LimiteAutenticacaoService>(); services.AddScoped<EmailService>();
-        services.AddSingleton<SmtpEnvioEmail>(); services.AddSingleton<IEnvioEmail>(p => p.GetRequiredService<SmtpEnvioEmail>());
+        services.AddScoped<AutenticacaoService>(); services.AddScoped<LimiteAutenticacaoService>();
         if (!env.IsEnvironment("Testing"))
         {
-            services.AddHostedService<EmailWorker>(); services.AddHostedService<ManutencaoSegurancaWorker>();
+            services.AddHostedService<ManutencaoSegurancaWorker>();
         }
         services.AddHttpContextAccessor();
         services.AddAntiforgery(o =>

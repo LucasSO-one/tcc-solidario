@@ -121,4 +121,4 @@ Consulte [o passo a passo de publicação](deploy/RAILWAY.md). O Dockerfile da r
 
 ## Segurança e publicação
 
-Esta versão altera autenticação, banco e variáveis de produção. Antes do deploy, siga [o roteiro de segurança](deploy/SEGURANCA.md). Há migration, confirmação de e-mail por SMTP e MFA obrigatório para administradores.
+Esta versão altera autenticação, banco e variáveis de produção. Antes do deploy, siga [o roteiro de segurança](deploy/SEGURANCA.md). Há migration de segurança e MFA obrigatório para administradores. Não há dependência de serviço de e-mail.

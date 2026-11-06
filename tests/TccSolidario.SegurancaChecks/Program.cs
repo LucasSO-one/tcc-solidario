@@ -1,6 +1,5 @@
 using System.Security.Cryptography;
 using System.Text;
-using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Data.Sqlite;
@@ -40,13 +39,13 @@ var config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<str
     ["Jwt:Key"] = "CHAVE-EXCLUSIVA-DE-TESTES-LOCAIS-123456789012345678901234567890",
     ["Jwt:Issuer"] = "VittaTest", ["Jwt:Audience"] = "VittaTest",
     ["Security:EncryptionKey"] = Convert.ToBase64String(Enumerable.Range(1, 32).Select(i => (byte)i).ToArray()),
-    ["Security:PublicOrigin"] = "http://localhost:55187", ["Storage:PersistentDirectory"] = root
+    ["Storage:PersistentDirectory"] = root
 }).Build();
 var protection = new ProtecaoSegredos(config, env);
-AutenticacaoService Auth(AppDbContext c) => new(c, protection, new(c, protection, config, env, clock), new(c, clock), new TokenService(config), clock);
+AutenticacaoService Auth(AppDbContext c) => new(c, protection, new(c, clock), new TokenService(config), clock);
 var auth = Auth(db);
 var uploads = new ImagemUploadService(env, config: config);
-var contas = new ContaService(db, uploads, auth);
+var contas = new ContaService(db, uploads);
 int total = 0;
 void Check(bool ok, string nome) { if (!ok) throw new Exception("FALHOU: " + nome); total++; Console.WriteLine("PASSOU: " + nome); }
 string Email(string nome) => nome + "-" + prefix + "@example.invalid";
@@ -70,35 +69,36 @@ Check(refused, "finalidade criptográfica impede troca de segredo entre usuário
 var registro = new UsuarioRegistrationService(db, NullLogger<UsuarioRegistrationService>.Instance);
 var user = new Consumidor { Nome = "Teste de cadastro", Email = Email("novo").ToUpperInvariant(), CPF = "12345678909", Telefone = "11900000000", Tipo = TipoUsuario.Consumidor };
 await registro.RegistrarAsync(user, senha); var id = user.Id; db.ChangeTracker.Clear();
-Check(!(await db.Usuarios.AsNoTracking().SingleAsync(u => u.Id == id)).EmailConfirmado, "cadastro novo não herda confirmação do default de legado");
+Check(!(await db.Usuarios.AsNoTracking().SingleAsync(u => u.Id == id)).EmailConfirmado, "cadastro não declara propriedade de e-mail verificada");
 try { await registro.RegistrarAsync(new Consumidor { Nome = "Duplicado", Email = Email("novo"), CPF = "12345678909", Tipo = TipoUsuario.Consumidor }, senha); throw new Exception("Duplicidade aceita."); }
 catch (ConflictException) { Check(true, "registro recusa endereço com outra capitalização"); }
 db.ChangeTracker.Clear();
 var duplicate = new Consumidor { Nome = "Duplicado direto", Email = Email("novo").ToUpperInvariant(), CPF = "12345678909", Tipo = TipoUsuario.Consumidor };
 db.Add(duplicate); bool unique = false; try { await db.SaveChangesAsync(); } catch (DbUpdateException) { unique = true; } db.ChangeTracker.Clear();
 Check(unique, "índice do banco também impede duplicidade");
-Check((await auth.LoginAsync(Email("novo"), senha)).Erro is not null, "login exige confirmação de e-mail"); db.ChangeTracker.Clear();
-await auth.EnfileirarConfirmacaoAsync(id); db.ChangeTracker.Clear();
-var queue = await db.EmailsPendentes.AsNoTracking().SingleAsync(e => e.UsuarioId == id);
-var message = protection.Desproteger(queue.MensagemProtegida, "email:" + queue.Id);
-var token = Regex.Match(message, "#token=([a-f0-9]{64})").Groups[1].Value;
-Check(token.Length == 64 && !queue.MensagemProtegida.Contains(token), "link na fila fica criptografado");
-Check(await db.TokensSeguranca.AnyAsync(t => t.Hash == ProtecaoSegredos.Hash(token)) && !await db.TokensSeguranca.AnyAsync(t => t.Hash == token), "banco guarda somente hash do token de uso único");
-Check(await auth.ConsumirLinkAsync(token, null), "confirmação de e-mail funciona"); db.ChangeTracker.Clear();
-Check(!await auth.ConsumirLinkAsync(token, null), "link de confirmação não pode ser reutilizado"); db.ChangeTracker.Clear();
 var login = await auth.LoginAsync(Email("novo").ToUpperInvariant(), senha); db.ChangeTracker.Clear();
 Check(login.Usuario?.Id == id && login.Jwt is not null, "login com capitalização diferente autentica a mesma conta");
 var session = await db.SessoesAutenticacao.AsNoTracking().SingleAsync(s => s.UsuarioId == id);
 await contas.AlterarSenhaAsync(id, new() { SenhaAtual = senha, NovaSenha = "OutraSenha!43-Fixture" }); db.ChangeTracker.Clear();
 Check(session.VersaoUsuario != (await db.Usuarios.AsNoTracking().SingleAsync(u => u.Id == id)).VersaoSeguranca, "troca de senha invalida versão das sessões antigas");
-await auth.SolicitarLinkAsync(Email("novo"), false); db.ChangeTracker.Clear();
-var resetMail = await db.EmailsPendentes.AsNoTracking().Where(e => e.UsuarioId == id).OrderByDescending(e => e.CriadoEmUtc).ThenByDescending(e => e.Id).ToListAsync();
-var resetMessage = resetMail.Select(e => protection.Desproteger(e.MensagemProtegida, "email:" + e.Id)).First(m => m.Contains("redefinir-senha"));
-var reset = Regex.Match(resetMessage, "#token=([a-f0-9]{64})").Groups[1].Value;
-Check(!await auth.ConsumirLinkAsync(reset, null), "token de recuperação não serve para confirmar e-mail"); db.ChangeTracker.Clear();
-Check(await auth.ConsumirLinkAsync(reset, "SenhaFinal!45-Fixture"), "recuperação redefine senha"); db.ChangeTracker.Clear();
-Check(!await auth.ConsumirLinkAsync(reset, "Outra!46-Fixture"), "link de recuperação é de uso único"); db.ChangeTracker.Clear();
-Check((await db.SessoesAutenticacao.AsNoTracking().SingleAsync(s => s.Id == session.Id)).RevogadaEmUtc.HasValue, "recuperação revoga sessões no banco");
+Check(!await db.EmailsPendentes.AnyAsync(e => e.UsuarioId == id), "cadastro e troca de senha não criam fila de e-mail");
+Check(!await db.TokensSeguranca.AnyAsync(t => t.UsuarioId == id), "consumidor não recebe tokens de confirmação ou recuperação");
+var perfil = await contas.ObterAsync(id);
+var versaoAntesEmail = (await db.Usuarios.AsNoTracking().SingleAsync(u => u.Id == id)).VersaoSeguranca;
+await contas.AtualizarAsync(id, new() { Nome = perfil.Nome, Email = Email("alterado").ToUpperInvariant(), SenhaAtual = "OutraSenha!43-Fixture" }); db.ChangeTracker.Clear();
+Check((await auth.LoginAsync(Email("alterado"), "OutraSenha!43-Fixture")).Jwt is not null, "novo e-mail funciona como login sem mensagem de confirmação"); db.ChangeTracker.Clear();
+Check((await auth.LoginAsync(Email("novo"), "OutraSenha!43-Fixture")).Erro is not null, "e-mail anterior deixa de autenticar"); db.ChangeTracker.Clear();
+Check(versaoAntesEmail != (await db.Usuarios.AsNoTracking().SingleAsync(u => u.Id == id)).VersaoSeguranca, "alteração de e-mail invalida sessão anterior");
+
+foreach (var instituicao in new Usuario[] { new Varejista { NomeEstabelecimento = "Loja pendente", RazaoSocial = "QA", CNPJ = "11222333000181", Tipo = TipoUsuario.Varejista }, new Ong { NomeFantasia = "ONG pendente", CNPJ = "11222333000181", Tipo = TipoUsuario.ONG } })
+{
+    instituicao.Nome = "Instituição QA"; instituicao.Email = Email("pendente-" + instituicao.Tipo);
+    await registro.RegistrarAsync(instituicao, senha); db.ChangeTracker.Clear();
+    Check((await auth.LoginAsync(instituicao.Email, senha)).Erro is not null, "aprovação continua obrigatória para " + instituicao.Tipo); db.ChangeTracker.Clear();
+    var aprovada = await db.Usuarios.SingleAsync(u => u.Id == instituicao.Id); aprovada.StatusAprovacao = StatusAprovacao.Aprovado;
+    await db.SaveChangesAsync(); db.ChangeTracker.Clear();
+    Check((await auth.LoginAsync(instituicao.Email, senha)).Jwt is not null, "instituição aprovada acessa sem confirmação por e-mail: " + instituicao.Tipo); db.ChangeTracker.Clear();
+}
 
 foreach (var org in new Usuario[] { new Varejista { NomeEstabelecimento = "Loja QA", RazaoSocial = "QA" }, new Ong { NomeFantasia = "ONG QA" } })
 {
@@ -109,7 +109,7 @@ foreach (var org in new Usuario[] { new Varejista { NomeEstabelecimento = "Loja 
     Check((await contas.ObterAsync(org.Id)).Endereco?.Rua == "Rua QA", "endereço persiste em " + org.Tipo);
 }
 
-var admin = await Criar(new Admin { Nome = "Admin QA", Email = Email("admin"), Tipo = TipoUsuario.Admin, StatusAprovacao = StatusAprovacao.Aprovado });
+var admin = await Criar(new Admin { EmailConfirmado = false, Nome = "Admin QA", Email = Email("admin"), Tipo = TipoUsuario.Admin, StatusAprovacao = StatusAprovacao.Aprovado });
 var setup = await auth.LoginAsync(admin.Email, senha); db.ChangeTracker.Clear();
 Check(setup.ConfigurarMfa && setup.Jwt is null && !await db.SessoesAutenticacao.AnyAsync(s => s.UsuarioId == admin.Id), "senha sozinha não concede sessão administrativa");
 var counter = clock.GetUtcNow().ToUnixTimeSeconds() / 30;

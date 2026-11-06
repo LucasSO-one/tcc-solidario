@@ -1,4 +1,4 @@
-> **Versão com segurança de contas:** leia primeiro [SEGURANCA.md](SEGURANCA.md) e o exemplo atualizado de variáveis. As novas configurações de SMTP, cifragem e armazenamento e a migration são obrigatórias antes de publicar.
+> **Versão com segurança de contas:** leia primeiro [SEGURANCA.md](SEGURANCA.md) e o exemplo atualizado de variáveis. As novas configurações de cifragem e armazenamento e a migration são obrigatórias antes de publicar.
 
 # Deploy no Railway com banco existente no Supabase
 

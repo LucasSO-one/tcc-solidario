@@ -19,7 +19,7 @@ public abstract class Usuario
     
     public string SenhaHash { get; set; } = string.Empty;
     public string EmailNormalizado { get; set; } = string.Empty;
-    public bool EmailConfirmado { get; set; } = true; // Legado e seed; cadastros novos começam sem confirmação.
+    public bool EmailConfirmado { get; set; } = true; // Coluna legada: preservada por compatibilidade; não é usada para autorizar acesso.
     public Guid VersaoSeguranca { get; set; } = Guid.NewGuid();
     public bool MfaAtivo { get; set; }
     public string? SegredoMfaProtegido { get; set; }

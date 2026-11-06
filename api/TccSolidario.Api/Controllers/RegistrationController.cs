@@ -15,16 +15,14 @@ public class RegistroController : ControllerBase
 {
     private readonly ICnpjValidatorService _cnpjValidator;
     private readonly IUsuarioRegistrationService _registrationService;
-    private readonly Services.Seguranca.AutenticacaoService _auth;
     private readonly TccSolidario.Api.Data.AppDbContext _db;
 
     public RegistroController(
         ICnpjValidatorService cnpjValidator,
-        IUsuarioRegistrationService registrationService, Services.Seguranca.AutenticacaoService auth, TccSolidario.Api.Data.AppDbContext db)
+        IUsuarioRegistrationService registrationService, TccSolidario.Api.Data.AppDbContext db)
     {
         _cnpjValidator = cnpjValidator;
         _registrationService = registrationService;
-        _auth = auth;
         _db = db;
     }
 
@@ -46,9 +44,8 @@ public class RegistroController : ControllerBase
 
         await using var operacao = await Services.OperacaoConta.IniciarAsync(_db);
         await _registrationService.RegistrarAsync(varejista, request.Senha);
-        await _auth.EnfileirarConfirmacaoAsync(varejista.Id);
         await operacao.CommitAsync();
-        return Ok(new { Sucesso = true, Mensagem = "Cadastro recebido. Confirme seu e-mail e aguarde a aprovação." });
+        return Ok(new { Sucesso = true, Mensagem = "Cadastro recebido. Aguarde a aprovação administrativa para acessar." });
     }
 
     [HttpPost("ong")]
@@ -69,9 +66,8 @@ public class RegistroController : ControllerBase
 
         await using var operacao = await Services.OperacaoConta.IniciarAsync(_db);
         await _registrationService.RegistrarAsync(ong, request.Senha);
-        await _auth.EnfileirarConfirmacaoAsync(ong.Id);
         await operacao.CommitAsync();
-        return Ok(new { Sucesso = true, Mensagem = "Cadastro recebido. Confirme seu e-mail e aguarde a aprovação." });
+        return Ok(new { Sucesso = true, Mensagem = "Cadastro recebido. Aguarde a aprovação administrativa para acessar." });
     }
 
     [HttpPost("consumidor")]
@@ -88,9 +84,8 @@ public class RegistroController : ControllerBase
 
         await using var operacao = await Services.OperacaoConta.IniciarAsync(_db);
         await _registrationService.RegistrarAsync(consumidor, request.Senha);
-        await _auth.EnfileirarConfirmacaoAsync(consumidor.Id);
         await operacao.CommitAsync();
-        return Ok(new { Sucesso = true, Mensagem = "Cadastro recebido. Confirme seu e-mail para entrar." });
+        return Ok(new { Sucesso = true, Mensagem = "Cadastro realizado. Você já pode entrar com seu e-mail e senha." });
     }
 
     private static string SomenteDigitos(string valor) => new(valor.Where(char.IsDigit).ToArray());

@@ -1,3 +1,5 @@
+> Relatório histórico de 04/11/2026, anterior à retirada do serviço de e-mail. Para o comportamento atual, consulte VALIDACAO-SEM-EMAIL.md e SEGURANCA.md.
+
 # Validação das alterações de segurança
 
 Data: 04/11/2026. Implementação local em `tccSolidario`. Não houve push, deploy ou alteração no Supabase nesta etapa.

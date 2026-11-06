@@ -24,6 +24,7 @@ public class TokenSeguranca
     public string? SegredoProtegido { get; set; }
 }
 
+// Mapeamento legado, sem produtor ou serviço de envio. Preserva o esquema já aplicado.
 public class EmailPendente
 {
     public Guid Id { get; set; } = Guid.NewGuid();

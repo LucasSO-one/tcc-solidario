@@ -145,7 +145,7 @@ builder.Services.AddAuthentication(options =>
             var sessao = Guid.TryParse(sid, out var sessaoId)
                 ? await db.SessoesAutenticacao.AsNoTracking().SingleOrDefaultAsync(s => s.Id == sessaoId) : null;
             var agora = validation.HttpContext.RequestServices.GetRequiredService<TimeProvider>().GetUtcNow().UtcDateTime;
-            if (usuario is null || !RegrasAcesso.PodeAcessar(usuario) || !usuario.EmailConfirmado
+            if (usuario is null || !RegrasAcesso.PodeAcessar(usuario)
                 || (usuario.Tipo == TccSolidario.Api.Models.Enums.TipoUsuario.Admin && !usuario.MfaAtivo)
                 || sessao is null || sessao.UsuarioId != usuario.Id || sessao.RevogadaEmUtc.HasValue || sessao.ExpiraEmUtc <= agora
                 || versao != usuario.VersaoSeguranca.ToString() || sessao.VersaoUsuario != usuario.VersaoSeguranca
@@ -182,9 +182,6 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 _ = app.Services.GetRequiredService<ProtecaoSegredos>();
-app.Services.GetRequiredService<SmtpEnvioEmail>().ValidarConfiguracao();
-using (var validacao = app.Services.CreateScope())
-    _ = validacao.ServiceProvider.GetRequiredService<EmailService>().OrigemPublica();
 
 
 // Configure the HTTP request pipeline.

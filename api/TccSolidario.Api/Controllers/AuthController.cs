@@ -44,21 +44,4 @@ public class AuthController(AutenticacaoService auth, AppDbContext db, IWebHostE
         Response.Cookies.Delete(CookieNome(env.IsProduction()), CookieOpcoes);
         return Ok(new { sucesso = true });
     }
-    [HttpPost("reenviar-confirmacao")]
-    [RequestSizeLimit(8192)]
-    public async Task<IActionResult> Reenviar(EmailRequest request) { await auth.SolicitarLinkAsync(request.Email, true); return MensagemGenerica(); }
-    [HttpPost("recuperar-senha")]
-    [RequestSizeLimit(8192)]
-    public async Task<IActionResult> Recuperar(EmailRequest request) { await auth.SolicitarLinkAsync(request.Email, false); return MensagemGenerica(); }
-    private IActionResult MensagemGenerica() => Ok(new { mensagem = "Se houver um cadastro elegível, enviaremos as instruções para o e-mail informado." });
-    [HttpPost("confirmar-email")]
-    [RequestSizeLimit(8192)]
-    public async Task<IActionResult> ConfirmarEmail(LinkRequest request) => await auth.ConsumirLinkAsync(request.Token, null)
-        ? Ok(new { mensagem = "E-mail confirmado. Você já pode entrar se seu perfil estiver aprovado." })
-        : BadRequest(new { message = "Link inválido, expirado ou já utilizado." });
-    [HttpPost("redefinir-senha")]
-    [RequestSizeLimit(8192)]
-    public async Task<IActionResult> RedefinirSenha(RedefinirSenhaRequest request) => await auth.ConsumirLinkAsync(request.Token, request.NovaSenha)
-        ? Ok(new { mensagem = "Senha redefinida. Entre novamente com a nova senha." })
-        : BadRequest(new { message = "Link inválido, expirado ou já utilizado, ou senha fora da política." });
 }

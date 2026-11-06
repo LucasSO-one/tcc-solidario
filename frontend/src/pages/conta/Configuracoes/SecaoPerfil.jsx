@@ -70,7 +70,7 @@ export default function SecaoPerfil({ conta, setConta, onSujo }) {
       }));
       setConta(atualizada);
       form.redefinir({ nome: atualizada.nome, email: atualizada.email, telefone: mascaraTelefone(atualizada.telefone), senhaAtual: '' });
-      if (trocandoEmail) navigate('/login', { replace: true, state: { mensagem: 'Confirme o novo e-mail pelo link enviado para entrar novamente.' } });
+      if (trocandoEmail) navigate('/login', { replace: true, state: { mensagem: 'E-mail atualizado. Entre novamente com o novo e-mail e sua senha.' } });
       else toast.success('Perfil atualizado.');
     } catch (err) {
       const porCampo = errosDoServidor(err);

@@ -12,7 +12,7 @@ public record ResultadoAutenticacao(Usuario? Usuario = null, string? Jwt = null,
     bool ConfigurarMfa = false, string? Segredo = null, string? UriAutenticador = null,
     string[]? CodigosRecuperacao = null, string? Erro = null);
 
-public sealed class AutenticacaoService(AppDbContext db, ProtecaoSegredos protecao, EmailService emails,
+public sealed class AutenticacaoService(AppDbContext db, ProtecaoSegredos protecao,
     LimiteAutenticacaoService limites, ITokenService tokens, TimeProvider clock)
 {
     private static readonly string HashFicticio = BCrypt.Net.BCrypt.HashPassword(ProtecaoSegredos.NovoToken(), 12);
@@ -37,7 +37,6 @@ public sealed class AutenticacaoService(AppDbContext db, ProtecaoSegredos protec
             db.EventosAuditoria.Add(new() { UsuarioId = usuario?.Id, Acao = "auth.login", Sucesso = false, EmUtc = Agora });
             resultado = new(Erro: "Credenciais inválidas ou cadastro sem autorização para acesso.");
         }
-        else if (!usuario.EmailConfirmado) resultado = new(Erro: "Confirme seu e-mail para entrar. Você pode solicitar outro link.");
         else if (usuario.Tipo == TipoUsuario.Admin || usuario.MfaAtivo)
             resultado = await PrepararMfaAsync(usuario, !usuario.MfaAtivo);
         else resultado = CriarSessao(usuario);
@@ -71,7 +70,7 @@ public sealed class AutenticacaoService(AppDbContext db, ProtecaoSegredos protec
         var t = await db.TokensSeguranca.SingleOrDefaultAsync(t => t.Hash == hash && t.ConsumidoEmUtc == null);
         var usuario = t is null ? null : await db.Usuarios.SingleOrDefaultAsync(u => u.Id == t.UsuarioId);
         if (t is null || usuario is null || !t.Finalidade.StartsWith("mfa") || t.ExpiraEmUtc <= Agora || t.Falhas >= 5
-            || t.VersaoUsuario != usuario.VersaoSeguranca || !RegrasAcesso.PodeAcessar(usuario) || !usuario.EmailConfirmado)
+            || t.VersaoUsuario != usuario.VersaoSeguranca || !RegrasAcesso.PodeAcessar(usuario))
             return new(Erro: "Desafio inválido ou expirado. Entre novamente.");
         var setup = t.Finalidade == "mfa-setup";
         var segredo = protecao.Desproteger(setup ? t.SegredoProtegido! : usuario.SegredoMfaProtegido!, "mfa:" + usuario.Id);
@@ -104,48 +103,5 @@ public sealed class AutenticacaoService(AppDbContext db, ProtecaoSegredos protec
         }
         var resultado = CriarSessao(usuario, novosCodigos);
         await db.SaveChangesAsync(); await operacao.CommitAsync(); return resultado;
-    }
-    public async Task EnfileirarConfirmacaoAsync(Guid id)
-    {
-        var usuario = await db.Usuarios.SingleAsync(u => u.Id == id);
-        if (!usuario.EmailConfirmado) await CriarLinkAsync(usuario, "confirmar-email", TimeSpan.FromHours(24));
-    }
-    public async Task SolicitarLinkAsync(string email, bool confirmar)
-    {
-        var normalizado = EmailNormalizado.Normalizar(email);
-        await limites.ExigirAsync(confirmar ? "reenviar" : "recuperar", normalizado, 3, TimeSpan.FromMinutes(15));
-        await using var operacao = await OperacaoConta.IniciarAsync(db);
-        var usuario = await db.Usuarios.SingleOrDefaultAsync(u => u.EmailNormalizado == normalizado && u.StatusAprovacao != StatusAprovacao.Excluido);
-        if (usuario is not null && (!confirmar || !usuario.EmailConfirmado))
-            await CriarLinkAsync(usuario, confirmar ? "confirmar-email" : "redefinir-senha", confirmar ? TimeSpan.FromHours(24) : TimeSpan.FromMinutes(30));
-        await operacao.CommitAsync();
-    }
-    private async Task CriarLinkAsync(Usuario usuario, string finalidade, TimeSpan prazo)
-    {
-        await db.TokensSeguranca.Where(t => t.UsuarioId == usuario.Id && t.Finalidade == finalidade && t.ConsumidoEmUtc == null)
-            .ExecuteUpdateAsync(s => s.SetProperty(t => t.ConsumidoEmUtc, Agora));
-        var valor = ProtecaoSegredos.NovoToken(); var expira = Agora.Add(prazo);
-        db.TokensSeguranca.Add(new() { Hash = ProtecaoSegredos.Hash(valor), UsuarioId = usuario.Id, VersaoUsuario = usuario.VersaoSeguranca, Finalidade = finalidade, ExpiraEmUtc = expira });
-        emails.Enfileirar(usuario, finalidade, valor, expira); await db.SaveChangesAsync();
-    }
-    public async Task<bool> ConsumirLinkAsync(string valor, string? novaSenha)
-    {
-        var finalidade = novaSenha is null ? "confirmar-email" : "redefinir-senha";
-        if (novaSenha is not null && !EmailNormalizado.SenhaValida(novaSenha)) return false;
-        await using var operacao = await OperacaoConta.IniciarAsync(db);
-        var hash = ProtecaoSegredos.Hash(valor);
-        var t = await db.TokensSeguranca.SingleOrDefaultAsync(t => t.Hash == hash && t.Finalidade == finalidade && t.ConsumidoEmUtc == null);
-        if (t is null || t.ExpiraEmUtc <= Agora) return false;
-        var usuario = await db.Usuarios.SingleOrDefaultAsync(u => u.Id == t.UsuarioId);
-        if (usuario is null || usuario.StatusAprovacao == StatusAprovacao.Excluido || usuario.VersaoSeguranca != t.VersaoUsuario) return false;
-        t.ConsumidoEmUtc = Agora;
-        if (novaSenha is null) usuario.EmailConfirmado = true;
-        else
-        {
-            usuario.SenhaHash = BCrypt.Net.BCrypt.HashPassword(novaSenha, 12); usuario.VersaoSeguranca = Guid.NewGuid();
-            await db.SessoesAutenticacao.Where(s => s.UsuarioId == usuario.Id && s.RevogadaEmUtc == null).ExecuteUpdateAsync(s => s.SetProperty(t => t.RevogadaEmUtc, Agora));
-        }
-        db.EventosAuditoria.Add(new() { UsuarioId = usuario.Id, Acao = "auth." + finalidade, EmUtc = Agora });
-        await db.SaveChangesAsync(); await operacao.CommitAsync(); return true;
     }
 }

@@ -16,8 +16,6 @@ public class OperacaoController(AppDbContext db, EstadoOperacao estado, TimeProv
     {
         var agora = clock.GetUtcNow().UtcDateTime;
         return Ok(new { workers = estado.Snapshot(),
-            emailsPendentes = await db.EmailsPendentes.CountAsync(e => !e.Cancelado && e.EnviadoEmUtc == null && e.ExpiraEmUtc > agora),
-            emailsSemEntrega = await db.EmailsPendentes.CountAsync(e => !e.Cancelado && e.EnviadoEmUtc == null && (e.Tentativas >= 5 || e.ExpiraEmUtc <= agora)),
             sessoesAtivas = await db.SessoesAutenticacao.CountAsync(s => s.RevogadaEmUtc == null && s.ExpiraEmUtc > agora
                 && db.Usuarios.Any(u => u.Id == s.UsuarioId && u.VersaoSeguranca == s.VersaoUsuario)),
             auditoria = await db.EventosAuditoria.AsNoTracking().OrderByDescending(e => e.EmUtc).Take(100)

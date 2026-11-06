@@ -39,7 +39,6 @@ import Privacidade from "../pages/publicas/Privacidade";
 // Auth
 import Register from "../pages/auth/Register/Register";
 import Login from "../pages/auth/Login/Login";
-import AcessoEmail from "../pages/auth/AcessoEmail";
 
 // Roteador de dados (createBrowserRouter): necessário para avisar sobre alterações não salvas (useBlocker).
 const router = createBrowserRouter(createRoutesFromElements(
@@ -49,7 +48,6 @@ const router = createBrowserRouter(createRoutesFromElements(
 
     {/* Rotas públicas */}
     <Route path="/login" element={<Login />} />
-    {['recuperar-senha', 'reenviar-confirmacao', 'confirmar-email', 'redefinir-senha'].map(acao => <Route key={acao} path={`/${acao}`} element={<AcessoEmail key={acao} acao={acao} />} />)}
     <Route path="/register" element={<Register />} />
     <Route path="/termos" element={<Termos />} />
     <Route path="/privacidade" element={<Privacidade />} />

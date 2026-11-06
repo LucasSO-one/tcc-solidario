@@ -3,10 +3,10 @@ import PaginaDocumento from './PaginaDocumento';
 import ContatoPrivacidade from './ContatoPrivacidade';
 
 export default function Termos() {
-  return <PaginaDocumento titulo="Termos de uso" atualizadoEm="3 de novembro de 2026">
+  return <PaginaDocumento titulo="Termos de uso" atualizadoEm="6 de novembro de 2026">
     <p>A VittaFlow é uma plataforma desenvolvida em um projeto acadêmico para aproximar estabelecimentos, consumidores e organizações sociais na destinação de excedentes alimentares. A plataforma organiza anúncios, reservas e registros de retirada. Ela não realiza transporte, processamento de pagamentos ou avaliação sanitária dos alimentos.</p>
     <h2>1. Cadastro e acesso</h2>
-    <p>Informe dados verdadeiros e confirme o endereço de e-mail pelo link recebido. Mantenha seu cadastro atualizado e proteja sua senha e seus códigos de retirada. Varejistas e ONGs dependem de aprovação administrativa para operar. A aprovação permite o acesso às funcionalidades institucionais e não constitui certificação sanitária ou garantia sobre os alimentos.</p>
+    <p>Informe dados verdadeiros e um endereço de e-mail válido, utilizado como login. Mantenha seu cadastro atualizado e proteja sua senha e seus códigos de retirada. Varejistas e ONGs dependem de aprovação administrativa para operar. A aprovação permite o acesso às funcionalidades institucionais e não constitui certificação sanitária ou garantia sobre os alimentos.</p>
     <h2>2. Ofertas e vitrine</h2>
     <p>Ofertas reúne os lotes destacados pelos varejistas. O botão “Ver na vitrine” abre o alimento correspondente. Na Vitrine, o consumidor consulta o catálogo comercial, com ou sem desconto, e realiza a reserva. A indicação de destaque não significa, por si só, desconto. Preço, quantidade, estabelecimento e validade devem ser conferidos antes da reserva.</p>
     <h2>3. Validade, doação e reservas</h2>

@@ -63,10 +63,8 @@ export default function Login() {
       {erro && <Alert variant="error">{erro}</Alert>}
       <Field label="E-mail"><input type="email" placeholder="seu@email.com" maxLength={254} autoComplete="email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} required /></Field>
       <Field label="Senha"><CampoSenha autoComplete="current-password" value={form.senha} maxLength={256} onChange={e => setForm({ ...form, senha: e.target.value })} required /></Field>
-      <Link to="/recuperar-senha">Esqueci minha senha</Link>
       <Button type="submit" variant="primary" block loading={carregando}>Entrar</Button>
       <p className="auth-form__rodape">Ainda não tem conta? <Link to="/register">Criar conta</Link></p>
-      <p className="auth-form__rodape"><Link to="/reenviar-confirmacao">Reenviar confirmação de e-mail</Link></p>
     </form>}
   </AuthLayout>;
 }
