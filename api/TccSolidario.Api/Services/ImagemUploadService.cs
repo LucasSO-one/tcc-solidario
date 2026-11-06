@@ -12,7 +12,7 @@ namespace TccSolidario.Api.Services;
 /// Com o Cloudinary configurado (seção "Cloudinary"), as fotos vão para lá; sem ele,
 /// ficam em wwwroot/uploads.
 /// </summary>
-public partial class ImagemUploadService(IWebHostEnvironment env, Cloudinary? cloudinary = null, IConfiguration? config = null)
+public partial class ImagemUploadService(IWebHostEnvironment env, Cloudinary? cloudinary = null, IConfiguration? config = null, ILogger<ImagemUploadService>? logger = null)
 {
     public const int MaxImagens = 6;
     public const long TamanhoMaximoBytes = 5 * 1024 * 1024;
@@ -42,15 +42,47 @@ public partial class ImagemUploadService(IWebHostEnvironment env, Cloudinary? cl
         if (cloudinary is not null)
         {
             await using var stream = imagem.OpenReadStream();
-            var resultado = await cloudinary.UploadAsync(new ImageUploadParams
+            ImageUploadResult resultado;
+            try
             {
-                File = new FileDescription($"{nome}{extensao}", stream),
-                Folder = $"{PastaCloudinary}/{pasta}",
-                PublicId = nome,
-                Overwrite = false,
-            });
-            if (resultado.Error is not null || resultado.SecureUrl is null)
-                throw new InvalidOperationException("Não foi possível enviar a foto. Tente novamente.");
+                resultado = await cloudinary.UploadAsync(new ImageUploadParams
+                {
+                    File = new FileDescription($"{nome}{extensao}", stream),
+                    Folder = $"{PastaCloudinary}/{pasta}",
+                    PublicId = nome,
+                    Overwrite = false,
+                });
+            }
+            catch (HttpRequestException)
+            {
+                throw FalhaCloudinary(0, "conexao", "Não foi possível conectar ao serviço de imagens. Tente novamente em instantes.");
+            }
+            catch (OperationCanceledException)
+            {
+                throw FalhaCloudinary(0, "tempo-esgotado", "O serviço de imagens demorou a responder. Tente novamente em instantes.");
+            }
+            var status = (int)resultado.StatusCode;
+            if (resultado.Error is not null || resultado.SecureUrl is null || status is < 200 or >= 300)
+            {
+                // A mensagem externa é usada apenas para classificação, nunca devolvida nem registrada.
+                var detalhe = resultado.Error?.Message ?? "";
+                bool Tem(string texto) => detalhe.Contains(texto, StringComparison.OrdinalIgnoreCase);
+                if (status == 401 || Tem("invalid signature") || Tem("unknown api key") || Tem("invalid api key"))
+                    throw FalhaCloudinary(status, "credenciais", "O Cloudinary recusou as credenciais de envio. O responsável pelo site deve conferir Cloud name, API Key e API Secret no Railway.");
+                if (status is 420 or 429 || Tem("quota exceeded") || Tem("rate limit"))
+                    throw FalhaCloudinary(status, "limite", "O serviço de imagens atingiu um limite de uso. Tente mais tarde ou avise o responsável pelo site.");
+                if (status == 404 || Tem("unknown cloud") || Tem("invalid cloud"))
+                    throw FalhaCloudinary(status, "ambiente", "O Cloudinary não encontrou o ambiente configurado. O responsável pelo site deve conferir o Cloud name no Railway.");
+                if (Tem("cloud_name is disabled") || Tem("cloud name is disabled"))
+                    throw FalhaCloudinary(status, "conta-desativada", "O ambiente do Cloudinary está desativado. O responsável pelo site deve conferir a situação da conta.");
+                if (status == 403)
+                    throw FalhaCloudinary(status, "permissao", "O Cloudinary não permitiu o envio. O responsável pelo site deve conferir as permissões da conta e da chave.");
+                if (status >= 500)
+                    throw FalhaCloudinary(status, "indisponivel", "O serviço de imagens está indisponível. Tente novamente em instantes.");
+                if (status == 400)
+                    throw FalhaCloudinary(status, "requisicao", "O Cloudinary recusou a imagem ou os parâmetros de envio. Tente outra imagem JPG, PNG ou WEBP; se persistir, avise o responsável pelo site.");
+                throw FalhaCloudinary(status, "resposta-invalida", "O serviço de imagens não confirmou o envio. Tente novamente em instantes.");
+            }
             return resultado.SecureUrl.ToString();
         }
 
@@ -59,6 +91,13 @@ public partial class ImagemUploadService(IWebHostEnvironment env, Cloudinary? cl
         await using var destino = new FileStream(Path.Combine(diretorio, nome + extensao), FileMode.CreateNew);
         await imagem.CopyToAsync(destino);
         return $"/uploads/{pasta}/{nome}{extensao}";
+    }
+
+    private InvalidOperationException FalhaCloudinary(int status, string motivo, string mensagem)
+    {
+        // Sem exceção bruta, credenciais, URL, imagem, assinatura, nome do arquivo ou corpo do provedor.
+        logger?.LogWarning("Cloudinary: upload recusado. HTTP {Status}; categoria {Categoria}.", status, motivo);
+        return new InvalidOperationException(mensagem);
     }
 
     public async Task RemoverAsync(IEnumerable<string> urls)

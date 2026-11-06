@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { HandHeart, Store, UserRound } from "lucide-react";
 import ilustracao from "../../../assets/harmony-produce2.png";
 import { register } from "../../../service/auth";
-import { mensagemErro } from "../../../utils/mensagemErro";
+import { mensagemErro, errosDeValidacao } from "../../../utils/mensagemErro";
 import { mascaraCnpj, mascaraCpf, mascaraTelefone, senhaValida } from "../../../utils/mascaras";
 import AuthLayout from "../../../components/AuthLayout/AuthLayout";
 import ForcaSenha from "../../../components/conta/ForcaSenha";
@@ -58,10 +58,13 @@ const Register = () => {
   const [userType, setUserType] = useState("consumidor");
   const [formData, setFormData] = useState(CAMPOS_INICIAIS);
   const [erro, setErro] = useState("");
+  const [errosCampos, setErrosCampos] = useState({});
   const [carregando, setCarregando] = useState(false);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
+    setErro("");
+    setErrosCampos(prev => ({ ...prev, [name]: undefined }));
     setFormData((prev) => ({ ...prev, [name]: MASCARAS[name] ? MASCARAS[name](value) : value }));
   };
 
@@ -69,6 +72,7 @@ const Register = () => {
   // (evita mandar, por exemplo, um CPF preenchido junto de um cadastro de ONG)
   const handleUserTypeChange = (novoTipo) => {
     setUserType(novoTipo);
+    setErrosCampos({});
     setFormData((prev) => ({
       ...prev,
       nome: "",
@@ -87,6 +91,7 @@ const Register = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErro("");
+    setErrosCampos({});
 
     if (!senhaValida(formData.senha)) {
       setErro("A senha ainda não atende a todos os requisitos.");
@@ -110,6 +115,7 @@ const Register = () => {
         },
       });
     } catch (err) {
+      setErrosCampos(errosDeValidacao(err));
       setErro(mensagemErro(err, "Não foi possível concluir o cadastro. Tente novamente."));
     } finally {
       setCarregando(false);
@@ -144,16 +150,16 @@ const Register = () => {
         </Alert>}
 
         {CAMPOS_POR_TIPO[userType].map(({ name, label, ...props }) => (
-          <Field key={name} label={label} required>
+          <Field key={name} label={label} required error={errosCampos[name]}>
             <input type="text" name={name} value={formData[name]} onChange={handleInputChange} {...props} />
           </Field>
         ))}
 
-        <Field label="E-mail" required help="Você vai usar este e-mail para entrar.">
+        <Field label="E-mail" required error={errosCampos.email} help="Você vai usar este e-mail para entrar.">
           <input type="email" name="email" placeholder="seu@email.com" autoComplete="email" value={formData.email} onChange={handleInputChange} />
         </Field>
 
-        <Field label="Senha" required>
+        <Field label="Senha" required error={errosCampos.senha}>
           <CampoSenha name="senha" autoComplete="new-password" value={formData.senha} onChange={handleInputChange} />
         </Field>
         <ForcaSenha senha={formData.senha} />

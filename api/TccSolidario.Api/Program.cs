@@ -76,7 +76,7 @@ if (!string.IsNullOrWhiteSpace(cloudinarySection["CloudName"])
     && !string.IsNullOrWhiteSpace(cloudinarySection["ApiSecret"]))
 {
     var cloudinary = new CloudinaryDotNet.Cloudinary(new CloudinaryDotNet.Account(
-        cloudinarySection["CloudName"], cloudinarySection["ApiKey"], cloudinarySection["ApiSecret"]));
+        cloudinarySection["CloudName"]!.Trim(), cloudinarySection["ApiKey"]!.Trim(), cloudinarySection["ApiSecret"]!.Trim()));
     cloudinary.Api.Secure = true;
     builder.Services.AddSingleton(cloudinary);
 }
