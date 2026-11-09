@@ -1,11 +1,13 @@
 namespace TccSolidario.Api.Controllers;
 
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Logging;
 using TccSolidario.Api.Services;
 using TccSolidario.Api.DTOs.Cnpj;
 
 [ApiController]
+[Authorize(Roles = "Admin")]
 [Route("api/[controller]")]
 public class CnpjController : ControllerBase
 {
@@ -21,17 +23,16 @@ public class CnpjController : ControllerBase
     [HttpPost("testar-validacao")]
     public async Task<IActionResult> TestarValidadorCnpj([FromBody] CnpjRequest request)
     {
-        _logger.LogInformation($"[Teste] Iniciando validacao isolada para o CNPJ: {request.Cnpj}");
 
         bool isValido = await _cnpjValidator.ValidarCnpjAtivoAsync(request.Cnpj);
 
         if (isValido)
         {
-            return Ok(new { Sucesso = true, Mensagem = "CNPJ Valido e Ativo na Receita!" });
+            return Ok(new { Sucesso = true, Mensagem = "A consulta cadastral retornou situação ativa." });
         }
         else
         {
-            return BadRequest(new { Sucesso = false, Erro = "CNPJ Invalido ou Inativo." });
+            return BadRequest(new { Sucesso = false, Erro = "Não foi possível confirmar um CNPJ ativo nesta consulta." });
         }
     }
 }

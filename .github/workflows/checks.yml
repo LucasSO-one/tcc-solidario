@@ -43,6 +43,7 @@ jobs:
           dotnet run --project tests/TccSolidario.ContaChecks
           dotnet run --project tests/TccSolidario.LegadoChecks
           dotnet run --project tests/TccSolidario.ImagensChecks
+          dotnet run --project tests/TccSolidario.CadastroChecks
       - name: Segurança no PostgreSQL isolado
         run: dotnet run --project tests/TccSolidario.SegurancaChecks
       - name: Preparar papel restrito para a API de teste

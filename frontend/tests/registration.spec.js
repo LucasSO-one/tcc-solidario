@@ -39,3 +39,20 @@ test('cadastro destaca CNPJ rejeitado pelo serviço e razão social rejeitada pe
   await expect(page.getByLabel('Razão social', { exact: false })).toHaveAttribute('aria-invalid', 'true');
   await expect(page.locator('.field__error')).toContainText('entre 3 e 100 caracteres');
 });
+
+test('cadastro ONG recusa telefone inválido antes de persistir a conta', async ({ request }) => {
+  for (const telefone of ['123', '11300000000', '1190000000']) {
+    const csrf = await (await request.get('/api/auth/csrf')).json();
+    const response = await request.post('/api/registro/ong', { headers: { 'X-CSRF-TOKEN': csrf.token },
+      data: { nomeFantasia: 'ONG QA telefone inválido', cnpj: '11222333000181', email: 'telefone-invalido@example.invalid', senha: 'SomenteTeste!42', telefone } });
+    expect(response.status()).toBe(400);
+    const body = await response.json();
+    expect(body.errors.Telefone).toContain('Informe um celular válido com DDD e 9 dígitos.');
+  }
+});
+
+test('diagnóstico cadastral é restrito ao administrador', async ({ request }) => {
+  const csrf = await (await request.get('/api/auth/csrf')).json();
+  const response = await request.post('/api/cnpj/testar-validacao', { headers: { 'X-CSRF-TOKEN': csrf.token }, data: { cnpj: '11222333000181' } });
+  expect(response.status()).toBe(401);
+});

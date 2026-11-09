@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using TccSolidario.Api.Models;
 using System.Text.RegularExpressions;
 
-public class RegistroOngRequest
+public class RegistroOngRequest : IValidatableObject
 {
     [Required(ErrorMessage = "O CNPJ da ONG e obrigatorio.")]
     [RegularExpression(@"^[A-Za-z0-9]{12}[0-9]{2}$", ErrorMessage = "O CNPJ deve conter exatamente 14 caracteres, com dois dígitos verificadores.")]

@@ -1,4 +1,4 @@
-> Relatório histórico de 04/11/2026, anterior à retirada do serviço de e-mail. Para o comportamento atual, consulte VALIDACAO-SEM-EMAIL.md e SEGURANCA.md.
+> Relatório histórico de 04/11/2026. Para o comportamento atual e as verificações mais recentes, consulte VALIDACAO-ENTREGA.md e SEGURANCA.md.
 
 # Validação das alterações de segurança
 
