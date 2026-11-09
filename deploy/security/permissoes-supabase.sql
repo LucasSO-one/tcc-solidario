@@ -13,11 +13,21 @@ DO $$ BEGIN
         RAISE EXCEPTION 'Papel vittaflow_app existente possui privilégios elevados ou herança. Revisar antes de continuar.';
     END IF;
 END $$;
+-- CONNECT pode não estar concedido por PUBLIC no banco hospedado.
+DO $$ BEGIN
+    EXECUTE format('GRANT CONNECT ON DATABASE %I TO vittaflow_app', current_database());
+END $$;
 GRANT USAGE ON SCHEMA public TO vittaflow_app;
 -- Em um projeto exclusivo desta API, public não deve conceder criação a todos.
 REVOKE CREATE ON SCHEMA public FROM PUBLIC;
 REVOKE ALL ON public."__EFMigrationsHistory" FROM PUBLIC, vittaflow_app;
 GRANT SELECT ON public."__EFMigrationsHistory" TO vittaflow_app;
+-- O Supabase pode já ter RLS ativada nesta tabela. SELECT sozinho não permite ler as linhas.
+-- O runtime apenas verifica migrations; não pode inserir, alterar ou excluir o histórico.
+ALTER TABLE public."__EFMigrationsHistory" ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS vittaflow_migrations_read ON public."__EFMigrationsHistory";
+CREATE POLICY vittaflow_migrations_read ON public."__EFMigrationsHistory"
+    FOR SELECT TO vittaflow_app USING (true);
 
 DO $$
 DECLARE tabela text; papel text;

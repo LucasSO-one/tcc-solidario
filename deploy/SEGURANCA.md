@@ -78,3 +78,17 @@ A partir desta correção, os logs registram `Cloudinary: upload recusado. HTTP 
 Confira que CloudName, ApiKey e ApiSecret pertencem ao mesmo ambiente e ao mesmo par de chaves ativo. Não confunda Key Name com Cloud name ou API Key. A inicialização valida presença, não testa as credenciais contra a rede. O código remove espaços nas extremidades dos três valores antes de construir o cliente.
 
 O projeto `tests/TccSolidario.ImagensChecks` exercita o SDK real contra HTTP exclusivamente local e respostas simuladas, sem credenciais reais ou acesso ao Cloudinary. Foram verificadas recusas, ausência de URL, sucesso e proteção dos logs. Esses testes não comprovam que as credenciais de produção estejam corretas.
+
+## Troca do usuário de banco na aplicação
+
+Execute primeiro conferir-permissoes.sql, somente leitura, e confirme separadamente o Username usado pelo Railway. O usuário da sessão do SQL Editor não identifica o usuário da aplicação.
+
+Com a aplicação ainda usando o proprietário postgres, execute permissoes-supabase.sql como proprietário. Ele mantém a propriedade das tabelas, prepara vittaflow_app sem login, concede CONNECT/USAGE e somente DML nas onze tabelas operacionais, habilita RLS nelas e remove os privilégios diretos dos papéis anon/authenticated/service_role. O histórico das migrations fica com RLS e política de SELECT para vittaflow_app, sem permissão de escrita. Isso evita que uma tabela de histórico com RLS previamente ativada pareça vazia ao runtime. O script não exclui registros e é transacional.
+
+Depois configure uma senha forte exclusiva e habilite LOGIN para vittaflow_app em uma sessão privada de administração. No pgAdmin, use Login/Group Roles → vittaflow_app → Properties: Definition → Password; Privileges → Can login = Yes, mantendo Superuser/Create roles/Create databases/Bypass RLS desabilitados. Não salve a senha em arquivos versionados ou mensagens.
+
+Antes de trocar a conexão do Railway, registre uma segunda conexão no pgAdmin com o mesmo Host e porta 5432 do Session pooler, Maintenance database postgres, Username vittaflow_app.REFERENCIA_DO_PROJETO e a senha própria desse papel. Alternativamente valide por psql com o mesmo usuário do pooler. Consulte `SELECT current_user;` e `SELECT count(*) FROM public."__EFMigrationsHistory";` e confirme que a migration de segurança é visível. Não basta testar SELECT sem confirmar o usuário efetivo. Mantenha a conexão administrativa separada para manutenção.
+
+Somente após essa validação, substitua Username e Password da ConnectionStrings__DefaultConnection do Railway pelos do papel app, preservando Host, Port, Database e validação TLS. Aplique a alteração em deploy e confira /health/ready, login, dados da conta e uma operação própria. Se ocorrer erro, preserve logs sem segredos e restaure a conexão anterior enquanto o motivo é corrigido; não remova RLS para contornar falha.
+
+Reexecute conferir-permissoes.sql após a mudança. O esperado é: papel app sem poderes administrativos, RLS ativada nas doze tabelas incluindo histórico, políticas restritas ao backend, sem privilégios diretos de anon/authenticated/service_role nas tabelas do sistema. Isso não substitui as permissões entre perfis verificadas pela API. Novas tabelas e funções de migrations futuras exigem nova revisão de RLS, grants e privilégios padrão do Supabase.
