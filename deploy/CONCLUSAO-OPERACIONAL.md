@@ -106,3 +106,22 @@ Para repetir localmente: use VITE_API_URL=/api no build, configure o banco
 vittaflow_* em loopback e VITTAFLOW_TEST_USE_LIMITED_ROLE=true. O servidor
 Playwright impede usar uma conexão de produção. O código de carga não aceita
 URL remota; não execute testes de carga contra o site publicado sem um plano específico.
+
+
+## Atualização de operação — 10/11/2026
+
+O responsável confirmou a aplicação da migration e a publicação do código.
+A classificação no Supabase retornou 4 lotes e 6 contas QA.
+As avaliações com participantes reais foram dispensadas pelo responsável; não há
+resultados humanos de usabilidade a acrescentar. Os alertas externos permanecem fora do escopo.
+
+Backup automático ativado em repositório privado separado do código do aplicativo:
+agendamento diário às 06:23 UTC (03:23 em Brasília), retenção de 14 dias,
+criptografia age, limite de 8 MiB por cópia e TLS verify-full com a CA oficial Supabase.
+A primeira cópia válida foi concluída em 10/11/2026, baixada, conferida por checksum,
+decifrada e restaurada em banco local vazio. Foram verificadas 12 tabelas, 12 migrations,
+4 lotes QA, 6 contas QA e a leitura pelo papel de runtime restrito.
+O banco temporário de validação foi removido depois dos testes; as cópias retidas são cifradas.
+A chave privada de restauração permanece fora do Git. É necessária uma segunda cópia
+segura dessa chave. A verificação feita cobre o schema public, não a recuperação completa
+de infraestrutura, imagens Cloudinary e segredos de aplicação.

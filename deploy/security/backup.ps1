@@ -6,7 +6,7 @@ foreach ($name in @('PGHOST','PGDATABASE','PGUSER')) {
 $target = [IO.Path]::GetFullPath($OutputFile)
 if (Test-Path -LiteralPath $target) { throw 'Destino já existe. Use outro nome; o backup anterior será preservado.' }
 if (-not (Test-Path -LiteralPath ([IO.Path]::GetDirectoryName($target)))) { throw 'Crie antes um diretório privado de backup.' }
-& pg_dump --schema=public --format=custom --no-owner --no-privileges --file=$target
+& pg_dump --schema=public --format=custom --no-owner --no-privileges --no-publications --no-subscriptions --file=$target
 if ($LASTEXITCODE -ne 0) { throw 'pg_dump falhou. Não considere o arquivo parcial como backup válido.' }
 & pg_restore --list $target | Out-Null
 if ($LASTEXITCODE -ne 0) { throw 'Arquivo de backup inválido.' }

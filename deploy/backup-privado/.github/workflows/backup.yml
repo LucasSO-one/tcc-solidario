@@ -21,10 +21,21 @@ jobs:
       PGUSER: ${{ secrets.BACKUP_PGUSER }}
       PGPASSWORD: ${{ secrets.BACKUP_PGPASSWORD }}
       PGSSLMODE: verify-full
+      PGSSLROOTCERT: ${{ github.workspace }}/deploy/security/supabase-ca.crt
       PGCONNECT_TIMEOUT: '20'
       AGE_RECIPIENT: ${{ vars.BACKUP_AGE_RECIPIENT }}
     steps:
+      - name: Conferir configuração sem exibir segredos
+        shell: pwsh
+        run: |
+          foreach ($name in @('PGHOST','PGUSER','PGPASSWORD','AGE_RECIPIENT')) {
+            if ([string]::IsNullOrWhiteSpace([Environment]::GetEnvironmentVariable($name))) {
+              throw "Configure o secret ou a variável correspondente a $name no repositório."
+            }
+          }
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - name: Preparar ferramentas
         shell: bash
         run: |

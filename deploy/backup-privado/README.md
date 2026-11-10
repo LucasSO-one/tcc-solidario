@@ -5,7 +5,7 @@ Sem canal adicional de alertas; confira o histórico das execuções no GitHub A
 
 1. Crie um repositório **privado** na sua conta GitHub. Convide apenas responsáveis pelo banco.
 2. Copie a pasta `.github` deste diretório para a raiz desse repositório. Copie também
-   `deploy/security/backup.ps1` e `backup-cifrado.ps1` do aplicativo, preservando esses caminhos.
+   `deploy/security/backup.ps1`, `backup-cifrado.ps1` e `supabase-ca.crt` do aplicativo, preservando esses caminhos.
 3. Instale age pela distribuição oficial e gere uma identidade local:
    `age-keygen -o backup-identity.txt`. Guarde o arquivo privado fora do Git e outra cópia offline.
    A chave pública age1... pode ir à variável do repositório `BACKUP_AGE_RECIPIENT`.
@@ -40,7 +40,7 @@ O checksum verifica integridade acidental; não substitui autenticação do arma
 Guarde separadamente também a chave Security__EncryptionKey da aplicação e os códigos
 de recuperação MFA. Sem a chave da aplicação, dados cifrados no dump podem ficar
 irrecuperáveis. Este backup cobre o schema public; não inclui as imagens do Cloudinary,
-configuração do Railway, papéis PostgreSQL, schemas internos do Supabase nem logs de provedor.
+configuração do Railway, papéis PostgreSQL, publicações/assinaturas de replicação, schemas internos do Supabase nem logs de provedor.
 
 Referências oficiais: [custos do GitHub Actions](https://docs.github.com/en/billing/concepts/product-billing/github-actions),
 [agendamentos](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#schedule),
