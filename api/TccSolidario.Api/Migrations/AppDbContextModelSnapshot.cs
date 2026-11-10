@@ -17,7 +17,7 @@ namespace TccSolidario.Api.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.10")
+                .HasAnnotation("ProductVersion", "8.0.33")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -196,6 +196,9 @@ namespace TccSolidario.Api.Migrations
                     b.Property<string>("Descricao")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<bool>("EhDadoTeste")
+                        .HasColumnType("boolean");
 
                     b.Property<bool>("FrutaFeia")
                         .HasColumnType("boolean");
@@ -406,6 +409,9 @@ namespace TccSolidario.Api.Migrations
 
                     b.Property<DateTime>("DataCriacao")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("EhDadoTeste")
+                        .HasColumnType("boolean");
 
                     b.Property<string>("Email")
                         .IsRequired()

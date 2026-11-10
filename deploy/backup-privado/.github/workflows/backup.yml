@@ -1,0 +1,57 @@
+# Copiar este modelo para OUTRO repositório PRIVADO, com os scripts indicados no README.
+name: Backup cifrado VittaFlow
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '23 6 * * *'
+permissions:
+  contents: read
+concurrency:
+  group: backup-diario
+  cancel-in-progress: false
+jobs:
+  backup:
+    if: github.event.repository.private == true
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      PGHOST: ${{ secrets.BACKUP_PGHOST }}
+      PGPORT: '5432'
+      PGDATABASE: postgres
+      PGUSER: ${{ secrets.BACKUP_PGUSER }}
+      PGPASSWORD: ${{ secrets.BACKUP_PGPASSWORD }}
+      PGSSLMODE: verify-full
+      PGCONNECT_TIMEOUT: '20'
+      AGE_RECIPIENT: ${{ vars.BACKUP_AGE_RECIPIENT }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Preparar ferramentas
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo gpg --dearmor --yes -o /usr/share/keyrings/postgresql.gpg
+          echo "deb [signed-by=/usr/share/keyrings/postgresql.gpg] https://apt.postgresql.org/pub/repos/apt noble-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list > /dev/null
+          sudo apt-get update -qq
+          sudo apt-get install --yes age postgresql-client-18
+          echo "/usr/lib/postgresql/18/bin" >> "$GITHUB_PATH"
+      - name: Criar backup cifrado
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Path out | Out-Null
+          ./deploy/security/backup-cifrado.ps1 -OutputFile out/vittaflow.dump.age -Recipient $env:AGE_RECIPIENT -MaxBytes 8388608
+      - name: Guardar somente o arquivo cifrado e sua soma
+        uses: actions/upload-artifact@v4
+        with:
+          name: banco-cifrado-${{ github.run_id }}
+          path: |
+            out/vittaflow.dump.age
+            out/vittaflow.dump.age.sha256
+          if-no-files-found: error
+          retention-days: 14
+      - name: Remover arquivos temporários do runner
+        if: always()
+        shell: pwsh
+        run: |
+          foreach ($file in @('out/vittaflow.dump.age', 'out/vittaflow.dump.age.sha256')) {
+            if (Test-Path -LiteralPath $file) { Remove-Item -LiteralPath $file -Force }
+          }

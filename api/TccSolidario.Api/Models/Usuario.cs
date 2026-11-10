@@ -7,6 +7,9 @@ namespace TccSolidario.Api.Models;
 public abstract class Usuario
 {
     public Guid Id { get; set; } = Guid.NewGuid();
+
+    // Classificação interna de QA; nunca recebida dos formulários públicos.
+    public bool EhDadoTeste { get; set; }
     
     [Required]
     public string Nome { get; set; } = string.Empty;

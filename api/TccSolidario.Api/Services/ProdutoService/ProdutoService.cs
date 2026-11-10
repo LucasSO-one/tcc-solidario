@@ -38,6 +38,7 @@ public class ProdutoService(AppDbContext context, ImagemUploadService uploads, C
             DataValidade = validade, PrecoOriginal = request.PrecoOriginal,
             PrecoVenda = request.PrecoDesconto, IsOferta = request.IsOferta,
             FrutaFeia = request.FrutaFeia, VarejistaId = varejistaId,
+            EhDadoTeste = varejista.EhDadoTeste,
             Status = request.PrecoDesconto.HasValue ? StatusProduto.EmDesconto : StatusProduto.Disponivel
         };
         var urls = new List<string>();

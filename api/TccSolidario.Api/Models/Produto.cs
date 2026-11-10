@@ -8,6 +8,9 @@ public class Produto
 {
     public Guid Id { get; set; } = Guid.NewGuid();
 
+    // Classificação interna de QA; nunca recebida dos formulários públicos.
+    public bool EhDadoTeste { get; set; }
+
     public string Titulo { get; set; } = string.Empty;
     public string Categoria { get; set; } = string.Empty;
     public string Descricao { get; set; } = string.Empty;

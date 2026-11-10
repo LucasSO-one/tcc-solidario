@@ -24,3 +24,7 @@
 **/playwright-report/
 **/*.dump
 **/*.backup
+
+# Chaves privadas e cópias cifradas permanecem fora do Git
+**/*.age
+**/backup-identity.txt

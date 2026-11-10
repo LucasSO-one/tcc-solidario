@@ -68,7 +68,7 @@ public static class ConfiguracaoSeguranca
         if (env.IsProduction()) ctx.Response.Headers["Strict-Transport-Security"] = "max-age=31536000";
         var csp = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://res.cloudinary.com; "
             + "font-src 'self'; connect-src 'self' https://viacep.com.br; media-src 'self' blob:; worker-src 'self' blob:; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'; report-uri /api/security/csp";
-        var modo = config.GetValue("Security:CspReportOnly", true) ? "Content-Security-Policy-Report-Only" : "Content-Security-Policy";
+        var modo = config.GetValue("Security:CspReportOnly", false) ? "Content-Security-Policy-Report-Only" : "Content-Security-Policy";
         ctx.Response.Headers[modo] = csp;
         if (ctx.Request.Path.StartsWithSegments("/api")) ctx.Response.Headers.CacheControl = "no-store";
     }

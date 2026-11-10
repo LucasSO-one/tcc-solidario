@@ -9,7 +9,8 @@ public record EvolucaoMes(string Mes, int Doadas, int Vendidas);
 public record ImpactoResponse(Dictionary<string, int> Indicadores, List<EvolucaoMes> Evolucao);
 
 /// <summary>
-/// Indicadores de impacto calculados só com retiradas CONCLUÍDAS (o alimento chegou a alguém).
+/// Indicadores operacionais calculados com retiradas confirmadas no sistema, sem registros de QA.
+/// A confirmação digital não comprova redução física de desperdício.
 /// Unidades = soma da quantidade dos lotes retirados. O sistema não registra peso (kg).
 /// </summary>
 public class ImpactoService(AppDbContext context, TimeProvider clock)
@@ -19,7 +20,10 @@ public class ImpactoService(AppDbContext context, TimeProvider clock)
     public async Task<ImpactoResponse> ObterAsync(Guid usuarioId, TipoUsuario tipo)
     {
         var concluidas = context.Transacoes.AsNoTracking().Include(t => t.Produto)
-            .Where(t => t.StatusReserva == StatusReserva.Concluida);
+            .Where(t => t.StatusReserva == StatusReserva.Concluida
+                && !t.Produto!.EhDadoTeste && !t.Produto.Varejista!.EhDadoTeste
+                && (t.Consumidor == null || !t.Consumidor.EhDadoTeste)
+                && (t.Ong == null || !t.Ong.EhDadoTeste));
         concluidas = tipo switch
         {
             TipoUsuario.Varejista => concluidas.Where(t => t.Produto!.VarejistaId == usuarioId),
@@ -57,10 +61,10 @@ public class ImpactoService(AppDbContext context, TimeProvider clock)
                 indicadores["alimentosSalvos"] = lista.Sum(t => t.Quantidade);
                 indicadores["doacoesRealizadas"] = doacoes.Count;
                 indicadores["ongsAtendidas"] = doacoes.Select(t => t.OngId).Distinct().Count();
-                indicadores["varejistasAtivos"] = await context.Varejistas.CountAsync(v => v.StatusAprovacao == StatusAprovacao.Aprovado);
-                indicadores["alimentosCadastrados"] = await context.Produtos.CountAsync();
-                indicadores["usuarios"] = await context.Usuarios.CountAsync(u => u.Tipo != TipoUsuario.Admin);
-                indicadores["cadastrosPendentes"] = await context.Usuarios.CountAsync(u => u.StatusAprovacao == StatusAprovacao.Pendente);
+                indicadores["varejistasAtivos"] = await context.Varejistas.CountAsync(v => v.StatusAprovacao == StatusAprovacao.Aprovado && !v.EhDadoTeste);
+                indicadores["alimentosCadastrados"] = await context.Produtos.CountAsync(p => !p.EhDadoTeste && !p.Varejista!.EhDadoTeste);
+                indicadores["usuarios"] = await context.Usuarios.CountAsync(u => u.Tipo != TipoUsuario.Admin && u.StatusAprovacao != StatusAprovacao.Excluido && !u.EhDadoTeste);
+                indicadores["cadastrosPendentes"] = await context.Usuarios.CountAsync(u => u.StatusAprovacao == StatusAprovacao.Pendente && !u.EhDadoTeste);
                 break;
         }
 

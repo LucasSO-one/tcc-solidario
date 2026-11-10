@@ -1,5 +1,6 @@
 import { test, expect, request as requestFactory } from '@playwright/test';
 import { createHmac } from 'node:crypto';
+import AxeBuilder from '@axe-core/playwright';
 
 test.describe.configure({ mode: 'serial' });
 const base = 'http://127.0.0.1:55187';
@@ -128,6 +129,15 @@ test('MFA administrativo, recuperação e limites persistentes', async ({ page, 
   expect((await request.post(`${control}/restart`)).status()).toBe(200);
   expect((await post(request, '/api/auth/login', { email: target, senha: 'Incorreta!42' })).status()).toBe(429);
   expect((await page.request.get('/api/admin/operacao')).status()).toBe(200);
+  const violations=[];
+  for(const route of ['/dashboard/admin','/dashboard/admin/approvals','/dashboard/admin/users','/dashboard/admin/configuracoes']) {
+    await page.goto(route);
+    await page.getByRole('heading',{level:1}).waitFor({timeout:15000});
+    await page.evaluate(()=>document.fonts.ready);
+    const result=await new AxeBuilder({page}).withTags(['wcag2a','wcag2aa','wcag21a','wcag21aa']).analyze();
+    violations.push(...result.violations.map(v=>({route,id:v.id,nodes:v.nodes.map(n=>n.target)})));
+  }
+  expect(violations).toEqual([]);
 });
 
 test('produção atrás do proxy HTTPS emite cookies Secure e protege diagnóstico CSP', async ({ request }) => {

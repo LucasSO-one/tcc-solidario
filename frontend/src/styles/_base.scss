@@ -98,3 +98,6 @@ table, time, data, .tabular {
     scroll-behavior: auto !important;
   }
 }
+
+// Links em texto corrido precisam de uma pista visual além da cor.
+p a:not(.btn) { text-decoration: underline; }

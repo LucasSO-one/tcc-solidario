@@ -41,12 +41,12 @@ export default function Login() {
     titulo={<>Reduza o desperdício.<br />Conecte alimentos a quem precisa.</>}
     frase="Cada refeição resgatada é um gesto de cuidado, com as pessoas e com a terra.">
     {codigos ? <section className="auth-form">
-      <h2>Guarde seus códigos de recuperação</h2>
+      <h1>Guarde seus códigos de recuperação</h1>
       <p>Salve-os em um lugar seguro, separado do seu celular. Cada código permite recuperar o autenticador uma única vez, junto com sua senha.</p>
       <ul className="mfa-codigos">{codigos.map(c => <li key={c}><code>{c}</code></li>)}</ul>
       <Button variant="primary" block onClick={() => navigate(ROTA_POR_TIPO[usuario.tipo], { replace: true })}>Guardei os códigos. Continuar</Button>
     </section> : mfa ? <form className="auth-form" onSubmit={validarMfa}>
-      <div className="auth-form__cabecalho"><h2>{mfa.configurarMfa ? 'Proteja sua conta administrativa' : 'Verifique sua identidade'}</h2>
+      <div className="auth-form__cabecalho"><h1>{mfa.configurarMfa ? 'Proteja sua conta administrativa' : 'Verifique sua identidade'}</h1>
         <p>{mfa.configurarMfa ? 'No seu aplicativo autenticador, adicione uma conta e leia o QR Code. Depois informe o código de seis dígitos.' : 'Informe o código atual do seu aplicativo autenticador.'}</p></div>
       {erro && <Alert variant="error">{erro}</Alert>}
       {mfa.configurarMfa && <div className="mfa-setup"><QRCodeSVG value={mfa.uriAutenticador} size={180} /><p>Ou digite esta chave no aplicativo:</p><code>{mfa.segredo}</code></div>}
@@ -58,7 +58,7 @@ export default function Login() {
       {!mfa.configurarMfa && <Button variant="ghost" onClick={() => { setRecuperacao(v => !v); setCodigo(''); }}>{recuperacao ? 'Usar aplicativo autenticador' : 'Perdi acesso ao autenticador'}</Button>}
       <Button variant="ghost" onClick={() => { setMfa(null); setCodigo(''); setErro(''); }}>Reiniciar login</Button>
     </form> : <form className="auth-form" onSubmit={entrar}>
-      <div className="auth-form__cabecalho"><h2>Bem-vindo de volta</h2><p>Acesse sua conta e continue de onde parou.</p></div>
+      <div className="auth-form__cabecalho"><h1>Bem-vindo de volta</h1><p>Acesse sua conta e continue de onde parou.</p></div>
       {location.state?.mensagem && !erro && <Alert variant="success">{location.state.mensagem}</Alert>}
       {erro && <Alert variant="error">{erro}</Alert>}
       <Field label="E-mail"><input type="email" placeholder="seu@email.com" maxLength={254} autoComplete="email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} required /></Field>

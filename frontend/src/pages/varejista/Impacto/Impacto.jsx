@@ -18,10 +18,10 @@ export default function Impacto() {
   const i = impacto?.indicadores ?? {};
   return <div className="fluxo">
     <header><span className="eyebrow">Impacto</span><h1>Relatório de impacto</h1>
-      <p>O quanto o seu estabelecimento já evitou de desperdício. Contamos apenas retiradas confirmadas com código.</p></header>
+      <p>Movimentação dos seus alimentos, considerando as retiradas confirmadas com código. Registros de teste não entram nos indicadores.</p></header>
     {erro && <Alert variant="error">{erro}</Alert>}
     <IndicadoresImpacto carregando={!impacto && !erro} itens={[
-      { valor: i.alimentosSalvos, rotulo: 'Unidades salvas do desperdício', descricao: 'Vendidas com desconto ou doadas', icone: Leaf },
+      { valor: i.alimentosSalvos, rotulo: 'Unidades com retirada confirmada', descricao: 'Vendidas com desconto ou doadas', icone: Leaf },
       { valor: i.unidadesDoadas, rotulo: 'Unidades doadas', descricao: 'Entregues gratuitamente a ONGs', icone: HandHeart },
       { valor: i.doacoesRealizadas, rotulo: 'Doações realizadas', descricao: 'Lotes retirados por ONGs', icone: PackageCheck },
       { valor: i.ongsAtendidas, rotulo: 'ONGs atendidas', descricao: 'Organizações diferentes beneficiadas', icone: Users },

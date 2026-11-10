@@ -20,7 +20,7 @@ export default function DashboardAdministrativo() {
   const carregando = !impacto && !erro;
   return <div className="fluxo">
     <header><span className="eyebrow">Visão geral</span><h1>Painel administrativo</h1>
-      <p>Indicadores da plataforma calculados em tempo real a partir das retiradas confirmadas.</p></header>
+      <p>Indicadores da plataforma calculados a partir das retiradas confirmadas. Registros de teste não entram nos indicadores.</p></header>
     {erro && <Alert variant="error">{erro}</Alert>}
 
     {i.cadastrosPendentes > 0 && <div className="banner-pendencias">
@@ -34,7 +34,7 @@ export default function DashboardAdministrativo() {
 
     <section><h2>Impacto da plataforma</h2>
       <IndicadoresImpacto carregando={carregando} itens={[
-        { valor: i.alimentosSalvos, rotulo: 'Unidades salvas do desperdício', icone: Leaf },
+        { valor: i.alimentosSalvos, rotulo: 'Unidades com retirada confirmada', icone: Leaf },
         { valor: i.doacoesRealizadas, rotulo: 'Doações realizadas', icone: HandHeart },
         { valor: i.ongsAtendidas, rotulo: 'ONGs atendidas', icone: Users },
         { valor: i.varejistasAtivos, rotulo: 'Varejistas ativos', icone: Store },
@@ -49,7 +49,7 @@ export default function DashboardAdministrativo() {
     <section><h2>Uso da plataforma</h2>
       <div className="fluxo-grade">
         <article className="stat"><span className="stat__value">{carregando ? '–' : (i.usuarios ?? 0).toLocaleString('pt-BR')}</span>
-          <span className="stat__label">Usuários cadastrados</span></article>
+          <span className="stat__label">Usuários com cadastro vigente</span></article>
         <article className="stat"><span className="stat__value">{carregando ? '–' : (i.alimentosCadastrados ?? 0).toLocaleString('pt-BR')}</span>
           <span className="stat__label">Lotes de alimentos cadastrados</span></article>
       </div>

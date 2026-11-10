@@ -10,7 +10,7 @@ export default function AuthLayout({ ilustracao, titulo, frase, children }) {
       <aside className="auth__marca" style={{ backgroundImage: `url(${ilustracao})` }}>
         <Link to="/" aria-label="VittaFlow: voltar ao início" className="auth__logo"><Logo className="logo--claro" /></Link>
         <div className="auth__texto">
-          <h1 className="auth__titulo">{titulo}</h1>
+          <p className="auth__titulo">{titulo}</p>
           <span className="auth__divisor" aria-hidden="true" />
           <p className="auth__frase">{frase}</p>
         </div>

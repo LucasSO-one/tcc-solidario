@@ -128,7 +128,7 @@ const Register = () => {
       frase="Varejistas, consumidores e ONGs juntos para que nenhum alimento bom vá para o lixo.">
       <form onSubmit={handleSubmit} className="auth-form">
         <div className="auth-form__cabecalho">
-          <h2>Criar conta</h2>
+          <h1>Criar conta</h1>
           <p>Escolha como você vai usar a VittaFlow.</p>
         </div>
 
